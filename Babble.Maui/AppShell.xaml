@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Babble.Maui"
+    x:Class="Babble.Maui.AppShell"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.TabBarIsVisible="True"
+    Shell.TabBarBackgroundColor="#2D2D2D"
+    Shell.TabBarTitleColor="White"
+    Shell.TabBarUnselectedColor="LightGray"
+    Title="Babble.Maui">
+
+    <TabBar>
+        <Tab Title="Cam"> <!-- Icon="camera_icon.png"-->
+            <ShellContent ContentTemplate="{DataTemplate local:CameraPage}"/>
+        </Tab>
+        <!--<Tab Title="Settings"> --><!-- Icon="settings_icon.png"--><!--
+            <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}"/>
+        </Tab>
+        <Tab Title="Algo Settings"> --><!-- Icon="algo_icon.png"--><!--
+            <ShellContent ContentTemplate="{DataTemplate local:AlgorithmSettingsPage}"/>
+        </Tab>-->
+        <!--<Tab Title="Calibration" Icon="calibration_icon.png">
+            <ShellContent ContentTemplate="{DataTemplate local:CalibrationPage}"/>
+        </Tab>-->
+    </TabBar>
+
+</Shell>
