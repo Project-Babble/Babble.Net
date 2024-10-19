@@ -11,7 +11,6 @@ class Program
 
         // Load the image from file
         string imagePath = "0085.png";
-        var image = new Bitmap(imagePath)!;
 
         // Load and preprocess the image
         var inputTensor = LoadImageAndPreprocess(imagePath);
