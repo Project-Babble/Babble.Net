@@ -1,62 +1,50 @@
-﻿using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.Tensors;
+﻿using Emgu.CV;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 class Program
 {
+    private static VideoCapture capture;
+    private static string ipCameraUrl = @"http://192.168.0.173:4747/video"; // Replace with the actual URL of your IP camera
+    private static bool capturing;
+
     static void Main()
     {
-        // Path to the ONNX model
-        string modelPath = "model.onnx";
-
-        // Load the image from file
-        string imagePath = "0085.png";
-
-        // Load and preprocess the image
-        var inputTensor = LoadImageAndPreprocess(imagePath);
-
-        //var sessionOptions = new SessionOptions();
-        //sessionOptions.AppendExecutionProvider_CUDA(1);
-
-        // Load ONNX model and create session
-        using var session = new InferenceSession(modelPath);
-
-        // Create input container
-        var inputName = session.InputMetadata.Keys.First();
-        var inputs = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor(inputName, inputTensor) };
-
-        // Run inference
-        using var results = session.Run(inputs);
-
-        // Get output and display
-        var output = results[0].AsEnumerable<float>().ToArray();
-        Console.WriteLine("Model Output:");
-        foreach (var value in output)
-        {
-            Console.WriteLine(value);
-        }
+        // Start capturing video from the IP camera
+        capturing = true;
+        StartCapture();
+        Console.ReadKey();
     }
 
-    static Tensor<float> LoadImageAndPreprocess(string imagePath)
+    private static void StartCapture()
     {
-        // Load the image
-        using var bitmap = new Bitmap(imagePath);
-
-        // Convert to grayscale, resize, and normalize (1/255.0)
-        var resized = new Bitmap(bitmap, new Size(256, 256));
-        var input = new DenseTensor<float>([1, 1, 256, 256]);
-
-        for (int y = 0; y < 256; y++)
+        try
         {
-            for (int x = 0; x < 256; x++)
+            // Initialize the capture from the IP camera
+            capture = new VideoCapture(ipCameraUrl);
+
+            if (!capture.IsOpened)
             {
-                // Grayscale and normalize (assuming RGB input)
-                var pixel = resized.GetPixel(x, y);
-                var grayscale = (float)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B) / 255.0f;
-                input[0, 0, y, x] = grayscale;
+                throw new Exception("Could not open the camera stream.");
+            }
+
+            // Grab the frame from the video stream
+            using Mat frame = capture.QueryFrame();
+            if (frame != null)
+            {
+                // Convert the frame to a Bitmap and display it
+                Bitmap bitmap = frame.ToBitmap();
+
+                // Save the frame as a PNG
+                bitmap.Save("test.png", ImageFormat.Png);
+
+                // Stop capturing after saving the frame
+                capturing = false;
             }
         }
-
-        return input;
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error connecting to the camera: " + ex.Message);
+        }
     }
 }

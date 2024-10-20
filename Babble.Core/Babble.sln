@@ -9,7 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.Tests", "..\Babble.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.CLI", "..\Babble.CLI\Babble.CLI.csproj", "{D1A99FD1-764E-4F63-8D44-D71457101DE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.Maui", "..\Babble.Maui\Babble.Maui.csproj", "{18DEE595-72E0-4933-AD11-8A78E0BA3860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Maui", "..\Babble.Maui\Babble.Maui.csproj", "{18DEE595-72E0-4933-AD11-8A78E0BA3860}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.OSC", "..\Babble.OSC\Babble.OSC.csproj", "{AAB1C4BB-3604-4C41-AB0D-D62E22390FA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.VRCFT", "..\Babble.VRCFT\Babble.VRCFT.csproj", "{5D54EEEB-1463-4CAB-BD3D-960728A09C79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +39,14 @@ Global
 		{18DEE595-72E0-4933-AD11-8A78E0BA3860}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18DEE595-72E0-4933-AD11-8A78E0BA3860}.Release|Any CPU.Build.0 = Release|Any CPU
 		{18DEE595-72E0-4933-AD11-8A78E0BA3860}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{AAB1C4BB-3604-4C41-AB0D-D62E22390FA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAB1C4BB-3604-4C41-AB0D-D62E22390FA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAB1C4BB-3604-4C41-AB0D-D62E22390FA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAB1C4BB-3604-4C41-AB0D-D62E22390FA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D54EEEB-1463-4CAB-BD3D-960728A09C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D54EEEB-1463-4CAB-BD3D-960728A09C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D54EEEB-1463-4CAB-BD3D-960728A09C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D54EEEB-1463-4CAB-BD3D-960728A09C79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,67 +1,61 @@
-﻿
+﻿using Babble.Core;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
 
-using Babble.Core;
-using OpenCvSharp;
-
-namespace Babble.CLI;
-
-internal class Program
+namespace Babble.CLI
 {
-    static void Main(string[] args)
+    internal class Program
     {
-        //VideoCapture capture = new(0); // 0 = default camera
-        //if (!capture.IsOpened())
-        //{
-        //    Console.WriteLine("Uh oh.");
-        //    return;
-        //}
-
-        var frame = Cv2.ImRead("0085.png");
-
-        BabbleCore.StartInference();
-
-        // using var frame = new Mat();
-        // capture.Read(frame);
-
-        //if (frame.Empty())
-        //    continue;
-
-        // Resize to the required 256 * 256
-        var resizedFrame = new Mat();
-        Cv2.Resize(frame, resizedFrame, new Size(256, 256));
-
-        // Convert the frame to grayscale
-        var grayFrame = new Mat();
-        Cv2.CvtColor(resizedFrame, grayFrame, ColorConversionCodes.BGR2GRAY);
-        var data = ConvertMatToFloatArray(grayFrame);
-
-        if (!BabbleCore.GetExpressionData(data, out var exp))
-            return;
-
-        foreach (var item in exp.OrderByDescending(x => x.Value))
-            Console.WriteLine($"{item.Key}: {item.Value}");
-
-        BabbleCore.StopInference();
-    }
-
-    public static float[] ConvertMatToFloatArray(Mat mat)
-    {
-        // Ensure that the Mat is of type CV_32F (float)
-        if (mat.Type() != MatType.CV_32F)
+        static void Main(string[] args)
         {
-            // Convert to CV_32F if needed
-            mat.ConvertTo(mat, MatType.CV_32F);
+            // Load the image using Emgu CV
+            Mat frame = CvInvoke.Imread("0085.png");
+
+            BabbleCore.StartInference();
+
+            // Resize to the required 256 * 256
+            Mat resizedFrame = new Mat();
+            CvInvoke.Resize(frame, resizedFrame, new System.Drawing.Size(256, 256));
+
+            // Convert the frame to grayscale
+            Mat grayFrame = new Mat();
+            CvInvoke.CvtColor(resizedFrame, grayFrame, ColorConversion.Bgr2Gray);
+
+            // Convert the Mat to a float array
+            float[] data = ConvertMatToFloatArray(grayFrame);
+
+            if (!BabbleCore.GetExpressionData(data, out var exp))
+                return;
+
+            // Output the expression data
+            foreach (var item in exp.OrderByDescending(x => x.Value))
+            {
+                Console.WriteLine($"{item.Key}: {item.Value}");
+            }
+
+            BabbleCore.StopInference();
         }
 
-        mat.GetArray(out float[] floatArray);
-
-        for (int i = 0; i < floatArray.Length; i++)
+        public static float[] ConvertMatToFloatArray(Mat mat)
         {
-            // Normalize pixel values to [0, 1]
-            // Assuming pixel values were originally 0-255
-            floatArray[i] /= 255.0f; 
-        }
+            // Ensure the Mat is of type CV_32F (float)
+            if (mat.Depth != Emgu.CV.CvEnum.DepthType.Cv32F)
+            {
+                // Convert to CV_32F if needed
+                mat.ConvertTo(mat, Emgu.CV.CvEnum.DepthType.Cv32F);
+            }
 
-        return floatArray;
+            // Get the float array from the Mat
+            float[] floatArray = new float[mat.Rows * mat.Cols];
+            mat.CopyTo(floatArray);
+
+            // Normalize pixel values to [0, 1] (assuming original values are 0-255)
+            for (int i = 0; i < floatArray.Length; i++)
+            {
+                floatArray[i] /= 255.0f;
+            }
+
+            return floatArray;
+        }
     }
 }

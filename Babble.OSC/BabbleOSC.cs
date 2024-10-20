@@ -1,11 +1,13 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
+using Rug.Osc;
 
 namespace Babble.OSC;
 
 public class BabbleOSC
 {
-    private Socket _receiver;
+    private OscSender _sender;
 
     private bool _loop = true;
 
@@ -24,7 +26,7 @@ public class BabbleOSC
     public BabbleOSC(string? host = null, int? port = null)
     {
         _resolvedHost = host ?? DEFAULT_HOST;
-        _resolvedPort = port ?? TIMEOUT_MS;
+        _resolvedPort = port ?? DEFAULT_PORT;
 
         ConfigureReceiver();
         _loop = true;
@@ -35,10 +37,9 @@ public class BabbleOSC
     private void ConfigureReceiver()
     {
         IPAddress address = IPAddress.Parse(_resolvedHost);
-        IPEndPoint localEP = new IPEndPoint(address, _resolvedPort);
-        _receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        _receiver.Bind(localEP);
-        _receiver.ReceiveTimeout = TIMEOUT_MS;
+        _sender = new OscSender(address, _resolvedPort);
+        _sender.DisconnectTimeout = TIMEOUT_MS;
+        _sender.Connect();
     }
 
     private void SendLoop()
@@ -47,16 +48,16 @@ public class BabbleOSC
         {
             try
             {
-                if (_receiver.IsBound)
+                switch (_sender.State)
                 {
-                    // TODO Fill this out
-                    _receiver.Send();
-                }
-                else
-                {
-                    _receiver.Close();
-                    _receiver.Dispose();
-                    ConfigureReceiver();
+                    case OscSocketState.Connected:
+                        // _sender.Send(new OscMessage("/test", 1, 2, 3, 4));
+                        break;
+                    case OscSocketState.Closed:
+                        _sender.Close();
+                        _sender.Dispose();
+                        ConfigureReceiver();
+                        break;
                 }
             }
             catch (Exception)
@@ -68,8 +69,8 @@ public class BabbleOSC
     public void Teardown()
     {
         _loop = false;
-        _receiver.Close();
-        _receiver.Dispose();
+        _sender.Close();
+        _sender.Dispose();
         _thread.Join();
     }
 }
