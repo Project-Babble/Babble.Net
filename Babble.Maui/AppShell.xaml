@@ -15,15 +15,15 @@
         <Tab Title="Cam"> <!-- Icon="camera_icon.png"-->
             <ShellContent ContentTemplate="{DataTemplate local:CameraPage}"/>
         </Tab>
-        <!--<Tab Title="Settings"> --><!-- Icon="settings_icon.png"--><!--
-            <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}"/>
+        <Tab Title="Settings">
+                <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}"/>
         </Tab>
-        <Tab Title="Algo Settings"> --><!-- Icon="algo_icon.png"--><!--
+        <Tab Title="Algo Settings">
             <ShellContent ContentTemplate="{DataTemplate local:AlgorithmSettingsPage}"/>
-        </Tab>-->
-        <!--<Tab Title="Calibration" Icon="calibration_icon.png">
+        </Tab>
+        <Tab Title="Calibration">
             <ShellContent ContentTemplate="{DataTemplate local:CalibrationPage}"/>
-        </Tab>-->
+        </Tab>
     </TabBar>
 
 </Shell>
