@@ -14,11 +14,11 @@ namespace Babble.CLI
             BabbleCore.StartInference();
 
             // Resize to the required 256 * 256
-            Mat resizedFrame = new Mat();
+            Mat resizedFrame = new();
             CvInvoke.Resize(frame, resizedFrame, new System.Drawing.Size(256, 256));
 
             // Convert the frame to grayscale
-            Mat grayFrame = new Mat();
+            Mat grayFrame = new();
             CvInvoke.CvtColor(resizedFrame, grayFrame, ColorConversion.Bgr2Gray);
 
             // Convert the Mat to a float array
@@ -28,6 +28,7 @@ namespace Babble.CLI
                 return;
 
             // Output the expression data
+            Console.WriteLine($"Length: {exp.Count}");
             foreach (var item in exp.OrderByDescending(x => x.Value))
             {
                 Console.WriteLine($"{item.Key}: {item.Value}");

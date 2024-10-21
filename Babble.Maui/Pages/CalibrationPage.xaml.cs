@@ -6,4 +6,9 @@ public partial class CalibrationPage : ContentPage
 	{
 		InitializeComponent();
 	}
+
+    public async void OnCalibrationModeChanged(object sender, EventArgs e)
+    {
+		
+    }
 }

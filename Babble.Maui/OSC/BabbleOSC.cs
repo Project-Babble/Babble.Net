@@ -1,11 +1,10 @@
-﻿using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
+﻿using Babble.Maui.Scripts;
 using Rug.Osc;
+using System.Net;
 
 namespace Babble.OSC;
 
-public class BabbleOSC
+public partial class BabbleOSC
 {
     private OscSender _sender;
 
@@ -13,32 +12,44 @@ public class BabbleOSC
 
     private readonly Thread _thread;
 
-    private readonly int _resolvedPort;
+    private readonly int _resolvedLocalPort;
+
+    private readonly int _resolvedRemotePort;
 
     private readonly string _resolvedHost;
 
     public const string DEFAULT_HOST = "127.0.0.1";
 
-    public const int DEFAULT_PORT = 8888;
+    public const int DEFAULT_LOCAL_PORT = 44444;
+
+    public const int DEFAULT_REMOTE_PORT = 8888;
 
     private const int TIMEOUT_MS = 10000;
 
-    public BabbleOSC(string? host = null, int? port = null)
+
+#pragma warning disable CS8618
+    public BabbleOSC(string? host = null, int? localPort = null, int? remotePort = null)
     {
         _resolvedHost = host ?? DEFAULT_HOST;
-        _resolvedPort = port ?? DEFAULT_PORT;
+        _resolvedLocalPort = localPort ?? DEFAULT_LOCAL_PORT;
+        _resolvedRemotePort = remotePort ?? DEFAULT_REMOTE_PORT;
 
         ConfigureReceiver();
+
         _loop = true;
         _thread = new Thread(new ThreadStart(SendLoop));
         _thread.Start();
     }
+#pragma warning restore CS8618
+
 
     private void ConfigureReceiver()
     {
         IPAddress address = IPAddress.Parse(_resolvedHost);
-        _sender = new OscSender(address, _resolvedPort);
-        _sender.DisconnectTimeout = TIMEOUT_MS;
+        _sender = new OscSender(address, _resolvedLocalPort, _resolvedRemotePort)
+        {
+            DisconnectTimeout = TIMEOUT_MS
+        };
         _sender.Connect();
     }
 
@@ -51,7 +62,8 @@ public class BabbleOSC
                 switch (_sender.State)
                 {
                     case OscSocketState.Connected:
-                        // _sender.Send(new OscMessage("/test", 1, 2, 3, 4));
+                        foreach (var exp in Expressions.InnerKeys)
+                            _sender.Send(new OscMessage(exp, Expressions.GetByKey2(exp)));
                         break;
                     case OscSocketState.Closed:
                         _sender.Close();
@@ -62,7 +74,10 @@ public class BabbleOSC
             }
             catch (Exception)
             {
+                // Ignore network exceptions
             }
+
+            Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
         }
     }
 

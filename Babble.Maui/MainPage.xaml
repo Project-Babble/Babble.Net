@@ -9,9 +9,6 @@
     <!-- Cam Tab -->
     <ContentPage Title="Cam">
         <StackLayout Padding="10" BackgroundColor="#2D2D2D">
-            <Label x:Name="barcodeResult" FontSize="20"/>
-            <cv:CameraView x:Name="cameraView" WidthRequest="256" HeightRequest="256" CamerasLoaded="cameraView_CamerasLoaded"/>
-            
             <Label Text="Camera Address" TextColor="White"/>
             <Entry Text="COM6" TextColor="White" BackgroundColor="#3D3D3D"/>
             <Button Text="Save and Restart Tracking" BackgroundColor="#4CAF50" TextColor="White"/>

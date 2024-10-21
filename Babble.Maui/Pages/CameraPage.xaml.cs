@@ -6,51 +6,53 @@ public partial class CameraPage : ContentPage
     {
         InitializeComponent();
     }
-    public async void SaveAndRestartTracking(object sender, EventArgs args)
+
+    public async void OnCameraAddressChanged(object sender, EventArgs args)
+    {
+        
+    }
+
+    public async void OnSaveAndRestartTrackingClicked(object sender, EventArgs args)
     {
 
     }
-    public async void TrackingMode(object sender, EventArgs args)
+
+    public async void OnTrackingModeClicked(object sender, EventArgs args)
     {
 
     }
 
-    public async void CroppingMode(object sender, EventArgs args)
+    public async void OnCroppingModeClicked(object sender, EventArgs args)
     {
 
     }
 
-    public async void StartCalibration(object sender, EventArgs args)
+    public async void OnSliderRotationChanged(object sender, EventArgs args)
+    {
+
+    }
+
+    public async void OnStartCalibrationClicked(object sender, EventArgs args)
     { 
     
     }
 
-    public async void StopCalibration(object sender, EventArgs args)
+    public async void OnStopCalibrationClicked(object sender, EventArgs args)
     { 
     
     }
 
-    public async void CameraSource(object sender, EventArgs args)
-    {
-        Console.WriteLine(((Entry)sender).Text); // Print the text upon completion 
-    }
-
-    public async void SliderRotation(object sender, EventArgs args)
-    {
-
-    }
-
-    public async void EnableCalibration(object sender, EventArgs args)
+    public async void OnEnableCalibrationToggled(object sender, EventArgs args)
     { 
     
     }
 
-    public async void VerticalFlip(object sender, EventArgs args)
+    public async void OnVerticalFlipToggled(object sender, EventArgs args)
     { 
     
     }
 
-    public async void HorizontalFlip(object sender, EventArgs args)
+    public async void OnHorizontalFlipToggled(object sender, EventArgs args)
     { 
     
     }

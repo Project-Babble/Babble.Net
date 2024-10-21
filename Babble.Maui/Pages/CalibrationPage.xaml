@@ -12,7 +12,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Label Text="Calibration Mode:" TextColor="White" Grid.Column="0" VerticalOptions="Center"/>
-                <Picker TextColor="White" BackgroundColor="#3D3D3D" Grid.Column="1">
+                <Picker TextColor="White" BackgroundColor="#3D3D3D" Grid.Column="1" SelectedIndexChanged="OnCalibrationModeChanged">
                     <Picker.Items>
                         <x:String>Neutral</x:String>
                     </Picker.Items>

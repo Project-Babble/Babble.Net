@@ -6,33 +6,33 @@
     <ScrollView>
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
             <Label Text="Camera Address" TextColor="White"/>
-            <Entry Text="COM6" TextColor="White" BackgroundColor="#3D3D3D" Completed="CameraSource"/>
-            <Button Text="Save and Restart Tracking" BackgroundColor="#4CAF50" TextColor="White" Clicked="SaveAndRestartTracking"/>
+            <Entry Text="COM6" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnCameraAddressChanged"/>
+            <Button Text="Save and Restart Tracking" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnSaveAndRestartTrackingClicked"/>
             
             <StackLayout Orientation="Horizontal"  Spacing="10" Margin="0,0,0,15">
-                <Button Text="Tracking Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="TrackingMode"/>
-                <Button Text="Cropping Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="CroppingMode"/>
+                <Button Text="Tracking Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnTrackingModeClicked"/>
+                <Button Text="Cropping Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnCroppingModeClicked"/>
             </StackLayout>
             
             <Label Text="Rotation" TextColor="White"/>
-            <Slider Maximum="360" Value="0" ValueChanged="SliderRotation"/>
+            <Slider Maximum="360" Value="0" ValueChanged="OnSliderRotationChanged"/>
             
             <StackLayout Orientation="Horizontal"  Spacing="10" Margin="0,0,0,15">
-                <Button Text="Start Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="StartCalibration"/>
-                <Button Text="Stop Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="StopCalibration"/>
+                <Button Text="Start Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnStartCalibrationClicked"/>
+                <Button Text="Stop Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnStopCalibrationClicked"/>
             </StackLayout>
             
             <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
-                <CheckBox IsChecked="True" CheckedChanged="EnableCalibration"/>
+                <CheckBox IsChecked="True" CheckedChanged="OnEnableCalibrationToggled"/>
                 <Label Text="Enable Calibration" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
             
             <Label Text="Mode: Camera Connecting" TextColor="White"/>
             
             <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
-                <CheckBox CheckedChanged="VerticalFlip"/>
+                <CheckBox CheckedChanged="OnVerticalFlipToggled"/>
                 <Label Text="Vertical Flip" TextColor="White" VerticalOptions="Center"/>
-                <CheckBox CheckedChanged="HorizontalFlip"/>
+                <CheckBox CheckedChanged="OnHorizontalFlipToggled" />
                 <Label Text="Horizontal Flip" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
             

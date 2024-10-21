@@ -1,6 +1,6 @@
 ﻿namespace Babble.Core.Enums;
 
-public enum UnifiedExpressions
+public enum UnifiedExpression
 {
     CheekPuffLeft,
     CheekPuffRight,

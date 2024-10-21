@@ -1,0 +1,38 @@
+﻿using System.Drawing;
+using System.Drawing.Imaging;
+
+public class CameraViewer
+{
+    private static MJPEGStreamDecoder decoder;
+    private static bool capturing;
+ 
+    public static void Main(string[] args)
+    {
+        string defaultStreamURL = @"http://192.168.0.173:4747/video";
+        decoder = new MJPEGStreamDecoder();
+        decoder.StartStream(defaultStreamURL);
+        while (decoder.Frame is null)
+            Thread.Sleep(10);
+        var output = ByteArrayToImage(decoder.Frame);
+        output.Save("test.jpg");
+    }
+
+    private static float[] ByteArrayToFloatArray(byte[] byteArray)
+    {
+        // Create a float array to store the float representation of the byte data
+        float[] floatArray = new float[byteArray.Length];
+
+        // Convert the byte data (0-255) to float (0.0-1.0)
+        for (int i = 0; i < byteArray.Length; i++)
+        {
+            floatArray[i] = byteArray[i] / 255f;
+        }
+
+        return floatArray;
+    }
+
+    public static Bitmap ByteArrayToImage(byte[] source)
+    {
+        return new Bitmap(new MemoryStream(source));
+    }
+}
