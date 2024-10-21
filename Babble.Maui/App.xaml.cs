@@ -1,4 +1,5 @@
 ﻿using Babble.Core;
+using Babble.Maui.Locale;
 using Babble.Maui.Scripts;
 using Babble.Maui.Scripts.Platforms;
 using Babble.OSC;
@@ -16,42 +17,45 @@ public partial class App : Application
         InitializeComponent();
         MainPage = new AppShell();
 
-        const string _ipCameraUrl = @"http://192.168.0.173:4747/video";
+        // Note: Currently the app will hang until the IP Camera defined below connects
+        const string _lang = "English";
+        const string _ip = @"192.168.0.75";
+        const string _ipCameraUrl = @$"http://{_ip}:4747/video";
 
-        if (DeviceInfo.Current.Platform == DevicePlatform.WinUI ||
-            DeviceInfo.Current.Platform == DevicePlatform.macOS)
-        {
-            _platformConnector = new DesktopConnector();
-        }
-        else if (DeviceInfo.Current.Platform == DevicePlatform.Unknown)
-        {
-            throw new PlatformNotSupportedException();
-        }
-        else
-        {
-            // DeviceInfo.Current.Platform == DevicePlatform.Android
-            // DeviceInfo.Current.Platform == DevicePlatform.watchOS
-            // DeviceInfo.Current.Platform == DevicePlatform.iOS
-            // DeviceInfo.Current.Platform == DevicePlatform.Tizen
-            // DeviceInfo.Current.Platform == DevicePlatform.MacCatalyst
-            // DeviceInfo.Current.Platform == DevicePlatform.tvOS
-            _platformConnector = new MobileConnector();
-        }
-
+        LocaleManager.Initialize(_lang);
+        
+        _platformConnector = DoPlatformSetup();
         if (!_platformConnector.Initialize(_ipCameraUrl))
         {
-            throw new Exception();
+            throw new Exception("Failed to start platform connectors.");
         }
-
         if (!BabbleCore.StartInference())
         {
-            throw new Exception();
+            throw new Exception("Failed to start Babble inference.");
         }
 
         // TODO Pass in user's Quest headset address here!
-        _sender = new BabbleOSC();
+        _sender = new BabbleOSC(_ip);
         _thread = new Thread(new ThreadStart(Update));
         _thread.Start();
+    }
+
+    private IPlatformConnector DoPlatformSetup()
+    {
+        if (DeviceInfo.Current.Platform == DevicePlatform.Unknown)
+        {
+            throw new PlatformNotSupportedException();
+        }
+        else if (DeviceInfo.Current.Platform == DevicePlatform.WinUI ||
+                 DeviceInfo.Current.Platform == DevicePlatform.macOS)
+        {
+            return new DesktopConnector();
+        }
+        else
+        {
+            // Android, watchOS, iOS, MacCatalyst, tvOS, Tizen, etc...
+            return new MobileConnector();
+        }
     }
 
     private void Update()

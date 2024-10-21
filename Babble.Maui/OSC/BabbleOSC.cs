@@ -18,7 +18,7 @@ public partial class BabbleOSC
 
     private readonly string _resolvedHost;
 
-    public const string DEFAULT_HOST = "127.0.0.1";
+    public const string DEFAULT_HOST = "192.168.0.75";
 
     public const int DEFAULT_LOCAL_PORT = 44444;
 

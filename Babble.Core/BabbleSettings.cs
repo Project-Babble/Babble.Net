@@ -8,9 +8,8 @@ public class BabbleSettings
 {
     public Dictionary<SettingKey, object> Settings { get; private set; }
 
-    private static string BabbleConfigFile => Path.Combine(
-        Path.GetDirectoryName(
-            Assembly.GetExecutingAssembly().Location)!, "BabbleConfig.json");
+    private static string BabbleConfigFile => Path.Combine
+        (AppContext.BaseDirectory, "BabbleConfig.json");
 
     private static readonly Dictionary<SettingKey, object> _defaultSettings = new()
 

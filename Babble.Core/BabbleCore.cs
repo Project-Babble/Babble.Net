@@ -1,5 +1,6 @@
 ﻿using Babble.Core.Enums;
 using Microsoft.ML.OnnxRuntime;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Babble.Core;
@@ -13,6 +14,7 @@ public static class BabbleCore
     private static InferenceSession _session;
     private static bool _isInferencing;
     private static string _inputName;
+    private static readonly Stopwatch _stopwatch = new Stopwatch();
 #pragma warning restore CS8618 
 
     public static bool StartInference()
@@ -125,7 +127,10 @@ public static class BabbleCore
             NamedOnnxValue.CreateFromTensor(_inputName, inputTensor) 
         };
 
+        _stopwatch.Restart();
         using var results = _session.Run(inputs);
+        _stopwatch.Stop();
+
         var output = results[0].AsEnumerable<float>().ToArray();
 
         for (int i = 0; i < output.Length; i++)
