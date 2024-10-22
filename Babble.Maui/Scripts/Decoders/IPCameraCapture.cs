@@ -1,22 +1,34 @@
 using System.Net;
 
-// https://gist.github.com/lightfromshadows/79029ca480393270009173abc7cad858
-public class MJPEGStreamDecoder : IDisposable
+namespace Babble.Maui.Scripts.Decoders;
+
+/// <summary>
+/// Decodes an MJPEG stream, commonly used by IP Cameras
+/// https://gist.github.com/lightfromshadows/79029ca480393270009173abc7cad858
+/// </summary>
+public class IPCameraCapture : BytesCapture
 {
-    public byte[] Frame { get; private set; }
+    public override byte[] Frame { get; }
+    public override bool IsReady { get; set; }
 
     private const int MAX_RETRIES = 3;
     private int _retryCount = 0; 
     private Thread _worker;
-    private List<BufferedStream> _trackedBuffers = new List<BufferedStream>();
+    private readonly List<BufferedStream> _trackedBuffers = new();
 
-    public void StartStream(string url)
+    public IPCameraCapture(string Url) : base(Url)
+    {
+    }
+
+    public override bool StartCapture()
     {
         _retryCount = 0;
-        Dispose();
+        StopCapture();
 
-        _worker = new Thread(() => ReadMJPEGStreamWorker(url));
+        _worker = new Thread(() => ReadMJPEGStreamWorker(Url));
         _worker.Start();
+        IsReady = true;
+        return true;
     }
 
     private void ReadMJPEGStreamWorker(string url)
@@ -37,7 +49,7 @@ public class MJPEGStreamDecoder : IDisposable
         }
         catch (Exception ex)
         {
-
+            Console.WriteLine(ex.Message);
         }
 
         int newByte;
@@ -86,7 +98,7 @@ public class MJPEGStreamDecoder : IDisposable
                     {
                         frameBuffer.Add((byte)newByte);
                         addToBuffer = false;
-                        Frame = frameBuffer.ToArray();
+                        Array.Copy(frameBuffer.ToArray(), Frame, Frame.Length);
                         frameBuffer.Clear();
                     }
                 }
@@ -99,7 +111,7 @@ public class MJPEGStreamDecoder : IDisposable
         {
             _retryCount++;
 
-            Dispose();
+            StopCapture();
             _trackedBuffers.Clear();
 
             _worker = new Thread(() => ReadMJPEGStreamWorker(url));
@@ -107,7 +119,7 @@ public class MJPEGStreamDecoder : IDisposable
         }
     }
 
-    private bool IsStartOfImage(int command)
+    private static bool IsStartOfImage(int command)
     {
         switch (command)
         {
@@ -126,12 +138,13 @@ public class MJPEGStreamDecoder : IDisposable
         return false;
     }
 
-    public void Dispose()
+    public override bool StopCapture()
     {
+        IsReady = false;
         foreach (var b in _trackedBuffers)
         {
-            if (b != null)
-                b.Close();
+            b?.Close();
         }
+        return true;
     }
 }

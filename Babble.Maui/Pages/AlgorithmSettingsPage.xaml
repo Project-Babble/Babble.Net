@@ -38,12 +38,12 @@
                 
                 <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
                     <Label Text="GPU Index:" TextColor="White"/>
-                    <Entry Text="0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnGPUIndexChanged"/>
+                    <Entry Text="0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnGPUIndexChanged" Keyboard="Numeric"/>
                 </StackLayout>
 
                 <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
                     <Label Text="Model output multiplier:" TextColor="White"/>
-                    <Entry Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnMultiplierChanged"/>
+                    <Entry Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnMultiplierChanged" Keyboard="Numeric"/>
                 </StackLayout>
             </Grid>
 

@@ -1,14 +1,14 @@
 ﻿using Babble.Core;
 using Babble.Maui.Locale;
 using Babble.Maui.Scripts;
-using Babble.Maui.Scripts.Platforms;
+using Babble.Maui.Scripts.Decoders;
 using Babble.OSC;
 
 namespace Babble.Maui;
 
 public partial class App : Application
 {
-    private IPlatformConnector _platformConnector;
+    private readonly PlatformConnector _platformConnector;
     private readonly BabbleOSC _sender;
     private readonly Thread _thread;
 
@@ -18,21 +18,18 @@ public partial class App : Application
         MainPage = new AppShell();
 
         // Note: Currently the app will hang until the IP Camera defined below connects
+        // Note: The CUDA runtime BLOWS UP how much ram we use?? Like 150mb to 1.2GB!!
         const string _lang = "English";
         const string _ip = @"192.168.0.75";
         const string _ipCameraUrl = @$"http://{_ip}:4747/video";
 
         LocaleManager.Initialize(_lang);
-        
-        _platformConnector = DoPlatformSetup();
-        if (!_platformConnector.Initialize(_ipCameraUrl))
-        {
-            throw new Exception("Failed to start platform connectors.");
-        }
-        if (!BabbleCore.StartInference())
-        {
-            throw new Exception("Failed to start Babble inference.");
-        }
+
+        //var debugCamera = EmguCVDeviceEnumerator.EnumerateCameras(out var cameraMap) ?
+        //    cameraMap.Last().Key.ToString() : "0";
+
+        _platformConnector = SetupPlatform();
+        _platformConnector.Initialize();
 
         // TODO Pass in user's Quest headset address here!
         _sender = new BabbleOSC(_ip);
@@ -40,21 +37,24 @@ public partial class App : Application
         _thread.Start();
     }
 
-    private IPlatformConnector DoPlatformSetup()
+    private static PlatformConnector SetupPlatform()
     {
         if (DeviceInfo.Current.Platform == DevicePlatform.Unknown)
         {
             throw new PlatformNotSupportedException();
         }
-        else if (DeviceInfo.Current.Platform == DevicePlatform.WinUI ||
-                 DeviceInfo.Current.Platform == DevicePlatform.macOS)
+        else if (DeviceInfo.Current.Platform == DevicePlatform.Android||
+                 DeviceInfo.Current.Platform == DevicePlatform.iOS)
         {
-            return new DesktopConnector();
+            // EmguCV doesn't have support for VideoCapture on Android, iOS, or UWP
+            // So we have a custom implementation for IP Cameras, the de-facto use case on mobile
+            return new MobileConnector(@"http://192.168.0.75:4747/video");
         }
         else
         {
-            // Android, watchOS, iOS, MacCatalyst, tvOS, Tizen, etc...
-            return new MobileConnector();
+            // Else, for WinUI, macOS, watchOS, MacCatalyst, tvOS, Tizen, etc...
+            // Use the standard EmguCV VideoCapture backend
+            return new DesktopConnector("0");
         }
     }
 
@@ -62,8 +62,7 @@ public partial class App : Application
     {
         while (true)
         {
-            if (!_platformConnector.GetCameraData(out float[] data))
-                goto End;
+            var data = _platformConnector.GetFrameData();
 
             if (!BabbleCore.GetExpressionData(data, out var expressions))
                 goto End;

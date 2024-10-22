@@ -8,17 +8,17 @@ using System.IO;
 public class LocaleManager
 {
     private static readonly Lazy<LocaleManager> _instance =
-        new Lazy<LocaleManager>(() => new LocaleManager());
+        new(() => new LocaleManager());
 
-    private List<string> _languages;
-    private Dictionary<string, Dictionary<string, string>> _strings;
+    private readonly HashSet<string> _languages;
+    private readonly Dictionary<string, Dictionary<string, string>> _strings;
     private string _currentLanguage;
 
     // Private constructor to prevent direct instantiation
     private LocaleManager()
     {
-        _languages = new List<string>();
-        _strings = new Dictionary<string, Dictionary<string, string>>();
+        _languages = [];
+        _strings = [];
     }
 
     public static LocaleManager Instance => _instance.Value;
@@ -40,7 +40,7 @@ public class LocaleManager
         {
             var lang = Path.GetFileName(dir);
             _languages.Add(lang);
-            _strings[lang] = new Dictionary<string, string>();
+            _strings[lang] = [];
 
             foreach (var file in Directory.GetFiles(dir, "*.json"))
             {
@@ -66,7 +66,7 @@ public class LocaleManager
         }
     }
 
-    public static List<string> GetLanguages()
+    public static HashSet<string> GetLanguages()
     {
         return Instance._languages;
     }
@@ -75,12 +75,12 @@ public class LocaleManager
     {
         var key = $"locale.{pattern}";
 
-        if (!Instance._strings[Instance._currentLanguage].ContainsKey(key))
+        if (!Instance._strings[Instance._currentLanguage].TryGetValue(key, out string? value))
         {
             throw new KeyNotFoundException($"String pattern '{key}' not found for language '{Instance._currentLanguage}'");
         }
 
-        return Instance._strings[Instance._currentLanguage][key];
+        return value;
     }
 
     public static void UpdateLanguage(string language)
