@@ -3,13 +3,14 @@ using System.Net;
 namespace Babble.Maui.Scripts.Decoders;
 
 /// <summary>
-/// Decodes an MJPEG stream, commonly used by IP Cameras
+/// Captures and decodes an MJPEG stream, commonly used by IP Cameras
 /// https://gist.github.com/lightfromshadows/79029ca480393270009173abc7cad858
 /// </summary>
-public class IPCameraCapture : BytesCapture
+public class IPCameraCapture : Capture
 {
     public override byte[] Frame { get; }
     public override bool IsReady { get; set; }
+    public override string Url { get; set; }
 
     private const int MAX_RETRIES = 3;
     private int _retryCount = 0; 

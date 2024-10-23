@@ -1,25 +1,27 @@
 ﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
 
 namespace Babble.Maui.Scripts.Decoders;
 
 /// <summary>
-/// Wrapper class for EmguCV for edge cases, IE Serial/IP Camera capture
+/// Wrapper class for EmguCV. We use this class when we know our camera isn't a:
+/// 1) Serial Camera
+/// 2) IP Camera capture
+/// 3) Or we aren't on an unsupported mobile platform (iOS or Android. Tizen/WatchOS are ok though??)
 /// </summary>
-internal class EmguCVCapture : MatCapture
+public class EmguCVCapture : Capture
 {
-    public override Mat Frame
+    public override byte[] Frame
     {
         get
         {
-            return !_videoCapture.IsOpened ? 
-                _videoCapture.QueryFrame() : 
-                Mat.Zeros(256, 256, DepthType.Cv32F, 1);
+            return !_videoCapture.IsOpened ?
+                _videoCapture.QueryFrame().GetRawData() : 
+                Array.Empty<byte>();
         }
-
     }
 
     public override bool IsReady { get; set; }
+    public override string Url { get; set; }
 
     private VideoCapture _videoCapture;
     private Thread _thread;
@@ -30,7 +32,6 @@ internal class EmguCVCapture : MatCapture
 
     public override bool StartCapture()
     {
-
         _videoCapture = new VideoCapture(Url);
 
         //while (!_videoCapture.IsOpened)

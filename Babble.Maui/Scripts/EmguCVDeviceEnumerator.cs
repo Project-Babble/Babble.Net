@@ -2,7 +2,10 @@
 
 namespace Babble.Maui.Scripts;
 
-// https://github.com/thohemp/OpenCVSharpCameraDeviceEnumerator/blob/master/OpenCVDeviceEnumerator/OpenCVDeviceEnumerator.cs
+/// <summary>
+/// A static helper class to detect what cameras are connected to this PC
+/// https://github.com/thohemp/OpenCVSharpCameraDeviceEnumerator/blob/master/OpenCVDeviceEnumerator/OpenCVDeviceEnumerator.cs
+/// </summary>
 public static class EmguCVDeviceEnumerator
 {
     private static List<int> camIdList = new List<int>();

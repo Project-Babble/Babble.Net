@@ -1,8 +1,12 @@
 ﻿namespace Babble.Maui.Scripts.Decoders;
 
+/// <summary>
+/// Defines custom camera stream behviour
+/// </summary>
 public abstract class Capture
 {
-    public string Url { get; set; }
+    public abstract string Url { get; set; }
+    public abstract byte[] Frame { get; }
     public abstract bool IsReady { get; set; }
     public abstract bool StartCapture();
     public abstract bool StopCapture();

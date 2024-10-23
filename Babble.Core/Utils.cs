@@ -82,6 +82,55 @@ internal static class Utils
         { ARKitExpression.TongueTwistRight, new List<UnifiedExpression>() { UnifiedExpression.TongueTwistRight } }
     };
 
+    internal static readonly Dictionary<ARKitExpression, float> ARKitExpressions = new()
+    {
+        { ARKitExpression.CheekPuffLeft, 0f },
+        { ARKitExpression.CheekPuffRight, 0f },
+        { ARKitExpression.CheekSuckLeft, 0f },
+        { ARKitExpression.CheekSuckRight, 0f },
+        { ARKitExpression.JawOpen, 0f },
+        { ARKitExpression.JawForward, 0f },
+        { ARKitExpression.JawLeft, 0f },
+        { ARKitExpression.JawRight, 0f },
+        { ARKitExpression.NoseSneerLeft, 0f },
+        { ARKitExpression.NoseSneerRight, 0f },
+        { ARKitExpression.MouthFunnel, 0f },
+        { ARKitExpression.MouthPucker, 0f },
+        { ARKitExpression.MouthLeft, 0f },
+        { ARKitExpression.MouthRight, 0f },
+        { ARKitExpression.MouthRollUpper, 0f },
+        { ARKitExpression.MouthRollLower, 0f },
+        { ARKitExpression.MouthShrugUpper, 0f },
+        { ARKitExpression.MouthShrugLower, 0f },
+        { ARKitExpression.MouthClose, 0f },
+        { ARKitExpression.MouthSmileLeft, 0f },
+        { ARKitExpression.MouthSmileRight, 0f },
+        { ARKitExpression.MouthFrownLeft, 0f },
+        { ARKitExpression.MouthFrownRight, 0f },
+        { ARKitExpression.MouthDimpleLeft, 0f },
+        { ARKitExpression.MouthDimpleRight, 0f },
+        { ARKitExpression.MouthUpperUpLeft, 0f },
+        { ARKitExpression.MouthUpperUpRight, 0f },
+        { ARKitExpression.MouthLowerDownLeft, 0f },
+        { ARKitExpression.MouthLowerDownRight, 0f },
+        { ARKitExpression.MouthPressLeft, 0f },
+        { ARKitExpression.MouthPressRight, 0f },
+        { ARKitExpression.MouthStretchLeft, 0f },
+        { ARKitExpression.MouthStretchRight, 0f },
+        { ARKitExpression.TongueOut, 0f },
+        { ARKitExpression.TongueUp, 0f },
+        { ARKitExpression.TongueDown, 0f },
+        { ARKitExpression.TongueLeft, 0f },
+        { ARKitExpression.TongueRight, 0f },
+        { ARKitExpression.TongueRoll, 0f },
+        { ARKitExpression.TongueBendDown, 0f },
+        { ARKitExpression.TongueCurlUp, 0f },
+        { ARKitExpression.TongueSquish, 0f },
+        { ARKitExpression.TongueFlat, 0f },
+        { ARKitExpression.TongueTwistLeft, 0f },
+        { ARKitExpression.TongueTwistRight, 0f }
+    };
+
     /// <summary>
     /// Represents the expected size of the input image,
     /// grayscale at 256x256px, 1 float per pixel, normalized to 0f-1f.

@@ -3,12 +3,13 @@
 namespace Babble.Maui.Scripts.Decoders;
 
 /// <summary>
-/// COM
+/// Captures and decodes a serial video stream, used by Babble Boards
 /// </summary>
-internal class SerialCameraCapture : BytesCapture
+public class SerialCameraCapture : Capture
 {
-    public override bool IsReady { get; set; }
     public override byte[] Frame { get; }
+    public override bool IsReady { get; set; }
+    public override string Url { get; set; }
 
     private const int BaudRate = 3000000;
     private const int BufferSize = 32768;

@@ -1,13 +1,18 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
+﻿namespace Babble.Maui.Scripts;
 
-namespace Babble.Maui.Scripts;
-
-internal static class Utils
+/// <summary>
+/// Utility class with a number of useful constants and methods
+/// </summary>
+public static class Utils
 {
-    internal const int THREAD_TIMEOUT_MS = 10;
+    public const int THREAD_TIMEOUT_MS = 10;
 
-    // https://stackoverflow.com/questions/1398664/enum-getvalues-return-type
+    /// <summary>
+    /// Gets all enums as an IEnumerable
+    /// https://stackoverflow.com/questions/1398664/enum-getvalues-return-type
+    /// </summary>
+    /// <typeparam name="TEnum"></typeparam>
+    /// <returns></returns>
     public static IEnumerable<TEnum> EnumerateEnum<TEnum>()
         where TEnum : struct, IConvertible, IComparable, IFormattable
         {
