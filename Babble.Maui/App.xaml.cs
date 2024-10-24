@@ -3,6 +3,7 @@ using Babble.Maui.Locale;
 using Babble.Maui.Scripts;
 using Babble.Maui.Scripts.Decoders;
 using Babble.OSC;
+using Microsoft.Extensions.Logging;
 
 namespace Babble.Maui;
 
@@ -11,6 +12,7 @@ namespace Babble.Maui;
 /// </summary>
 public partial class App : Application
 {
+    public static ILogger Logger { get; private set; }
     private readonly PlatformConnector _platformConnector;
     private readonly BabbleOSC _sender;
     private readonly Thread _thread;
@@ -20,7 +22,10 @@ public partial class App : Application
     {
         InitializeComponent();
         MainPage = new AppShell();
-        
+
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        Logger = factory.CreateLogger(nameof(App));
+
         // Debugging values
         const string _lang = "English";
         const string _ip = @"192.168.0.75";

@@ -17,10 +17,11 @@ public class DesktopConnector : PlatformConnector
         // TODO Add logic to reload camera on change
 
         // Determine if this is an IP Camera, Serial Camera, or something else
+        // Base Capture class reuses logic to check for empty/null strings
         var str = Url.ToLower();
         if (str.StartsWith("com"))
         {
-            Capture = new SerialCameraCapture(Url);
+            Capture = new SerialCamera(Url);
         }
         else if (str.StartsWith("http"))
         {
@@ -28,7 +29,8 @@ public class DesktopConnector : PlatformConnector
         }
         else
         {
-            Capture = new EmguCVCapture(Url);
+            // Capture = new EmguCVCapture(Url);
+            Capture = new DummyCapture(Url);
         }
 
         Capture.StartCapture();

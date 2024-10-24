@@ -1,33 +1,38 @@
 ﻿using Babble.Core.Enums;
+using Babble.Core.Settings;
+using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace Babble.Core;
 
 public static class BabbleCore
 {
-
-#pragma warning disable CS8618
-    private static BabbleLogger _logger;
-    private static BabbleSettings _settings;
+    public static BabbleSettings Settings = new();
     private static InferenceSession _session;
     private static bool _isInferencing;
     private static string _inputName;
-    private static readonly Stopwatch _stopwatch = new Stopwatch();
-#pragma warning restore CS8618 
+    private static ILogger _logger;
 
-    public static bool StartInference()
+    public static bool StartInference(string modelName = "model.onnx", string path = "")
     {
         if (_isInferencing)
             return false;
 
-        _settings = new BabbleSettings();
-        _logger = new BabbleLogger("Logs");
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        _logger = factory.CreateLogger(nameof(BabbleCore));
+
+        string modelPath;
+        if (string.IsNullOrEmpty(path))
+        {
+            modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
+        }
+        else
+        {
+            modelPath = path;
+        }
 
         // Extract the embedded model
-        var modelName = (string) _settings.Settings[SettingKey.ModelFile];   
-        var modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
         if (!File.Exists(modelPath))
         {
             using var stm = Assembly
@@ -56,7 +61,7 @@ public static class BabbleCore
         // _capture.FrameHeight = 480;
 
         _session = new InferenceSession(modelPath, sessionOptions);
-        _logger.Log(LogLevel.Info, "Inference started");
+        _logger.LogInformation("Inference started");
         _inputName = _session.InputMetadata.Keys.First().ToString();
 
         _isInferencing = true;
@@ -80,9 +85,7 @@ public static class BabbleCore
             NamedOnnxValue.CreateFromTensor(_inputName, inputTensor) 
         };
 
-        _stopwatch.Restart();
         using var results = _session.Run(inputs);
-        _stopwatch.Stop();
 
         var output = results[0].AsEnumerable<float>().ToArray();
 
@@ -111,31 +114,7 @@ public static class BabbleCore
         
         _isInferencing = false;
         _session.Dispose();
-        _logger.Log(LogLevel.Info, "Inference stopped");
+        _logger.LogInformation("Inference stopped");
         return true;     
-    }
-
-    public static bool UpdateSetting(SettingKey key, object value)
-    {
-        if (_settings.Settings.ContainsKey(key))
-        {
-            _settings.Settings[key] = value;
-            _settings.Save();
-            _logger.Log(LogLevel.Info, $"Updated setting: {key} to {value}");
-
-            // If inference is running, restart it to apply new settings
-            if (_isInferencing)
-            {
-                StopInference();
-                StartInference();
-            }
-
-            return true;
-        }
-        else
-        {
-            _logger.Log(LogLevel.Warning, $"Warning: Unknown setting '{key}'");
-            return false;
-        }
     }
 }

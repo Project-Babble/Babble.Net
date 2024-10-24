@@ -1,6 +1,5 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Microsoft.Maui.Controls;
 
 namespace Babble.Maui.Scripts.Decoders;
 
@@ -41,6 +40,11 @@ public abstract class PlatformConnector
         if (Capture is null)
         {
             throw new InvalidOperationException();
+        }
+
+        if (Capture.Frame is null || Capture.Frame.Length == 0)
+        {
+            return Array.Empty<float>();
         }
 
         // Convert the frame to grayscale

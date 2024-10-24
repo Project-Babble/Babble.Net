@@ -1,0 +1,41 @@
+﻿{
+	"version": 1,
+	"cam": {
+		"rotation_angle": 0,
+		"roi_window_x": 101,
+		"roi_window_y": 95,
+		"roi_window_w": 239,
+		"roi_window_h": 264,
+		"capture_source": "COM5",
+		"gui_vertical_flip": false,
+		"gui_horizontal_flip": false,
+		"use_ffmpeg": false
+	},
+	"settings": {
+		"gui_min_cutoff": "0.9",
+		"gui_speed_coefficient": "0.9",
+		"gui_osc_address": "127.0.0.1",
+		"gui_osc_port": 9001,
+		"gui_osc_receiver_port": 9001,
+		"gui_osc_recalibrate_address": "/avatar/parameters/babble_recalibrate",
+		"gui_update_check": true,
+		"gui_ROSC": false,
+		"gui_osc_location": "",
+		"gui_multiply": 1.0,
+		"gui_model_file": "Models/3MEFFB0E7MSE/",
+		"gui_runtime": "ONNX",
+		"gui_use_gpu": true,
+		"gui_gpu_index": 0,
+		"gui_inference_threads": 4,
+		"gui_use_red_channel": false,
+		"calib_deadzone": -0.1,
+		"calib_array": "[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]",
+		"gui_cam_resolution_x": 0,
+		"gui_cam_resolution_y": 0,
+		"gui_cam_framerate": 0,
+		"use_calibration": true,
+		"calibration_mode": "Neutral",
+		"gui_language": "English"
+	},
+	"cam_display_id": 0
+}

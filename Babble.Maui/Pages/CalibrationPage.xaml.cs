@@ -1,3 +1,5 @@
+using Babble.Core;
+
 namespace Babble.Maui;
 
 public partial class CalibrationPage : ContentPage
@@ -7,8 +9,8 @@ public partial class CalibrationPage : ContentPage
 		InitializeComponent();
 	}
 
-    public async void OnCalibrationModeChanged(object sender, EventArgs e)
+    public async void OnCalibrationModeChanged(object sender, EventArgs args)
     {
-		
+        
     }
 }
