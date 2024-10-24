@@ -1,4 +1,4 @@
-using Babble.Core;
+using Babble.Maui;
 
 namespace Babble.Maui;
 

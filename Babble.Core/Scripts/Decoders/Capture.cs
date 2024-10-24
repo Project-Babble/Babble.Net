@@ -14,7 +14,7 @@ public abstract class Capture
     public Capture(string Url)
     {
         if (string.IsNullOrEmpty(Url))
-            throw new ArgumentNullException("Capture Url cannot be null or empty.");
+            throw new ArgumentNullException("(Camera) Capture Url cannot be null or empty.");
 
         this.Url = Url;
         IsReady = false;

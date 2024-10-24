@@ -1,4 +1,4 @@
-﻿namespace Babble.Maui.Scripts.Validation;
+﻿namespace Babble.Core.Scripts.Validation;
 
 internal abstract class Validator<T> where T : struct
 {

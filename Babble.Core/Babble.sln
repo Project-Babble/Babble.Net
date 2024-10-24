@@ -5,11 +5,9 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Core", "Babble.Core.csproj", "{C243810D-B621-4317-90F9-2B8DCAF03792}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Maui.Native", "..\Babble.Maui\Babble.Maui.Native.csproj", "{18DEE595-72E0-4933-AD11-8A78E0BA3860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Maui", "..\Babble.Maui\Babble.Maui.csproj", "{18DEE595-72E0-4933-AD11-8A78E0BA3860}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.VRCFT", "..\Babble.VRCFT\Babble.VRCFT.csproj", "{5D54EEEB-1463-4CAB-BD3D-960728A09C79}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.Maui.Blazor", "..\Babble.Maui.Blazor\Babble.Maui.Blazor.csproj", "{3E39E522-AE91-4EF0-AF5C-14EC143D6562}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.Tests", "..\Babble.Tests\Babble.Tests.csproj", "{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}"
 EndProject
@@ -33,12 +31,6 @@ Global
 		{5D54EEEB-1463-4CAB-BD3D-960728A09C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D54EEEB-1463-4CAB-BD3D-960728A09C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D54EEEB-1463-4CAB-BD3D-960728A09C79}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E39E522-AE91-4EF0-AF5C-14EC143D6562}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E39E522-AE91-4EF0-AF5C-14EC143D6562}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E39E522-AE91-4EF0-AF5C-14EC143D6562}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{3E39E522-AE91-4EF0-AF5C-14EC143D6562}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E39E522-AE91-4EF0-AF5C-14EC143D6562}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E39E522-AE91-4EF0-AF5C-14EC143D6562}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}.Release|Any CPU.ActiveCfg = Release|Any CPU

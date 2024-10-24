@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-namespace Babble.Maui.Scripts.Decoders.Tests;
+namespace Babble.Core.Scripts.Decoders.Tests;
 
 
 /* Hiding this test until an underlying issue can be resolved - 
