@@ -5,6 +5,15 @@
 /// </summary>
 public class DesktopConnector : PlatformConnector
 {
+    private static readonly HashSet<string> SerialConnections 
+        = new(StringComparer.OrdinalIgnoreCase) { "com" };
+
+    private static readonly HashSet<string> IPConnections 
+        = new(StringComparer.OrdinalIgnoreCase) { "http " };
+
+    private static readonly HashSet<string> ImageConnections 
+        = new(StringComparer.OrdinalIgnoreCase) { "bmp", "gif", "ico", "jpeg", "jpg", "png", "psd", "tiff" };
+
     public DesktopConnector(string Url) : base(Url)
     {
     }
@@ -17,18 +26,18 @@ public class DesktopConnector : PlatformConnector
         // TODO Add logic to reload camera on change
 
         // Determine if this is an IP Camera, Serial Camera, or something else
-        // Base Capture class reuses logic to check for empty/null strings
-        var str = Url.ToLower();
-        if (str.StartsWith("com"))
+        if (SerialConnections.Any(Url.StartsWith))
         {
             Capture = new SerialCamera(Url);
         }
-        else if (str.StartsWith("http"))
+        else if (ImageConnections.Any(Url.StartsWith))
         {
-            Capture = new IPCameraCapture(Url);
+            Capture = new ImageCapture(Url);
         }
         else
         {
+            // On non-mobile platforms, we'll use EmguCVCapture for IP Cameras
+            // Capture = new IPCameraCapture(Url);
             // Capture = new EmguCVCapture(Url);
             Capture = new DummyCapture(Url);
         }

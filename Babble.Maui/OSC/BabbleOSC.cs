@@ -18,7 +18,7 @@ public partial class BabbleOSC
 
     private readonly string _resolvedHost;
 
-    public const string DEFAULT_HOST = "192.168.0.75";
+    public const string DEFAULT_HOST = "127.0.0.1";
 
     public const int DEFAULT_LOCAL_PORT = 44444;
 
@@ -27,7 +27,6 @@ public partial class BabbleOSC
     private const int TIMEOUT_MS = 10000;
 
 
-#pragma warning disable CS8618
     public BabbleOSC(string? host = null, int? localPort = null, int? remotePort = null)
     {
         _resolvedHost = host ?? DEFAULT_HOST;
@@ -40,7 +39,6 @@ public partial class BabbleOSC
         _thread = new Thread(new ThreadStart(SendLoop));
         _thread.Start();
     }
-#pragma warning restore CS8618
 
 
     private void ConfigureReceiver()

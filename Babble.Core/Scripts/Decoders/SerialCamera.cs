@@ -2,9 +2,12 @@
 
 namespace Babble.Core.Scripts.Decoders;
 
+/// <summary>
+/// Serial Camera capture class intended for use on Desktop platforms
+/// Babble-board specific implementation, assumes a fixed camera size of 256x256
+/// </summary>
 public class SerialCamera : Capture, IDisposable
 {
-    // Protocol constants
     private const int BAUD_RATE = 3000000;
     private static readonly byte[] ETVR_HEADER = [0xff, 0xa0];
     private static readonly byte[] ETVR_HEADER_FRAME = [0xff, 0xa1];
@@ -17,6 +20,7 @@ public class SerialCamera : Capture, IDisposable
 
     public override string Url { get; set; }
     public override byte[] Frame => GetNextFrame();
+    public override (int width, int height) Dimensions => (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
     public override bool IsReady { get; set; }
 
     public SerialCamera(string portName) : base(portName)

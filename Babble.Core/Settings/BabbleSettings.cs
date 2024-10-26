@@ -17,7 +17,7 @@ public sealed class BabbleSettings
     public GeneralSettings GeneralSettings { get; set; }
 
     [JsonPropertyName("cam_display_id")]
-    public int CamDisplayId { get; set; }
+    public string CamDisplayId { get; set; }
 
     private static string AppConfigFile => Path.Combine(AppContext.BaseDirectory, "AppConfiguration.json");
 
@@ -28,6 +28,8 @@ public sealed class BabbleSettings
     {
         _propertyCache = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
         CacheProperties(GetType());
+        Version = 0;
+        CamDisplayId = "0";
         Cam = new CameraSettings();
         GeneralSettings = new GeneralSettings();
     }
@@ -56,10 +58,17 @@ public sealed class BabbleSettings
     public T GetSetting<T>(string propertyName)
     {
         propertyName = propertyName.Replace("_", string.Empty);
-        if (_propertyCache.TryGetValue(propertyName, out var propertyInfo))
+
+        // This is hacky. This MUST return something
+        var prefixes = new string[] { "", "cam.", "generalsettings." };
+        foreach (var p in prefixes)
         {
-            var target = GetPropertyTarget(propertyName);
-            return (T) propertyInfo.GetValue(target);
+            var fullPropertyName = p + propertyName;
+            if (_propertyCache.TryGetValue(fullPropertyName, out var propertyInfo))
+            {
+                var target = GetPropertyTarget(fullPropertyName);
+                return (T)propertyInfo.GetValue(target);
+            }
         }
         throw new ArgumentException($"Property '{propertyName}' does not exist.");
     }
@@ -78,6 +87,14 @@ public sealed class BabbleSettings
             propertyInfo.SetValue(target, convertedValue);
 
             Save();
+
+            // If we were already running, and we NEED to restart, restart
+            // TODO Add settings whitelist. What settings should restart the app?
+            if (BabbleCore.Instance.IsRunning && false)
+            {
+                BabbleCore.Instance.Stop();
+                BabbleCore.Instance.Start(this);
+            }
         }
         else
         {
@@ -103,26 +120,27 @@ public sealed class BabbleSettings
         throw new ArgumentException($"Parent property '{parentPath}' does not exist.");
     }
 
-    // Method to save the settings to a JSON file
-    public void Save()
+    /// <summary>
+    /// Method to save the settings to a JSON file
+    /// </summary>
+    public void Save(bool restart = false)
     {
         var options = new JsonSerializerOptions
         {
-            WriteIndented = true // To get a nicely formatted JSON
+            WriteIndented = true
         };
 
-        // Serialize the Settings object to JSON
-        var json = System.Text.Json.JsonSerializer.Serialize(this, options);
-
-        // Write the JSON to the specified file
+        var json = JsonSerializer.Serialize(this, options);
         File.WriteAllText(AppConfigFile, json);
     }
 
-    // Method to load the settings from a JSON file
+    /// <summary>
+    /// Method to load the settings from a JSON file
+    /// </summary>
     public void Load()
     {
         var json = File.ReadAllText(AppConfigFile);
-        var config = System.Text.Json.JsonSerializer.Deserialize<BabbleSettings>(json);
+        var config = JsonSerializer.Deserialize<BabbleSettings>(json);
         Version = config.Version;
         Cam = config.Cam;
         GeneralSettings = config.GeneralSettings;

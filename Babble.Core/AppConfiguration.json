@@ -2,10 +2,10 @@
 	"version": 1,
 	"cam": {
 		"rotation_angle": 0,
-		"roi_window_x": 101,
-		"roi_window_y": 95,
-		"roi_window_w": 239,
-		"roi_window_h": 264,
+		"roi_window_x": 10,
+		"roi_window_y": 10,
+		"roi_window_w": 100,
+		"roi_window_h": 100,
 		"capture_source": "COM5",
 		"gui_vertical_flip": false,
 		"gui_horizontal_flip": false,
@@ -37,5 +37,5 @@
 		"calibration_mode": "Neutral",
 		"gui_language": "English"
 	},
-	"cam_display_id": 0
+	"cam_display_id": "0"
 }

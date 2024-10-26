@@ -1,12 +1,11 @@
 ﻿using Babble.Core.Enums;
 using Babble.Core.Scripts;
 using Babble.Core.Scripts.Decoders;
+using Babble.Core.Scripts.EmguCV;
 using Babble.Core.Settings;
-using Babble.OSC;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace Babble.Core;
 
@@ -14,64 +13,90 @@ namespace Babble.Core;
 /// The singleton entrypoint for our library
 /// The EmguCV CUDA runtime BLOWS UP how much ram we use?? Like 150mb to 1.2GB!!
 /// </summary>
-public static class BabbleCore
+public class BabbleCore
 {
-    public static PlatformConnector PlatformConnector { get; private set; }
+    public static BabbleCore Instance { get; private set; }
 
-    public static BabbleSettings Settings { get; private set; }
+    public BabbleSettings Settings { get; private set; }
 
-    public static ILogger Logger { get; private set; }
+    public ILogger Logger { get; private set; }
 
-    private static InferenceSession _session;
+    public bool IsRunning { get; private set; }
 
-    private static bool _isInferencing;
+    private PlatformConnector _platformConnector;
+    private InferenceSession _session;
+    private readonly Thread _thread;
+    private string _inputName;
 
-    private static string _inputName;
-
-    private static readonly BabbleOSC _sender;
-
-    private static readonly Thread _thread;
+    // TODO: Ponder OSC/HTTP
+    // private readonly BabbleOSC _sender;
 
     static BabbleCore()
     {
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        Logger = factory.CreateLogger(nameof(BabbleCore));
+        Instance = new BabbleCore();
+    }
 
+    private BabbleCore()
+    {
         // Debugging values
-        const string _lang = "English";
         const string _ip = @"192.168.0.75";
         const string _ipCameraUrl = @$"http://{_ip}:4747/video";
-        var randomCameraUrl = DeviceEnumerator.EnumerateCameras(out var cameraMap) ?
-            cameraMap.ElementAt(Random.Shared.Next(cameraMap.Count)).Key.ToString() : "0";
+
+        //var dummyCamera = DeviceEnumerator.EnumerateCameras(out var cameraMap) ?
+        //    cameraMap.ElementAt(Random.Shared.Next(cameraMap.Count)).Key.ToString() : "0";
+
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+
+        Logger = factory.CreateLogger(nameof(BabbleCore));
+        Settings = new BabbleSettings();
 
         // LocaleManager.Initialize(_lang);
 
-        PlatformConnector = SetupPlatform(randomCameraUrl);
-        PlatformConnector.Initialize();
-
-        // TODO Pass in user's Quest headset address here!
-        _sender = new BabbleOSC(_ip);
-        _thread = new Thread(new ThreadStart(Update));
-        _thread.Start();
+        // TODO Create OSC/HTTP API!
+        // _sender = new BabbleOSC(_ip);
     }
 
-    public static bool StartInference(string modelName = "model.onnx", string path = "")
+    /// <summary>
+    /// Big bang. True to load settings, false to use default.
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void Start(bool loadConfig = true)
     {
-        if (_isInferencing)
-            return false;
+        if (loadConfig)
+        {
+            Instance.Settings.Load();
+            Start(Instance.Settings);
+        }
+        else
+        {
+            Start(new BabbleSettings());
+        }
+    }
+
+
+    /// <summary>
+    /// Big bang, but with custom parameters.
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void Start(BabbleSettings settings)
+    {
+        if (IsRunning)
+        {
+            Logger.LogInformation("Babble.Core was already running. Restarting...");
+            Stop();
+        }
+
+        Settings = settings;
 
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
         Logger = factory.CreateLogger(nameof(BabbleCore));
 
-        string modelPath;
-        if (string.IsNullOrEmpty(path))
-        {
-            modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
-        }
-        else
-        {
-            modelPath = path;
-        }
+        // TODO Support a multi-model system
+        // For the time being one model is enough
+        const string modelName = "model.onnx";
+        string modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
 
         // Extract the embedded model
         if (!File.Exists(modelPath))
@@ -94,77 +119,56 @@ public static class BabbleCore
             }
         }
 
-        // TODO: Add settings!
-        var sessionOptions = new SessionOptions();
-        
-        // Set webcam resolution (optional)
-        // _capture.FrameWidth = 640;
-        // _capture.FrameHeight = 480;
+        SessionOptions sessionOptions = ParseSettings();
 
         _session = new InferenceSession(modelPath, sessionOptions);
-        Logger.LogInformation("Inference started");
+        Logger.LogInformation("Babble.Core started.");
         _inputName = _session.InputMetadata.Keys.First().ToString();
 
-        _isInferencing = true;
-
-        return true;
-    }
-
-    /// <summary>
-    /// Creates the proper video streaming classes based on the platform we're deploying to.
-    /// EmguCV doesn't have support for VideoCapture on Android, iOS, or UWP
-    /// We have a custom implementations for IP Cameras, the de-facto use case on mobile
-    /// As well as SerialCameras (not tested on mobile yet)
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="PlatformNotSupportedException"></exception>
-    private static PlatformConnector SetupPlatform(string url)
-    {
-        if (OperatingSystem.IsAndroid() ||
-            OperatingSystem.IsIOS() )
+        // Creates the proper video streaming classes based on the platform we're deploying to.
+        // EmguCV doesn't have support for VideoCapture on Android, iOS, or UWP
+        // We have a custom implementations for IP Cameras, the de-facto use case on mobile
+        // As well as SerialCameras (not tested on mobile yet)
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
         {
-
-            return new MobileConnector(@"http://192.168.0.75:4747/video"); // url
+            _platformConnector = new MobileConnector(Settings.CamDisplayId); // _cameraUrl @"http://192.168.0.75:4747/video"
         }
         else
         {
             // Else, for WinUI, macOS, watchOS, MacCatalyst, tvOS, Tizen, etc...
             // Use the standard EmguCV VideoCapture backend
-            return new DesktopConnector(url);
+            _platformConnector = new DesktopConnector(Settings.CamDisplayId); // _cameraUrl
         }
+
+        _platformConnector.Initialize();
+
+        IsRunning = true;
+
     }
 
-    private static void Update()
-    {
-        while (true)
-        {
-            var data = PlatformConnector.GetFrameData();
-
-            if (!GetExpressionData(data, out var expressions))
-                goto End;
-
-            foreach (var exp in expressions)
-                BabbleOSC.Expressions.SetByKey1(exp.Key, exp.Value);
-
-            End:
-            Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
-        }
-    }
-
-    public static bool GetExpressionData(float[] frame, out Dictionary<UnifiedExpression, float> UnifiedExpressions)
+    /// <summary>
+    /// Poll expression data
+    /// </summary>
+    /// <param name="UnifiedExpressions"></param>
+    /// <returns></returns>
+    public bool GetExpressionData(out Dictionary<UnifiedExpression, float> UnifiedExpressions)
     {
         // Cache/Clear dictionary on start?
         UnifiedExpressions = new();
 
+        if (!IsRunning || Instance is null)
+        {
+            Logger.LogError("Tried to to poll Babble.Core, but it wasn't running!");
+            return false;
+        }
+
         var arKitExpressions = Utils.ARKitExpressions;
 
-        if (!_isInferencing)
-            return false;
-
-        var inputTensor = Utils.PreprocessFrame(frame);
-        var inputs = new List<NamedOnnxValue> 
-        { 
-            NamedOnnxValue.CreateFromTensor(_inputName, inputTensor) 
+        var data = _platformConnector.GetFrameData();
+        var inputTensor = Utils.PreprocessFrame(data);
+        var inputs = new List<NamedOnnxValue>
+        {
+            NamedOnnxValue.CreateFromTensor(_inputName, inputTensor)
         };
 
         using var results = _session.Run(inputs);
@@ -189,14 +193,42 @@ public static class BabbleCore
         return true;
     }
 
-    public static bool StopInference()
+    /// <summary>
+    /// Stop things
+    /// </summary>
+    public void Stop()
     {
-        if (!_isInferencing)
-            return false;
-        
-        _isInferencing = false;
+        if (!IsRunning)
+        {
+            Logger.LogWarning("Tried to to stop Babble.Core, but it wasn't running!");
+            return;
+        }
+
+        IsRunning = false;
         _session.Dispose();
-        Logger.LogInformation("Inference stopped");
-        return true;     
+        _platformConnector.Terminate();
+        Logger.LogInformation("Babble.Core stopped");
+    }
+    
+    private SessionOptions ParseSettings()
+    {
+        // Random environment variable to speed up webcam opening on the MSMF backend.
+        // https://github.com/opencv/opencv/issues/17687
+        Environment.SetEnvironmentVariable("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0");
+        Environment.SetEnvironmentVariable("OMP_NUM_THREADS", "1");
+
+        // TODO: Add settings!
+        // Setup inference backend
+        var sessionOptions = new SessionOptions();
+        if (Settings.GetSetting<bool>($"gui_use_gpu") && RuntimeDetector.IsRuntimeSupported(Runtime.CUDA))
+        {
+            sessionOptions.AppendExecutionProvider_CUDA(Settings.GetSetting<int>($"gui_gpu_index"));
+        }
+        sessionOptions.InterOpNumThreads = 1;
+        sessionOptions.IntraOpNumThreads = Settings.GetSetting<int>($"gui_inference_threads");
+        sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+        sessionOptions.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");  // ~3% savings worth ~6ms avg latency. Not noticeable at 60fps?
+        sessionOptions.EnableMemoryPattern = true;
+        return sessionOptions;
     }
 }

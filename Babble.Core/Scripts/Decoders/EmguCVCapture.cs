@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -15,8 +16,18 @@ public class EmguCVCapture : Capture
         get
         {
             return !_videoCapture.IsOpened ?
-                _videoCapture.QueryFrame().GetRawData() : 
-                Array.Empty<byte>();
+                _videoCapture.QueryFrame().GetRawData() :
+                EmptyFrame;
+        }
+    }
+
+    public override (int width, int height) Dimensions
+    {
+        get
+        {
+            return !_videoCapture.IsOpened ?
+                (_videoCapture.Width, _videoCapture.Height) :
+                (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
         }
     }
 
@@ -34,10 +45,24 @@ public class EmguCVCapture : Capture
     {
         _videoCapture = new VideoCapture(Url);
 
-        //while (!_videoCapture.IsOpened)
-        //{
-        //    Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
-        //}
+        var x = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_x");
+        var y = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_y");
+        var fr = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_framerate");
+
+        if (x > 0)
+        {
+            _videoCapture.Set(CapProp.FrameWidth, x);
+        }
+
+        if (y > 0)
+        {
+            _videoCapture.Set(CapProp.FrameHeight, y);
+        }
+
+        if (fr > 0)
+        {
+            _videoCapture.Set(CapProp.Fps, fr);
+        }
 
         IsReady = true;
         return true;

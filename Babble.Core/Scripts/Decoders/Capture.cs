@@ -5,8 +5,12 @@
 /// </summary>
 public abstract class Capture
 {
+    protected readonly byte[] EmptyFrame = Enumerable.Repeat<byte>(0, 256).ToArray();
+
+    public const int BABBLE_FRAME_SIZE = 256;
     public abstract string Url { get; set; }
     public abstract byte[] Frame { get; }
+    public abstract (int width, int height) Dimensions { get; }
     public abstract bool IsReady { get; set; }
     public abstract bool StartCapture();
     public abstract bool StopCapture();

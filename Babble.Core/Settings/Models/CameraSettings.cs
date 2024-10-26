@@ -36,11 +36,11 @@ public sealed class CameraSettings
         // Default to no rotation
         RotationAngle = 0;
 
-        // Default ROI window to center 640x480 region
+        // Default ROI window to 256x256 (No crop)
         RoiWindowX = 0;
         RoiWindowY = 0;
-        RoiWindowW = 640;
-        RoiWindowH = 480;
+        RoiWindowW = 256;
+        RoiWindowH = 256;
 
         // Default to first available camera
         CaptureSource = "0";

@@ -5,11 +5,13 @@ namespace Babble.Core.Scripts.Decoders;
 
 /// <summary>
 /// Captures and decodes an MJPEG stream, commonly used by IP Cameras
+/// Mobile-platform specific implementation, assumes a fixed camera size of 256x256
 /// https://gist.github.com/lightfromshadows/79029ca480393270009173abc7cad858
 /// </summary>
 public class IPCameraCapture : Capture
 {
     public override byte[] Frame { get; }
+    public override (int width, int height) Dimensions => (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
     public override bool IsReady { get; set; }
     public override string Url { get; set; }
 
@@ -51,7 +53,7 @@ public class IPCameraCapture : Capture
         }
         catch (Exception ex)
         {
-            BabbleCore.Logger.LogError(ex.Message);
+            BabbleCore.Instance.Logger.LogError(ex.Message);
         }
 
         int newByte;

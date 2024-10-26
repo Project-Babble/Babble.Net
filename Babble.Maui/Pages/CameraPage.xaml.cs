@@ -1,5 +1,4 @@
 using Babble.Core;
-using Babble.Maui.Pages;
 
 namespace Babble.Maui;
 
@@ -12,7 +11,7 @@ public partial class CameraPage : ContentPage
 
     public async void OnCameraAddressChanged(object sender, TextChangedEventArgs args)
     {
-        BabbleCore.Settings.UpdateSetting<int>($"{Prefixes.Camera}capture_source", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("capture_source", args.NewTextValue);
     }
 
     public async void OnSaveAndRestartTrackingClicked(object sender, EventArgs args)
@@ -47,16 +46,16 @@ public partial class CameraPage : ContentPage
 
     public async void OnEnableCalibrationToggled(object sender, CheckedChangedEventArgs args)
     {
-        BabbleCore.Settings.UpdateSetting<bool>($"{Prefixes.Camera}use_calibration", args.Value.ToString());
+        BabbleCore.Instance.Settings.UpdateSetting<bool>("use_calibration", args.Value.ToString());
     }
 
     public async void OnVerticalFlipToggled(object sender, CheckedChangedEventArgs args)
     {
-        BabbleCore.Settings.UpdateSetting<bool>($"{Prefixes.Camera}gui_vertical_flip", args.Value.ToString());
+        BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_vertical_flip", args.Value.ToString());
     }
 
     public async void OnHorizontalFlipToggled(object sender, CheckedChangedEventArgs args)
     {
-        BabbleCore.Settings.UpdateSetting<bool>($"{Prefixes.Camera}gui_horizontal_flip", args.Value.ToString());
+        BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_horizontal_flip", args.Value.ToString());
     }
 }

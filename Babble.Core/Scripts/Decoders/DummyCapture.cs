@@ -10,7 +10,9 @@ public class DummyCapture : Capture
 {
     public override string Url { get; set; }
 
-    public override byte[] Frame => Array.Empty<byte>();
+    public override byte[] Frame => EmptyFrame;
+
+    public override (int width, int height) Dimensions => (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
 
     public override bool IsReady { get; set; }
 

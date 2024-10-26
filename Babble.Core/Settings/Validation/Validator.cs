@@ -4,7 +4,7 @@ internal abstract class Validator<T> where T : struct
 {
     public static T Validate(string str)
     {
-        if (string.IsNullOrEmpty(null))
+        if (string.IsNullOrEmpty(str))
             throw new ArgumentException("Invalid event args passed.");
 
         if (ParseValue<T>(str, out var newValue))

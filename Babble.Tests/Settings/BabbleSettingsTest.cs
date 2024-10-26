@@ -14,7 +14,7 @@ public class SettingsTests : IDisposable
         var testSettings = new BabbleSettings
         {
             Version = 1,
-            CamDisplayId = 0,
+            CamDisplayId = "0",
             Cam = new CameraSettings
             {
                 // Add appropriate test values for CameraSettings
@@ -142,7 +142,7 @@ public class SettingsTests : IDisposable
 
         // Assert
         Assert.Equal(expectedVersion, settings.Version);
-        Assert.Equal(expectedDisplayId, settings.CamDisplayId);
+        Assert.Equal(expectedDisplayId.ToString(), settings.CamDisplayId);
         Assert.NotNull(settings.Cam);
         Assert.NotNull(settings.GeneralSettings);
     }

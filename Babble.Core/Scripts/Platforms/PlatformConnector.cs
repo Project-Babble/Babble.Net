@@ -1,4 +1,5 @@
-﻿using Emgu.CV;
+﻿using Babble.Core.Scripts.EmguCV;
+using Emgu.CV;
 using Emgu.CV.CvEnum;
 
 namespace Babble.Core.Scripts.Decoders;
@@ -39,40 +40,48 @@ public abstract class PlatformConnector
         // Fail fast
         if (Capture is null)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Capture cannot be null");
         }
-
         if (Capture.Frame is null || Capture.Frame.Length == 0)
         {
             return Array.Empty<float>();
         }
 
-        // Convert the frame to grayscale
-        Mat grayFrame = new();
-        CvInvoke.Imdecode(Capture.Frame, ImreadModes.Grayscale, grayFrame);
+        using var processingChain = new MatProcessingChain();
 
-        // Resize to the required 256 * 256
-        Mat resizedFrame = new();
-        CvInvoke.Resize(grayFrame, resizedFrame, new System.Drawing.Size(256, 256));
+        // Get ROI settings
+        var roiX = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_x");
+        var roiY = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_y");
+        var roiWidth = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_w");
+        var roiHeight = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_h");
+        var rotationAngle = BabbleCore.Instance.Settings.GetSetting<int>("rotation_angle");
+        var useRedChannel = BabbleCore.Instance.Settings.GetSetting<bool>("gui_use_red_channel");
 
-        // Ensure the Mat is of type CV_32F (float)
-        if (resizedFrame.Depth != DepthType.Cv32F)
-        {
-            // Convert to CV_32F if needed
-            resizedFrame.ConvertTo(resizedFrame, DepthType.Cv32F);
-        }
+        // Process the image through our chain of operations
+        using Mat finalMat = processingChain
+            .StartWith(Capture.Frame, Capture.Dimensions)
+            .Normalize(useRedChannel)
+            .Rotate(rotationAngle)
+            .Crop(roiX, roiY, roiWidth, roiHeight)
+            .Resize(new System.Drawing.Size(256, 256))
+            .EnsureDepth(DepthType.Cv32F)
+            .ApplyFlip("gui_vertical_flip", FlipType.Vertical)
+            .ApplyFlip("gui_horizontal_flip", FlipType.Horizontal)
+            .Result;
 
-        // Get the float array from the Mat (for our ONNX model)
-        float[] floatArray = new float[resizedFrame.Rows * resizedFrame.Cols];
-        resizedFrame.CopyTo(floatArray);
+        // Debugging
+        // CvInvoke.Imwrite("output.png", finalMat);
 
-        // Normalize pixel values to [0, 1] (assuming original values are 0-255)
+        // Convert to float array and normalize
+        float[] floatArray = new float[finalMat.Rows * finalMat.Cols];
+        finalMat.CopyTo(floatArray);
+
+        // Normalize pixel values to [0, 1]
         for (int i = 0; i < floatArray.Length; i++)
         {
             floatArray[i] /= 255f;
         }
 
-        // Send it
         return floatArray;
     }
 
