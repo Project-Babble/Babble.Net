@@ -6,8 +6,21 @@
     <ScrollView>
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
             <Label Text="Camera Address" TextColor="White"/>
-            <Entry Text="COM6" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnCameraAddressChanged"/>
+            <Entry x:Name="CameraAddress" Text="" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnCameraAddressChanged"/>
             <Button Text="Save and Restart Tracking" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnSaveAndRestartTrackingClicked"/>
+            
+            <Grid>
+                <Image x:Name="CameraImage" 
+                   Aspect="AspectFit"
+                   BackgroundColor="LightGray"
+                   HeightRequest="256" 
+                   WidthRequest="256" />
+                <ActivityIndicator x:Name="LoadingIndicator" 
+                    IsVisible="False"
+                    IsRunning="False"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Grid>
 
             <StackLayout Orientation="Horizontal"  Spacing="10" Margin="0,0,0,15">
                 <Button Text="Tracking Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnTrackingModeClicked"/>

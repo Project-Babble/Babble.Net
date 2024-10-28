@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Babble.Tests.Decoders.MJPEG;
+namespace Babble.Tests.Decoders;
 
 public class IPCameraCaptureTests
 {

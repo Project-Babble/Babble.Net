@@ -1,4 +1,6 @@
 using Babble.Core;
+using Babble.Core.Scripts;
+using Microsoft.Maui.Graphics.Platform;
 
 namespace Babble.Maui;
 
@@ -7,11 +9,14 @@ public partial class CameraPage : ContentPage
     public CameraPage()
     {
         InitializeComponent();
+        CameraAddress.Text = BabbleCore.Instance.Settings.GetSetting<string>("capture_source");
     }
 
     public async void OnCameraAddressChanged(object sender, TextChangedEventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("capture_source", args.NewTextValue);
+        if (string.IsNullOrEmpty(args.OldTextValue)) return;
+        if (args.OldTextValue != args.NewTextValue)
+            BabbleCore.Instance.Settings.UpdateSetting<int>("capture_source", args.NewTextValue);
     }
 
     public async void OnSaveAndRestartTrackingClicked(object sender, EventArgs args)

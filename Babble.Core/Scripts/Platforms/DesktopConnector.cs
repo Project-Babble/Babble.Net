@@ -26,11 +26,11 @@ public class DesktopConnector : PlatformConnector
         // TODO Add logic to reload camera on change
 
         // Determine if this is an IP Camera, Serial Camera, or something else
-        if (SerialConnections.Any(Url.StartsWith))
+        if (SerialConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
         {
             Capture = new SerialCamera(Url);
         }
-        else if (ImageConnections.Any(Url.StartsWith))
+        else if (ImageConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
         {
             Capture = new ImageCapture(Url);
         }
@@ -38,8 +38,8 @@ public class DesktopConnector : PlatformConnector
         {
             // On non-mobile platforms, we'll use EmguCVCapture for IP Cameras
             // Capture = new IPCameraCapture(Url);
-            // Capture = new EmguCVCapture(Url);
-            Capture = new DummyCapture(Url);
+            // Capture = new DummyCapture(Url);
+            Capture = new EmguCVCapture(Url); 
         }
 
         Capture.StartCapture();

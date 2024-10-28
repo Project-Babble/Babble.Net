@@ -22,7 +22,7 @@ public class ImageCapture : Capture
                 }
             }
 
-            return EmptyFrame;
+            throw new FileNotFoundException();
         }
     }
 
@@ -39,7 +39,7 @@ public class ImageCapture : Capture
                 }
             }
 
-            return (-1, -1);
+            throw new FileNotFoundException();
         }
     }
 

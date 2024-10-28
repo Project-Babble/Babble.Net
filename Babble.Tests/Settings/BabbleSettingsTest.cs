@@ -11,19 +11,7 @@ public class SettingsTests : IDisposable
 
     private static BabbleSettings CreateTestConfiguration()
     {
-        var testSettings = new BabbleSettings
-        {
-            Version = 1,
-            CamDisplayId = "0",
-            Cam = new CameraSettings
-            {
-                // Add appropriate test values for CameraSettings
-            },
-            GeneralSettings = new GeneralSettings
-            {
-                // Add appropriate test values for GeneralSettings
-            }
-        };
+        var testSettings = new BabbleSettings();
 
         var json = JsonSerializer.Serialize(testSettings, new JsonSerializerOptions
         {
@@ -142,7 +130,7 @@ public class SettingsTests : IDisposable
 
         // Assert
         Assert.Equal(expectedVersion, settings.Version);
-        Assert.Equal(expectedDisplayId.ToString(), settings.CamDisplayId);
+        Assert.Equal(expectedDisplayId, settings.CamDisplayId);
         Assert.NotNull(settings.Cam);
         Assert.NotNull(settings.GeneralSettings);
     }

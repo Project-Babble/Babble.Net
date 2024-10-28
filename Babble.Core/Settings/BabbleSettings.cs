@@ -1,23 +1,27 @@
 ﻿using Babble.Core.Settings.Models;
+using Newtonsoft.Json;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Babble.Core.Settings;
 
-public sealed class BabbleSettings
+public class BabbleSettings
 {
-    [JsonPropertyName("version")]
-    public int Version { get; set; }
+    // This is hacky. This MUST return something
+    private static readonly string[] prefixes = ["", "cam.", "generalsettings."];
 
-    [JsonPropertyName("cam")]
-    public CameraSettings Cam { get; set; }
+    public event Action<string> OnUpdate;
 
-    [JsonPropertyName("settings")]
-    public GeneralSettings GeneralSettings { get; set; }
+    [JsonProperty("version")]
+    public int Version { get; private set; }
 
-    [JsonPropertyName("cam_display_id")]
-    public string CamDisplayId { get; set; }
+    [JsonProperty("cam")]
+    public CameraSettings Cam { get; private set; }
+
+    [JsonProperty("settings")]
+    public GeneralSettings GeneralSettings { get; private set; }
+
+    [JsonProperty("cam_display_id")]
+    public int CamDisplayId { get; private set; }
 
     private static string AppConfigFile => Path.Combine(AppContext.BaseDirectory, "AppConfiguration.json");
 
@@ -29,7 +33,7 @@ public sealed class BabbleSettings
         _propertyCache = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
         CacheProperties(GetType());
         Version = 0;
-        CamDisplayId = "0";
+        CamDisplayId = 0;
         Cam = new CameraSettings();
         GeneralSettings = new GeneralSettings();
     }
@@ -58,9 +62,7 @@ public sealed class BabbleSettings
     public T GetSetting<T>(string propertyName)
     {
         propertyName = propertyName.Replace("_", string.Empty);
-
-        // This is hacky. This MUST return something
-        var prefixes = new string[] { "", "cam.", "generalsettings." };
+        
         foreach (var p in prefixes)
         {
             var fullPropertyName = p + propertyName;
@@ -76,30 +78,35 @@ public sealed class BabbleSettings
     // Method to set property value by name
     public void UpdateSetting<T>(string propertyName, string value)
     {
-        propertyName = propertyName.Replace("_", string.Empty);
-        if (_propertyCache.TryGetValue(propertyName, out var propertyInfo))
+        var propertyNameCopy = propertyName.Replace("_", string.Empty);
+        foreach (var p in prefixes)
         {
-            // Get the containing object for the property
-            var target = GetPropertyTarget(propertyName);
-
-            // Convert the value to the correct type and set it
-            var convertedValue = Convert.ChangeType(value, propertyInfo.PropertyType);
-            propertyInfo.SetValue(target, convertedValue);
-
-            Save();
-
-            // If we were already running, and we NEED to restart, restart
-            // TODO Add settings whitelist. What settings should restart the app?
-            if (BabbleCore.Instance.IsRunning && false)
+            var fullPropertyName = p + propertyNameCopy;
+            if (_propertyCache.TryGetValue(fullPropertyName, out var propertyInfo))
             {
-                BabbleCore.Instance.Stop();
-                BabbleCore.Instance.Start(this);
+                // Get the containing object for the property
+                var target = GetPropertyTarget(fullPropertyName);
+
+                // Convert the value to the correct type and set it
+                var convertedValue = Convert.ChangeType(value, propertyInfo.PropertyType);
+                propertyInfo.SetValue(target, convertedValue);
+
+                Save();
+                OnUpdate?.Invoke(propertyName);
+                return;
+
+                // If the user changes a setting that requires them to restart,
+                // DON't force them in and out of the app! Be consistent with the 
+                // current Babble App
+                //if (BabbleCore.Instance.IsRunning)
+                //{
+                //    BabbleCore.Instance.Stop();
+                //    BabbleCore.Instance.Start(this);
+                //}
             }
         }
-        else
-        {
-            throw new ArgumentException($"Property '{propertyName}' does not exist.");
-        }
+
+        throw new ArgumentException($"Property '{propertyName}' does not exist.");
     }
 
     private object GetPropertyTarget(string propertyName)
@@ -123,14 +130,9 @@ public sealed class BabbleSettings
     /// <summary>
     /// Method to save the settings to a JSON file
     /// </summary>
-    public void Save(bool restart = false)
-    {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
-
-        var json = JsonSerializer.Serialize(this, options);
+    public void Save()
+    {       
+        var json = JsonConvert.SerializeObject(this);
         File.WriteAllText(AppConfigFile, json);
     }
 
@@ -139,8 +141,17 @@ public sealed class BabbleSettings
     /// </summary>
     public void Load()
     {
-        var json = File.ReadAllText(AppConfigFile);
-        var config = JsonSerializer.Deserialize<BabbleSettings>(json);
+        BabbleSettings config;
+        if (File.Exists(AppConfigFile))
+        {
+            var json = File.ReadAllText(AppConfigFile);
+            config = JsonConvert.DeserializeObject<BabbleSettings>(json)!;
+        }
+        else
+        {
+            config = new BabbleSettings();
+        }
+
         Version = config.Version;
         Cam = config.Cam;
         GeneralSettings = config.GeneralSettings;

@@ -9,7 +9,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Maui", "..\Babble.Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.VRCFT", "..\Babble.VRCFT\Babble.VRCFT.csproj", "{5D54EEEB-1463-4CAB-BD3D-960728A09C79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.Tests", "..\Babble.Tests\Babble.Tests.csproj", "{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Tests", "..\Babble.Tests\Babble.Tests.csproj", "{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Avalonia", "..\Babble.Avalonia\Babble.Avalonia.csproj", "{D8B7CF7E-2569-462D-A5AF-C1121AC23395}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Avalonia.Android", "..\Babble.Avalonia.Android\Babble.Avalonia.Android.csproj", "{44A2A13F-C2D9-4092-ACBB-A67FA17B5B32}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Avalonia.Desktop", "..\Babble.Avalonia.Desktop\Babble.Avalonia.Desktop.csproj", "{593EF598-EC36-4CBD-93CB-9AD319F250A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Avalonia.iOS", "..\Babble.Avalonia.iOS\Babble.Avalonia.iOS.csproj", "{0CD6C055-5718-408A-9460-D2A856491121}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +43,26 @@ Global
 		{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C66B2A7B-EA24-49A5-91DB-5482CF48B3DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8B7CF7E-2569-462D-A5AF-C1121AC23395}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8B7CF7E-2569-462D-A5AF-C1121AC23395}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8B7CF7E-2569-462D-A5AF-C1121AC23395}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8B7CF7E-2569-462D-A5AF-C1121AC23395}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44A2A13F-C2D9-4092-ACBB-A67FA17B5B32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44A2A13F-C2D9-4092-ACBB-A67FA17B5B32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44A2A13F-C2D9-4092-ACBB-A67FA17B5B32}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{44A2A13F-C2D9-4092-ACBB-A67FA17B5B32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44A2A13F-C2D9-4092-ACBB-A67FA17B5B32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44A2A13F-C2D9-4092-ACBB-A67FA17B5B32}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{593EF598-EC36-4CBD-93CB-9AD319F250A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{593EF598-EC36-4CBD-93CB-9AD319F250A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{593EF598-EC36-4CBD-93CB-9AD319F250A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{593EF598-EC36-4CBD-93CB-9AD319F250A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CD6C055-5718-408A-9460-D2A856491121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CD6C055-5718-408A-9460-D2A856491121}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CD6C055-5718-408A-9460-D2A856491121}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0CD6C055-5718-408A-9460-D2A856491121}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CD6C055-5718-408A-9460-D2A856491121}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CD6C055-5718-408A-9460-D2A856491121}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

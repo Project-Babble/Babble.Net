@@ -15,6 +15,16 @@
         <Tab Title="Cam">
             <ShellContent ContentTemplate="{DataTemplate local:CameraPage}"/>
         </Tab>
+        <Tab Title="Settings">
+            <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}"/>
+        </Tab>
+        <Tab Title="Algo Settings">
+            <ShellContent ContentTemplate="{DataTemplate local:AlgorithmSettingsPage}"/>
+        </Tab>
+        <Tab Title="Calibration">
+            <ShellContent ContentTemplate="{DataTemplate local:CalibrationPage}"/>
+        </Tab>
+
     </TabBar>
 
 </Shell>

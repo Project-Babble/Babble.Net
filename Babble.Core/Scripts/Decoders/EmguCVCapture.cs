@@ -11,13 +11,29 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class EmguCVCapture : Capture
 {
+
+    private static readonly object lockObject = new();
+
     public override byte[] Frame
     {
         get
         {
-            return !_videoCapture.IsOpened ?
-                _videoCapture.QueryFrame().GetRawData() :
-                EmptyFrame;
+            lock (lockObject)
+            {
+                if (_videoCapture is not null)
+                {
+                    if (_videoCapture.IsOpened)
+                    {
+                        var frame = _videoCapture.QueryFrame();
+                        if (frame is not null)
+                        {
+                            return frame.GetRawData();
+                        }
+                    }
+                }
+
+                return EmptyFrame;
+            }
         }
     }
 
@@ -25,9 +41,22 @@ public class EmguCVCapture : Capture
     {
         get
         {
-            return !_videoCapture.IsOpened ?
-                (_videoCapture.Width, _videoCapture.Height) :
-                (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
+            lock (lockObject)
+            {
+                if (_videoCapture is not null)
+                {
+                    if (_videoCapture.IsOpened)
+                    {
+                        var frame = _videoCapture.QueryFrame();
+                        if (frame is not null)
+                        {
+                            return (frame.Width, frame.Height);
+                        }
+                    }
+                }
+
+                return (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
+            }
         }
     }
 
@@ -64,7 +93,7 @@ public class EmguCVCapture : Capture
             _videoCapture.Set(CapProp.Fps, fr);
         }
 
-        IsReady = true;
+        IsReady = _videoCapture.IsOpened;
         return true;
     }
 

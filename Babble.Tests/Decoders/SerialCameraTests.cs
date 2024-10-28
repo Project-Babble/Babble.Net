@@ -1,6 +1,7 @@
-﻿using FluentAssertions;
+﻿using Babble.Core.Scripts.Decoders;
+using FluentAssertions;
 
-namespace Babble.Core.Scripts.Decoders.Tests;
+namespace Babble.Tests.Decoders;
 
 
 /* Hiding this test until an underlying issue can be resolved - 

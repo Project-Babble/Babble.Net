@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Babble.Core;
+using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Graphics.Platform;
+using System.Drawing;
 
 namespace Babble.Maui;
 

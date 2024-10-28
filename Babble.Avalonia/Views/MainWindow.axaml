@@ -1,0 +1,309 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+		xmlns:vm="clr-namespace:Babble.Avalonia.Views"
+        x:Class="Babble.Avalonia.Views.MainWindow"
+        Title="Babble v2.0.6"
+        Width="800" Height="600"
+        Background="#2D2D2D">
+
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<!-- Tab buttons -->
+		<TabControl Grid.Row="1" Margin="0,10,0,0">
+			<!-- Cam Tab -->
+			<TabItem Header="Cam" Foreground="White">
+				<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+					<StackPanel Spacing="5">
+						<TextBlock Text="Camera Address" Foreground="White"/>
+						<TextBox Text="" Background="#2D2D2D" Foreground="White"/>
+
+						<Image Grid.Column="1" Source="{Binding MouthBitmap, Mode=TwoWay}" Width="256" Height="256" MaxWidth="256" MaxHeight="256" />
+
+						<Button Content="Save and Restart Tracking" 
+								Click="SaveAndRestartTracking_Click"
+                                Background="#4CAF50"
+                                Foreground="White"/>
+
+						<StackPanel Orientation="Horizontal" Spacing="5">
+							<Button Content="Tracking Mode"
+									Click="TrackingMode_Click"
+                                    Background="#4CAF50"
+                                    Foreground="White"/>
+							<Button Content="Cropping Mode"
+									Click="CroppingMode_Click"
+                                    Background="#4CAF50"
+                                    Foreground="White"/>
+						</StackPanel>
+
+						<TextBlock Text="Rotation" Foreground="White"/>
+						<Slider Maximum="360" Value="0" />
+
+						<StackPanel Orientation="Horizontal" Spacing="5">
+							<Button Content="Start Calibration"
+                                    Background="#4CAF50"
+                                    Foreground="White"/>
+							<Button Content="Stop Calibration"
+                                    Background="#4CAF50"
+                                    Foreground="White"/>
+						</StackPanel>
+
+						<CheckBox Content="Enable Calibration"
+                                 Foreground="White"
+                                 IsChecked="True"/>
+
+						<TextBlock Text="Mode: Camera Connecting"
+                                 Foreground="White"/>
+
+						<StackPanel Orientation="Horizontal" Spacing="10">
+							<CheckBox Content="Vertical Flip" Foreground="White"/>
+							<CheckBox Content="Horizontal Flip" Foreground="White"/>
+						</StackPanel>
+					</StackPanel>
+				</Border>
+			</TabItem>
+
+			<!-- Settings Tab -->
+			<TabItem Header="Settings" Foreground="White">
+				<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+					<StackPanel Spacing="5">
+						<TextBlock Text="General Settings:"
+                                 Foreground="White"
+                                 FontWeight="Bold"/>
+						<CheckBox Content="Check For Updates"
+                                 Foreground="White"
+                                 IsChecked="True"/>
+
+						<TextBlock Text="OSC Settings:"
+                                 Foreground="White"
+                                 FontWeight="Bold"
+                                 Margin="0,10,0,0"/>
+
+						<TextBlock Text="Location Prefix:" Foreground="White"/>
+						<TextBox Background="#2D2D2D" Foreground="White"/>
+
+						<Grid ColumnDefinitions="Auto,*">
+							<TextBlock Text="Address:"
+                                     Grid.Column="0"
+                                     Foreground="White"
+                                     VerticalAlignment="Center"/>
+							<TextBox Text=""
+                                    Grid.Column="1"
+                                    Background="#2D2D2D"
+                                    Foreground="White"/>
+						</Grid>
+
+						<Grid ColumnDefinitions="Auto,*">
+							<TextBlock Text="Port:"
+                                     Grid.Column="0"
+                                     Foreground="White"
+                                     VerticalAlignment="Center"/>
+							<TextBox Text=""
+                                    Grid.Column="1"
+                                    Background="#2D2D2D"
+                                    Foreground="White"/>
+						</Grid>
+
+						<CheckBox Content="Receive functions" Foreground="White"/>
+
+						<TextBlock Text="Receiver Port:" Foreground="White"/>
+						<TextBox Text=""
+                                Background="#2D2D2D"
+                                Foreground="White"/>
+
+						<TextBlock Text="Recalibrate Address:" Foreground="White"/>
+						<TextBox Text=""
+                                Background="#2D2D2D"
+                                Foreground="White"/>
+
+						<TextBlock Text="UVC Camera Settings:"
+                                 Foreground="White"
+                                 FontWeight="Bold"
+                                 Margin="0,10,0,0"/>
+						<CheckBox Content="Use Red Channel" Foreground="White"/>
+
+						<Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto">
+							<TextBlock Text="X Resolution:"
+                                     Grid.Column="0"
+                                     Foreground="White"/>
+							<TextBox Text=""
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Background="#2D2D2D"
+                                    Foreground="White"/>
+
+							<TextBlock Text="Y Resolution:"
+                                     Grid.Column="1"
+                                     Foreground="White"/>
+							<TextBox Text=""
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Background="#2D2D2D"
+                                    Foreground="White"/>
+
+							<TextBlock Text="Framerate:"
+                                     Grid.Column="2"
+                                     Foreground="White"/>
+							<TextBox Text=""
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Background="#2D2D2D"
+                                    Foreground="White"/>
+						</Grid>
+					</StackPanel>
+				</Border>
+			</TabItem>
+
+			<!-- Algo Settings Tab -->
+			<TabItem Header="Algo Settings" Foreground="White">
+				<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+					<StackPanel Spacing="5">
+						<TextBlock Text="Model Settings:"
+                                 Foreground="White"
+                                 FontWeight="Bold"/>
+
+						<TextBlock Text="Model file:" Foreground="White"/>
+						<TextBox Text=""
+                                Background="#2D2D2D"
+                                Foreground="White"/>
+
+						<Grid ColumnDefinitions="*,*,Auto">
+							<StackPanel Grid.Column="0" Spacing="5">
+								<TextBlock Text="Inference Threads:"
+                                         Foreground="White"/>
+								<TextBox Text=""
+                                        Background="#2D2D2D"
+                                        Foreground="White"/>
+							</StackPanel>
+
+							<StackPanel Grid.Column="1" Spacing="5">
+								<TextBlock Text="Runtime:" Foreground="White"/>
+								<ComboBox SelectedIndex="0"
+                                        Background="#2D2D2D"
+                                        Foreground="White">
+									<ComboBoxItem>ONNX</ComboBoxItem>
+								</ComboBox>
+							</StackPanel>
+
+							<CheckBox Grid.Column="2"
+                                     Content="Use GPU"
+                                     IsChecked="False"
+                                     Foreground="White"
+                                     VerticalAlignment="Bottom"/>
+						</Grid>
+
+						<TextBlock Text="Model output multiplier:"
+                                 Foreground="White"/>
+						<TextBox Text=""
+                                Background="#2D2D2D"
+                                Foreground="White"/>
+
+						<TextBlock Text="Calibration Deadzone:"
+                                 Foreground="White"/>
+						<TextBox Text=""
+                                Background="#2D2D2D"
+                                Foreground="White"/>
+
+						<TextBlock Text="One Euro Filter Parameters:"
+                                 Foreground="White"
+                                 FontWeight="Bold"
+                                 Margin="0,10,0,0"/>
+
+						<Grid ColumnDefinitions="*,*">
+							<StackPanel Grid.Column="0" Spacing="5">
+								<TextBlock Text="Min Frequency Cutoff:"
+                                         Foreground="White"/>
+								<TextBox Text=""
+                                        Background="#2D2D2D"
+                                        Foreground="White"/>
+							</StackPanel>
+
+							<StackPanel Grid.Column="1" Spacing="5">
+								<TextBlock Text="Speed Coefficient:"
+                                         Foreground="White"/>
+								<TextBox Text=""
+                                        Background="#2D2D2D"
+                                        Foreground="White"/>
+							</StackPanel>
+						</Grid>
+					</StackPanel>
+				</Border>
+			</TabItem>
+
+			<!-- Calibration Tab -->
+			<TabItem Header="Calibration" Foreground="White">
+				<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+					<StackPanel Spacing="5">
+						<Grid ColumnDefinitions="Auto,*">
+							<TextBlock Text="Calibration Mode:"
+                                     Grid.Column="0"
+                                     Foreground="White"
+                                     VerticalAlignment="Center"/>
+							<ComboBox Grid.Column="1"
+                                    SelectedIndex="0"
+                                    Background="#2D2D2D"
+                                    Foreground="White">
+								<ComboBoxItem>Neutral</ComboBoxItem>
+							</ComboBox>
+						</Grid>
+
+						<Grid ColumnDefinitions="*,2*,*" Margin="0,10">
+							<TextBlock Text="Left"
+                                     Grid.Column="0"
+                                     Foreground="White"
+                                     HorizontalAlignment="Center"/>
+							<TextBlock Text="Shape"
+                                     Grid.Column="1"
+                                     Foreground="White"
+                                     HorizontalAlignment="Center"/>
+							<TextBlock Text="Right"
+                                     Grid.Column="2"
+                                     Foreground="White"
+                                     HorizontalAlignment="Center"/>
+						</Grid>
+
+						<ItemsControl ItemsSource="{Binding CalibrationItems}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<Grid ColumnDefinitions="*,2*,*" Margin="0,2">
+										<TextBox Grid.Column="0"
+                                                Text="{Binding LeftValue}"
+                                                Background="#2D2D2D"
+                                                Foreground="White"/>
+										<TextBlock Grid.Column="1"
+                                                 Text="{Binding ShapeName}"
+                                                 Foreground="White"
+                                                 VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"/>
+										<TextBox Grid.Column="2"
+                                                Text="{Binding RightValue}"
+                                                Background="#2D2D2D"
+                                                Foreground="White"/>
+									</Grid>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+
+						<StackPanel Orientation="Horizontal"
+                                  Spacing="10"
+                                  HorizontalAlignment="Center"
+                                  Margin="0,10,0,0">
+							<Button Content="Reset Min"
+                                    Background="#4CAF50"
+                                    Foreground="White"/>
+							<Button Content="Reset Max"
+                                    Background="#4CAF50"
+                                    Foreground="White"/>
+						</StackPanel>
+					</StackPanel>
+				</Border>
+			</TabItem>
+		</TabControl>
+	</Grid>
+</Window>

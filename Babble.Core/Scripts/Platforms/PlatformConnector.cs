@@ -1,6 +1,7 @@
 ﻿using Babble.Core.Scripts.EmguCV;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
+using System.Linq;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -37,12 +38,27 @@ public abstract class PlatformConnector
     /// <exception cref="InvalidOperationException"></exception>
     public float[] GetFrameData()
     {
-        // Fail fast
-        if (Capture is null)
+        try
         {
-            throw new InvalidOperationException("Capture cannot be null");
+            // Fail fast
+            if (Capture is null)
+            {
+                return Array.Empty<float>();
+            }
+            if (!Capture.IsReady)
+            {
+                return Array.Empty<float>();
+            }
+            if (Capture.Frame is null)
+            {
+                return Array.Empty<float>();
+            }
+            if (Capture.Frame.Length == 0)
+            {
+                return Array.Empty<float>();
+            }
         }
-        if (Capture.Frame is null || Capture.Frame.Length == 0)
+        catch
         {
             return Array.Empty<float>();
         }
@@ -104,9 +120,9 @@ public abstract class PlatformConnector
     /// </summary>
     public void WaitForCamera()
     {
-        while (!Capture.IsReady)
-        {
-            Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
-        }
+        //while (!Capture.IsReady)
+        //{
+        //    Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
+        //}
     }
 }

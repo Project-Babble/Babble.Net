@@ -1,8 +1,9 @@
-﻿using Babble.Core.Settings;
+﻿using Babble.Core;
+using Babble.Core.Scripts.Decoders;
+using Babble.Core.Settings;
 using Emgu.CV;
-using System.Runtime.InteropServices;
 
-namespace Babble.Core.Scripts.Decoders.Tests;
+namespace Babble.Tests.Decoders;
 
 public class TestPlatformConnector : PlatformConnector
 {
@@ -28,7 +29,7 @@ public class ImageCaptureTests : IDisposable
     public ImageCaptureTests()
     {
         BabbleSettings settings = new BabbleSettings();
-        settings.CamDisplayId = _testImagePath;
+        settings.Cam.CaptureSource = _testImagePath;
         BabbleCore.Instance.Start(settings);
         _connector = new TestPlatformConnector(_testImagePath); // We don't technically need to pass in the image here
         _connector.Initialize();
@@ -57,11 +58,9 @@ public class ImageCaptureTests : IDisposable
         _connector.Initialize();
         _connector.Capture.StartCapture();
 
-        // Act
-        float[] frameData = _connector.GetFrameData();
-
-        // Assert
-        Assert.Empty(frameData);
+        // Act/Assert
+        Assert.Throws<FileNotFoundException>(() =>
+            _connector.GetFrameData());
     }
 
     [Fact]

@@ -6,7 +6,7 @@
 		"roi_window_y": 10,
 		"roi_window_w": 100,
 		"roi_window_h": 100,
-		"capture_source": "COM5",
+		"capture_source": "http://192.168.0.117:4747/video",
 		"gui_vertical_flip": false,
 		"gui_horizontal_flip": false,
 		"use_ffmpeg": false
@@ -15,7 +15,7 @@
 		"gui_min_cutoff": "0.9",
 		"gui_speed_coefficient": "0.9",
 		"gui_osc_address": "127.0.0.1",
-		"gui_osc_port": 9001,
+		"gui_osc_port": 8888,
 		"gui_osc_receiver_port": 9001,
 		"gui_osc_recalibrate_address": "/avatar/parameters/babble_recalibrate",
 		"gui_update_check": true,
@@ -37,5 +37,5 @@
 		"calibration_mode": "Neutral",
 		"gui_language": "English"
 	},
-	"cam_display_id": "0"
+	"cam_display_id": 0
 }

@@ -1,79 +1,79 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace Babble.Core.Settings.Models;
 
 public sealed class GeneralSettings
 {
-    [JsonPropertyName("gui_min_cutoff")]
+    [JsonProperty("gui_min_cutoff")]
     public string GuiMinCutoff { get; set; }
 
-    [JsonPropertyName("gui_speed_coefficient")]
+    [JsonProperty("gui_speed_coefficient")]
     public string GuiSpeedCoefficient { get; set; }
 
-    [JsonPropertyName("gui_osc_address")]
+    [JsonProperty("gui_osc_address")]
     public string GuiOscAddress { get; set; }
 
-    [JsonPropertyName("gui_osc_port")]
+    [JsonProperty("gui_osc_port")]
     public int GuiOscPort { get; set; }
 
-    [JsonPropertyName("gui_osc_receiver_port")]
+    [JsonProperty("gui_osc_receiver_port")]
     public int GuiOscReceiverPort { get; set; }
 
-    [JsonPropertyName("gui_osc_recalibrate_address")]
+    [JsonProperty("gui_osc_recalibrate_address")]
     public string GuiOscRecalibrateAddress { get; set; }
 
-    [JsonPropertyName("gui_update_check")]
+    [JsonProperty("gui_update_check")]
     public bool GuiUpdateCheck { get; set; }
 
-    [JsonPropertyName("gui_ROSC")]
+    [JsonProperty("gui_ROSC")]
     public bool GuiROSC { get; set; }
 
-    [JsonPropertyName("gui_osc_location")]
+    [JsonProperty("gui_osc_location")]
     public string GuiOscLocation { get; set; }
 
-    [JsonPropertyName("gui_multiply")]
+    [JsonProperty("gui_multiply")]
     public double GuiMultiply { get; set; }
 
-    [JsonPropertyName("gui_model_file")]
+    [JsonProperty("gui_model_file")]
     public string GuiModelFile { get; set; }
 
-    [JsonPropertyName("gui_runtime")]
+    [JsonProperty("gui_runtime")]
     public string GuiRuntime { get; set; }
 
-    [JsonPropertyName("gui_use_gpu")]
+    [JsonProperty("gui_use_gpu")]
     public bool GuiUseGpu { get; set; }
 
-    [JsonPropertyName("gui_gpu_index")]
+    [JsonProperty("gui_gpu_index")]
     public int GuiGpuIndex { get; set; }
 
-    [JsonPropertyName("gui_inference_threads")]
+    [JsonProperty("gui_inference_threads")]
     public int GuiInferenceThreads { get; set; }
 
-    [JsonPropertyName("gui_use_red_channel")]
+    [JsonProperty("gui_use_red_channel")]
     public bool GuiUseRedChannel { get; set; }
 
-    [JsonPropertyName("calib_deadzone")]
+    [JsonProperty("calib_deadzone")]
     public double CalibDeadzone { get; set; }
 
-    [JsonPropertyName("calib_array")]
+    [JsonProperty("calib_array")]
     public string CalibArray { get; set; }
 
-    [JsonPropertyName("gui_cam_resolution_x")]
+    [JsonProperty("gui_cam_resolution_x")]
     public int GuiCamResolutionX { get; set; }
 
-    [JsonPropertyName("gui_cam_resolution_y")]
+    [JsonProperty("gui_cam_resolution_y")]
     public int GuiCamResolutionY { get; set; }
 
-    [JsonPropertyName("gui_cam_framerate")]
+    [JsonProperty("gui_cam_framerate")]
     public int GuiCamFramerate { get; set; }
 
-    [JsonPropertyName("use_calibration")]
+    [JsonProperty("use_calibration")]
     public bool UseCalibration { get; set; }
 
-    [JsonPropertyName("calibration_mode")]
+    [JsonProperty("calibration_mode")]
     public string CalibrationMode { get; set; }
 
-    [JsonPropertyName("gui_language")]
+    [JsonProperty("gui_language")]
     public string GuiLanguage { get; set; }
 
     public GeneralSettings()

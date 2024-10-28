@@ -19,9 +19,9 @@ public class MatProcessingChain : IDisposable
     public MatProcessingChain StartWith(byte[] frameData, (int width, int height) dimensions)
     {
         /* A little rant. This function has caused me so many problems, originally I thought
-         * we could use EmguCV's CvInoke.Imdecode to convert a byte[] to a Mat but noooooo
+         * we could use EmguCV's CvInvoke.Imdecode to convert a byte[] to a Mat but noooooo
          * https://github.com/emgucv/emgucv/issues/203
-         * Apparently this has been an issue for a while. To summarize, CvInoke.Imdecode might not work bc:
+         * Apparently this has been an issue for a while. To summarize, CvInvoke.Imdecode might not work bc:
          *  1) The ImDecode function might not be thread safe
          *  2) The ImDecode function might require some global OS resource 
          * This is the entire reason why we're having to query Capture size, BS!

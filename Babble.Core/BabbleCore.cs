@@ -15,6 +15,8 @@ namespace Babble.Core;
 /// </summary>
 public class BabbleCore
 {
+    private static readonly HashSet<string> Whitelist = new(StringComparer.OrdinalIgnoreCase) { "capture_source" };
+
     public static BabbleCore Instance { get; private set; }
 
     public BabbleSettings Settings { get; private set; }
@@ -23,13 +25,11 @@ public class BabbleCore
 
     public bool IsRunning { get; private set; }
 
+
     private PlatformConnector _platformConnector;
     private InferenceSession _session;
     private readonly Thread _thread;
     private string _inputName;
-
-    // TODO: Ponder OSC/HTTP
-    // private readonly BabbleOSC _sender;
 
     static BabbleCore()
     {
@@ -38,23 +38,18 @@ public class BabbleCore
 
     private BabbleCore()
     {
-        // Debugging values
-        const string _ip = @"192.168.0.75";
-        const string _ipCameraUrl = @$"http://{_ip}:4747/video";
-
         //var dummyCamera = DeviceEnumerator.EnumerateCameras(out var cameraMap) ?
         //    cameraMap.ElementAt(Random.Shared.Next(cameraMap.Count)).Key.ToString() : "0";
-
+        
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
 
         Logger = factory.CreateLogger(nameof(BabbleCore));
         Settings = new BabbleSettings();
+        Settings.OnUpdate += ConfigureCaptureSource;
 
         // LocaleManager.Initialize(_lang);
-
-        // TODO Create OSC/HTTP API!
-        // _sender = new BabbleOSC(_ip);
     }
+    
 
     /// <summary>
     /// Big bang. True to load settings, false to use default.
@@ -120,29 +115,14 @@ public class BabbleCore
         }
 
         SessionOptions sessionOptions = ParseSettings();
+        ConfigurePlatformSpecificGpu(sessionOptions);
+        ConfigurePlatformConnector();
 
         _session = new InferenceSession(modelPath, sessionOptions);
-        Logger.LogInformation("Babble.Core started.");
         _inputName = _session.InputMetadata.Keys.First().ToString();
-
-        // Creates the proper video streaming classes based on the platform we're deploying to.
-        // EmguCV doesn't have support for VideoCapture on Android, iOS, or UWP
-        // We have a custom implementations for IP Cameras, the de-facto use case on mobile
-        // As well as SerialCameras (not tested on mobile yet)
-        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
-        {
-            _platformConnector = new MobileConnector(Settings.CamDisplayId); // _cameraUrl @"http://192.168.0.75:4747/video"
-        }
-        else
-        {
-            // Else, for WinUI, macOS, watchOS, MacCatalyst, tvOS, Tizen, etc...
-            // Use the standard EmguCV VideoCapture backend
-            _platformConnector = new DesktopConnector(Settings.CamDisplayId); // _cameraUrl
-        }
-
-        _platformConnector.Initialize();
-
         IsRunning = true;
+
+        Logger.LogInformation("Babble.Core started.");
 
     }
 
@@ -164,8 +144,19 @@ public class BabbleCore
 
         var arKitExpressions = Utils.ARKitExpressions;
 
+        // Camera not ready, or connecting to new source
         var data = _platformConnector.GetFrameData();
+        if (data is null)
+        {
+            return false;
+        }
+        if (data.Length == 0)
+        {
+            return false;
+        }
+
         var inputTensor = Utils.PreprocessFrame(data);
+
         var inputs = new List<NamedOnnxValue>
         {
             NamedOnnxValue.CreateFromTensor(_inputName, inputTensor)
@@ -193,6 +184,23 @@ public class BabbleCore
         return true;
     }
 
+    public bool GetLipImage(out byte[] image)
+    {
+        image = Array.Empty<byte>();
+        if (_platformConnector.Capture.Frame is null)
+        {
+            return false;
+        }
+
+        if (_platformConnector.Capture.Frame.Length == 0)
+        {
+            return false;
+        }
+
+        image = _platformConnector.Capture.Frame;
+        return true;
+    }
+
     /// <summary>
     /// Stop things
     /// </summary>
@@ -212,23 +220,83 @@ public class BabbleCore
     
     private SessionOptions ParseSettings()
     {
-        // Random environment variable to speed up webcam opening on the MSMF backend.
+        // Random environment variable(s) to speed up webcam opening on the MSMF backend.
         // https://github.com/opencv/opencv/issues/17687
         Environment.SetEnvironmentVariable("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0");
         Environment.SetEnvironmentVariable("OMP_NUM_THREADS", "1");
 
-        // TODO: Add settings!
         // Setup inference backend
         var sessionOptions = new SessionOptions();
-        if (Settings.GetSetting<bool>($"gui_use_gpu") && RuntimeDetector.IsRuntimeSupported(Runtime.CUDA))
-        {
-            sessionOptions.AppendExecutionProvider_CUDA(Settings.GetSetting<int>($"gui_gpu_index"));
-        }
         sessionOptions.InterOpNumThreads = 1;
         sessionOptions.IntraOpNumThreads = Settings.GetSetting<int>($"gui_inference_threads");
         sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-        sessionOptions.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");  // ~3% savings worth ~6ms avg latency. Not noticeable at 60fps?
+        // ~3% savings worth ~6ms avg latency. Not noticeable at 60fps?
+        sessionOptions.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");  
         sessionOptions.EnableMemoryPattern = true;
         return sessionOptions;
+    }
+    
+    private void ConfigurePlatformConnector()
+    {
+        // Creates the proper video streaming classes based on the platform we're deploying to.
+        // EmguCV doesn't have support for VideoCapture on Android, iOS, or UWP
+        // We have a custom implementations for IP Cameras, the de-facto use case on mobile
+        // As well as SerialCameras (not tested on mobile yet)
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+        {
+            _platformConnector = new MobileConnector(Settings.Cam.CaptureSource);
+        }
+        else
+        {
+            // Else, for WinUI, macOS, watchOS, MacCatalyst, tvOS, Tizen, etc...
+            // Use the standard EmguCV VideoCapture backend
+            _platformConnector = new DesktopConnector(Settings.Cam.CaptureSource);
+        }
+
+        _platformConnector.Initialize();
+    }
+
+    private void ConfigureCaptureSource(string setting)
+    {
+        if (Whitelist.Contains(setting))
+        {
+            _platformConnector.Terminate();
+            ConfigurePlatformConnector();
+        }
+    }
+
+    private void ConfigurePlatformSpecificGpu(SessionOptions options)
+    {
+        try
+        {
+            if (Settings.GetSetting<bool>("gui_use_gpu"))
+            {
+                if (OperatingSystem.IsAndroid())
+                {
+                    options.AppendExecutionProvider_Nnapi();
+                }
+                else if (OperatingSystem.IsIOS() || 
+                         OperatingSystem.IsMacCatalyst() || 
+                         OperatingSystem.IsMacOS() || 
+                         OperatingSystem.IsWatchOS() || 
+                         OperatingSystem.IsTvOS())
+                {
+                    options.AppendExecutionProvider_CoreML();
+                }
+                else if (RuntimeDetector.IsRuntimeSupported(Runtime.CUDA))
+                {
+                    var gpuIndex = Settings.GetSetting<int>("gui_gpu_index");
+                    options.AppendExecutionProvider_CUDA(gpuIndex);
+                }
+            }
+            else
+            {
+                options.AppendExecutionProvider_CPU();
+            }
+        }
+        catch (Exception ex) 
+        {
+            Logger.LogError(ex.Message);
+        }
     }
 }

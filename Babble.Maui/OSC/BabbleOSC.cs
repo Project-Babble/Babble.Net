@@ -27,7 +27,7 @@ public partial class BabbleOSC
     private const int TIMEOUT_MS = 10000;
 
 
-    public BabbleOSC(string? host = null, int? localPort = null, int? remotePort = null)
+    public BabbleOSC(string? host = null, int? remotePort = null, int ? localPort = null)
     {
         _resolvedHost = host ?? DEFAULT_HOST;
         _resolvedLocalPort = localPort ?? DEFAULT_LOCAL_PORT;

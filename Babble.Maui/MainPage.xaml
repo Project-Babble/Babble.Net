@@ -7,29 +7,35 @@
 
     <!-- Cam Tab -->
     <ContentPage Title="Cam">
-        <StackLayout Padding="10" BackgroundColor="#2D2D2D">
+        <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
             <Label Text="Camera Address" TextColor="White"/>
-            <Entry Text="COM6" TextColor="White" BackgroundColor="#3D3D3D"/>
-            <Button Text="Save and Restart Tracking" BackgroundColor="#4CAF50" TextColor="White"/>
-            <StackLayout Orientation="Horizontal">
-                <Button Text="Tracking Mode" BackgroundColor="#4CAF50" TextColor="White"/>
-                <Button Text="Cropping Mode" BackgroundColor="#4CAF50" TextColor="White"/>
+            <Entry x:Name="CameraAddress" Text="" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnCameraAddressChanged"/>
+            <Button Text="Save and Restart Tracking" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnSaveAndRestartTrackingClicked"/>
+
+            <StackLayout Orientation="Horizontal"  Spacing="10" Margin="0,0,0,15">
+                <Button Text="Tracking Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnTrackingModeClicked"/>
+                <Button Text="Cropping Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnCroppingModeClicked"/>
             </StackLayout>
+
             <Label Text="Rotation" TextColor="White"/>
-            <Slider Maximum="360" Value="0"/>
-            <StackLayout Orientation="Horizontal">
-                <Button Text="Start Calibration" BackgroundColor="#4CAF50" TextColor="White"/>
-                <Button Text="Stop Calibration" BackgroundColor="#4CAF50" TextColor="White"/>
+            <Slider Maximum="360" Value="0" ValueChanged="OnSliderRotationChanged"/>
+
+            <StackLayout Orientation="Horizontal"  Spacing="10" Margin="0,0,0,15">
+                <Button Text="Start Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnStartCalibrationClicked"/>
+                <Button Text="Stop Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnStopCalibrationClicked"/>
             </StackLayout>
-            <StackLayout Orientation="Horizontal">
-                <CheckBox IsChecked="True"/>
+
+            <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
+                <CheckBox IsChecked="True" CheckedChanged="OnEnableCalibrationToggled"/>
                 <Label Text="Enable Calibration" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
+
             <Label Text="Mode: Camera Connecting" TextColor="White"/>
-            <StackLayout Orientation="Horizontal">
-                <CheckBox/>
+
+            <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
+                <CheckBox CheckedChanged="OnVerticalFlipToggled"/>
                 <Label Text="Vertical Flip" TextColor="White" VerticalOptions="Center"/>
-                <CheckBox/>
+                <CheckBox CheckedChanged="OnHorizontalFlipToggled" />
                 <Label Text="Horizontal Flip" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
         </StackLayout>
@@ -38,10 +44,12 @@
     <!-- Settings Tab -->
     <ContentPage Title="Settings">
         <ScrollView>
-            <StackLayout Padding="10" BackgroundColor="#2D2D2D">
+            <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
+
                 <Label Text="General Settings:" TextColor="White" FontAttributes="Bold"/>
-                <StackLayout Orientation="Horizontal">
-                    <CheckBox IsChecked="True"/>
+
+                <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
+                    <CheckBox IsChecked="True" CheckedChanged="OnCheckForUpdatesToggled"/>
                     <Label Text="Check For Updates" TextColor="White" VerticalOptions="Center"/>
                 </StackLayout>
 
@@ -49,24 +57,28 @@
                 <Label Text="Location Prefix:" TextColor="White"/>
                 <Entry BackgroundColor="#3D3D3D" TextColor="White"/>
                 <Label Text="Address:" TextColor="White"/>
-                <Entry Text="127.0.0.1" BackgroundColor="#3D3D3D" TextColor="White"/>
+                <Entry Text="127.0.0.1" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnAddressChanged"/>
                 <Label Text="Port:" TextColor="White"/>
-                <Entry Text="8888" BackgroundColor="#3D3D3D" TextColor="White"/>
-                <StackLayout Orientation="Horizontal">
+                <Entry Text="8888" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnPortChanged"/>
+
+                <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
                     <CheckBox/>
                     <Label Text="Receive functions" TextColor="White" VerticalOptions="Center"/>
                 </StackLayout>
+
                 <Label Text="Receiver Port:" TextColor="White"/>
-                <Entry Text="9001" BackgroundColor="#3D3D3D" TextColor="White"/>
+                <Entry Text="9001" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnReceiverPortChanged"/>
                 <Label Text="Recalibrate Address:" TextColor="White"/>
-                <Entry Text="/avatar/parameters/babble_recalibrate" BackgroundColor="#3D3D3D" TextColor="White"/>
+                <Entry Text="/avatar/parameters/babble_recalibrate" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnRecalibrateAddressChanged"/>
 
                 <Label Text="UVC Camera Settings:" TextColor="White" FontAttributes="Bold"/>
-                <StackLayout Orientation="Horizontal">
-                    <CheckBox/>
+
+                <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
+                    <CheckBox CheckedChanged="OnUseRedChannelToggled"/>
                     <Label Text="Use Red Channel" TextColor="White" VerticalOptions="Center"/>
                 </StackLayout>
-                <Grid>
+
+                <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -74,15 +86,15 @@
                     </Grid.ColumnDefinitions>
                     <StackLayout Grid.Column="0">
                         <Label Text="X Resolution:" TextColor="White"/>
-                        <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White"/>
+                        <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnXResChanged"/>
                     </StackLayout>
                     <StackLayout Grid.Column="1">
                         <Label Text="Y Resolution:" TextColor="White"/>
-                        <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White"/>
+                        <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnYResChanged"/>
                     </StackLayout>
                     <StackLayout Grid.Column="2">
                         <Label Text="Framerate:" TextColor="White"/>
-                        <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White"/>
+                        <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnFramerateChanged"/>
                     </StackLayout>
                 </Grid>
             </StackLayout>
@@ -92,23 +104,23 @@
     <!-- Algo Settings Tab -->
     <ContentPage Title="Algo Settings">
         <ScrollView>
-            <StackLayout Padding="10" BackgroundColor="#2D2D2D">
+            <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
                 <Label Text="Model Settings:" TextColor="White" FontAttributes="Bold"/>
                 <Label Text="Model file:" TextColor="White"/>
                 <Entry Text="Models/3MEFFB0E7MSE/" TextColor="White" BackgroundColor="#3D3D3D"/>
 
-                <Grid>
+                <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <StackLayout Grid.Column="0">
+                    <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
                         <Label Text="Inference Threads:" TextColor="White"/>
-                        <Entry Text="2" TextColor="White" BackgroundColor="#3D3D3D"/>
+                        <Entry Text="2" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnInferenceThreadNumChanged" Keyboard="Numeric"/>
                     </StackLayout>
-                    <StackLayout Grid.Column="1">
+                    <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
                         <Label Text="Runtime:" TextColor="White"/>
-                        <Picker TextColor="White" BackgroundColor="#3D3D3D">
+                        <Picker TextColor="White" BackgroundColor="#3D3D3D" SelectedIndexChanged="OnRuntimeChanged">
                             <Picker.Items>
                                 <x:String>ONNX</x:String>
                             </Picker.Items>
@@ -117,42 +129,45 @@
                     </StackLayout>
                 </Grid>
 
-                <Grid>
+                <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackLayout Grid.Column="0">
+
+                    <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
                         <Label Text="GPU Index:" TextColor="White"/>
-                        <Entry Text="0" TextColor="White" BackgroundColor="#3D3D3D"/>
+                        <Entry Text="0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnGPUIndexChanged" Keyboard="Numeric"/>
                     </StackLayout>
-                    <StackLayout Grid.Column="1">
+
+                    <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
                         <Label Text="Model output multiplier:" TextColor="White"/>
-                        <Entry Text="1.0" TextColor="White" BackgroundColor="#3D3D3D"/>
-                    </StackLayout>
-                    <StackLayout Grid.Column="2" VerticalOptions="End">
-                        <CheckBox IsChecked="True"/>
-                        <Label Text="Use GPU" TextColor="White"/>
+                        <Entry Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnMultiplierChanged" Keyboard="Numeric"/>
                     </StackLayout>
                 </Grid>
 
+                <StackLayout Orientation="Horizontal" Grid.Column="2" Spacing="10" Margin="0,0,0,15">
+                    <CheckBox IsChecked="True" CheckedChanged="OnUseGPUToggled"/>
+                    <Label Text="Use GPU" TextColor="White" VerticalOptions="Center"/>
+                </StackLayout>
+
                 <Label Text="Calibration Deadzone:" TextColor="White"/>
-                <Entry Text="-0.1" TextColor="White" BackgroundColor="#3D3D3D"/>
+                <Entry Text="-0.1" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnCalibrationDeadzoneChanged"/>
 
                 <Label Text="One Euro Filter Parameters:" TextColor="White" FontAttributes="Bold"/>
-                <Grid>
+                <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <StackLayout Grid.Column="0">
+                    <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
                         <Label Text="Min Frequency Cutoff:" TextColor="White"/>
-                        <Entry Text="0.9" TextColor="White" BackgroundColor="#3D3D3D"/>
+                        <Entry Text="0.9" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnMinCutoffChanged"/>
                     </StackLayout>
-                    <StackLayout Grid.Column="1">
+                    <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
                         <Label Text="Speed Coefficient:" TextColor="White"/>
-                        <Entry Text="0.9" TextColor="White" BackgroundColor="#3D3D3D"/>
+                        <Entry Text="0.9" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnSpeedCoeffChanged"/>
                     </StackLayout>
                 </Grid>
             </StackLayout>
@@ -162,9 +177,9 @@
     <!-- Calibration Tab -->
     <ContentPage Title="Calibration">
         <ScrollView>
-            <StackLayout Padding="10" BackgroundColor="#2D2D2D">
+            <StackLayout Padding="20" Spacing="15"  BackgroundColor="#2D2D2D">
                 <Label Text="Calibration Settings:" TextColor="White" FontAttributes="Bold"/>
-                <Grid>
+                <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -178,7 +193,7 @@
                     </Picker>
                 </Grid>
 
-                <Grid>
+                <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -192,7 +207,7 @@
                 <CollectionView ItemsSource="{Binding CalibrationItems}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
+                            <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="2*"/>
@@ -206,7 +221,7 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <StackLayout Orientation="Horizontal">
+                <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
                     <Button Text="Reset Min" BackgroundColor="#4CAF50" TextColor="White"/>
                     <Button Text="Reset Max" BackgroundColor="#4CAF50" TextColor="White"/>
                 </StackLayout>
