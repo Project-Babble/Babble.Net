@@ -2,6 +2,7 @@ using Babble.Core;
 using Microsoft.Maui.Controls;
 using SkiaSharp;
 using SkiaSharp.Views.Maui;
+using System.Runtime.InteropServices;
 
 namespace Babble.Maui;
 
@@ -41,20 +42,23 @@ public partial class CameraPage : ContentPage
         var canvas = e.Surface.Canvas;
         canvas.Clear(SKColors.Transparent);
 
-        var bitmap = new SKBitmap(dimensions.width, dimensions.height, SKColorType.Rgb888x, SKAlphaType.Opaque);
+        var info = new SKImageInfo(dimensions.width, dimensions.height, SKColorType.Gray8);
+        using var bitmap = new SKBitmap(info);
 
-        int i = 0;
-        for (int y = 0; y < dimensions.height; y++)
+        //pin the frame to a array to prevent gc from moving it.
+        var handle = GCHandle.Alloc(frame, GCHandleType.Pinned);
+        try
         {
-            for (int x = 0; x < dimensions.width; x++)
-            {
-                bitmap.SetPixel(x, y, new SKColor(frame[i], frame[i], frame[i]));
-                i++;
-            }
+            var ptr = handle.AddrOfPinnedObject();
+            bitmap.InstallPixels(info, ptr, info.RowBytes); //install pixels into the pointer manually to byte array
+        }
+        finally
+        {
+            handle.Free(); //ensure handle is free after use.
         }
 
-        canvas.DrawBitmap(bitmap, new SKRect(0, 0, dimensions.width, dimensions.height));
-        MouthCanvasActivityView.IsRunning = false;
+        canvas.DrawBitmap(bitmap,new SKRect(0,0,dimensions.width,dimensions.height));
+        MouthCanvasActivityView.IsRunning=false;
     }
 
     public void OnSaveAndRestartTrackingClicked(object sender, EventArgs args)
