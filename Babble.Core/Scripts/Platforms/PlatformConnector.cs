@@ -1,7 +1,6 @@
 ﻿using Babble.Core.Scripts.EmguCV;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
-using System.Linq;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -74,19 +73,25 @@ public abstract class PlatformConnector
         var useRedChannel = BabbleCore.Instance.Settings.GetSetting<bool>("gui_use_red_channel");
 
         // Process the image through our chain of operations
-        using Mat finalMat = processingChain
+        // In IPCameraCapture, the frame is passed in as a 640x480 1 byte per pixel
+        using Mat resultMat = processingChain
             .StartWith(Capture.Frame, Capture.Dimensions)
-            .UseRedChannel(useRedChannel) // TODO??
+            .UseRedChannel(useRedChannel)
             .Rotate(rotationAngle)
             .Crop(roiX, roiY, roiWidth, roiHeight)
             .Resize(new System.Drawing.Size(256, 256))
-            .EnsureDepth(DepthType.Cv32F)
             .ApplyFlip("gui_vertical_flip", FlipType.Vertical)
             .ApplyFlip("gui_horizontal_flip", FlipType.Horizontal)
             .Result;
 
-        // Debugging
-        // CvInvoke.Imwrite("output.png", finalMat);
+        // Verify That the matrix is in continous memory layout - xlinka
+        if (!resultMat.IsContinuous)
+        {
+            throw new InvalidOperationException("Image Matrix is not continious in memory layout");
+        }
+
+        var finalMat = new Mat();
+        resultMat.ConvertTo(finalMat, DepthType.Cv32F);
 
         // Convert to float array and normalize
         float[] floatArray = new float[finalMat.Rows * finalMat.Cols];

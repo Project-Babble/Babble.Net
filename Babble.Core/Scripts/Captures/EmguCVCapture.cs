@@ -57,7 +57,7 @@ public class EmguCVCapture : Capture
                     }
                 }
 
-                return (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
+                return FrameDimensions;
             }
         }
     }

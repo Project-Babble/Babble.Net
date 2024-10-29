@@ -6,8 +6,6 @@
     <ScrollView>
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
             <Label Text="Model Settings:" TextColor="White" FontAttributes="Bold"/>
-            <Label Text="Model file:" TextColor="White"/>
-            <Entry Text="Models/3MEFFB0E7MSE/" TextColor="White" BackgroundColor="#3D3D3D"/>
 
             <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                 <Grid.ColumnDefinitions>
@@ -16,7 +14,7 @@
                 </Grid.ColumnDefinitions>
                 <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
                     <Label Text="Inference Threads:" TextColor="White"/>
-                    <Entry Text="2" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnInferenceThreadNumChanged" Keyboard="Numeric"/>
+                    <Entry Text="2" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnInferenceThreadNumChanged" Keyboard="Numeric"/>
                 </StackLayout>
                 <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
                     <Label Text="Runtime:" TextColor="White"/>
@@ -29,6 +27,13 @@
                 </StackLayout>
             </Grid>
 
+            <Label Text="GPU Settings:" TextColor="White" FontAttributes="Bold"/>
+            
+            <StackLayout Orientation="Horizontal" Grid.Column="2" Spacing="10" Margin="0,0,0,15">
+                <CheckBox IsChecked="False" CheckedChanged="OnUseGPUToggled"/>
+                <Label Text="Use GPU" TextColor="White" VerticalOptions="Center"/>
+            </StackLayout>
+
             <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -36,40 +41,17 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
-                <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
+                <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,0">
                     <Label Text="GPU Index:" TextColor="White"/>
-                    <Entry Text="0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnGPUIndexChanged" Keyboard="Numeric"/>
+                    <Entry Text="0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnGPUIndexChanged" Keyboard="Numeric"/>
                 </StackLayout>
 
                 <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
                     <Label Text="Model output multiplier:" TextColor="White"/>
-                    <Entry Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnMultiplierChanged" Keyboard="Numeric"/>
+                    <Entry Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnMultiplierChanged" Keyboard="Numeric"/>
                 </StackLayout>
             </Grid>
 
-            <StackLayout Orientation="Horizontal" Grid.Column="2" Spacing="10" Margin="0,0,0,15">
-                <CheckBox IsChecked="True" CheckedChanged="OnUseGPUToggled"/>
-                <Label Text="Use GPU" TextColor="White" VerticalOptions="Center"/>
-            </StackLayout>
-
-            <Label Text="Calibration Deadzone:" TextColor="White"/>
-            <Entry Text="-0.1" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnCalibrationDeadzoneChanged"/>
-
-            <Label Text="One Euro Filter Parameters:" TextColor="White" FontAttributes="Bold"/>
-            <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
-                    <Label Text="Min Frequency Cutoff:" TextColor="White"/>
-                    <Entry Text="0.9" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnMinCutoffChanged"/>
-                </StackLayout>
-                <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
-                    <Label Text="Speed Coefficient:" TextColor="White"/>
-                    <Entry Text="0.9" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnSpeedCoeffChanged"/>
-                </StackLayout>
-            </Grid>
         </StackLayout>
     </ScrollView>
 </ContentPage>

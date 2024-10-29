@@ -1,4 +1,5 @@
 using Babble.Core;
+using Microsoft.Maui.Controls;
 using SkiaSharp;
 using SkiaSharp.Views.Maui;
 
@@ -12,16 +13,26 @@ public partial class CameraPage : ContentPage
     public CameraPage()
     {
         InitializeComponent();
+        frame = Array.Empty<byte>();
+        dimensions = (0, 0);
         CameraAddress.Text = BabbleCore.Instance.Settings.GetSetting<string>("capture_source");
+    }
+
+    public void OnPreviewCameraClicked(object sender, EventArgs args)
+    {
+        if (BabbleCore.Instance.GetImage(out var frame, out var dimensions))
+        {
+            MouthCanvasActivityView.IsRunning = true;
+            this.frame = frame;
+            this.dimensions = dimensions;
+            MouthCanvasView.HeightRequest = dimensions.height;
+            MouthCanvasView.WidthRequest = dimensions.width;
+            MouthCanvasView.InvalidateSurface(); // Triggers the repaint of the canvas
+        }
     }
 
     public void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs e)
     {
-        if (frame is null)
-        {
-            return;
-        }
-
         if (frame.Length == 0)
         {
             return;
@@ -46,67 +57,53 @@ public partial class CameraPage : ContentPage
         MouthCanvasActivityView.IsRunning = false;
     }
 
-    public async void OnPreviewCameraClicked(object sender, EventArgs args)
-    {
-        if (BabbleCore.Instance.GetLipImage(out var frame, out var dimensions))
-        {
-            MouthCanvasActivityView.IsRunning = true;
-            this.frame = frame;
-            this.dimensions = dimensions;
-            MouthCanvasView.InvalidateSurface(); // Triggers a repaint of the canvas
-        }
-
-    }
-
-    public async void OnCameraAddressChanged(object sender, TextChangedEventArgs args)
-    {
-        if (string.IsNullOrEmpty(args.OldTextValue)) return;
-        if (args.OldTextValue != args.NewTextValue)
-            BabbleCore.Instance.Settings.UpdateSetting<int>("capture_source", args.NewTextValue);
-    }
-
-
-    public async void OnSaveAndRestartTrackingClicked(object sender, EventArgs args)
+    public void OnSaveAndRestartTrackingClicked(object sender, EventArgs args)
     {
         
     }
 
-    public async void OnTrackingModeClicked(object sender, EventArgs args)
+    public void OnTrackingModeClicked(object sender, EventArgs args)
     {
         
     }
 
-    public async void OnCroppingModeClicked(object sender, EventArgs args)
+    public void OnCroppingModeClicked(object sender, EventArgs args)
     {
         
     }
 
-    public async void OnSliderRotationChanged(object sender, EventArgs args)
+    public void OnStartCalibrationClicked(object sender, EventArgs args)
     {
         
     }
 
-    public async void OnStartCalibrationClicked(object sender, EventArgs args)
+    public void OnStopCalibrationClicked(object sender, EventArgs args)
     {
         
     }
 
-    public async void OnStopCalibrationClicked(object sender, EventArgs args)
+    public void OnCameraAddressChanged(object sender, EventArgs args)
     {
-        
+        BabbleCore.Instance.Settings.UpdateSetting<int>("capture_source", ((Entry)sender).Text);
     }
 
-    public async void OnEnableCalibrationToggled(object sender, CheckedChangedEventArgs args)
+    public void OnSliderRotationChanged(object sender, EventArgs args)
+    {
+        BabbleCore.Instance.Settings.UpdateSetting<bool>("rotation_angle", ((Entry)sender).Text);
+    }
+
+
+    public void OnEnableCalibrationToggled(object sender, CheckedChangedEventArgs args)
     {
         BabbleCore.Instance.Settings.UpdateSetting<bool>("use_calibration", args.Value.ToString());
     }
 
-    public async void OnVerticalFlipToggled(object sender, CheckedChangedEventArgs args)
+    public void OnVerticalFlipToggled(object sender, CheckedChangedEventArgs args)
     {
         BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_vertical_flip", args.Value.ToString());
     }
 
-    public async void OnHorizontalFlipToggled(object sender, CheckedChangedEventArgs args)
+    public void OnHorizontalFlipToggled(object sender, CheckedChangedEventArgs args)
     {
         BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_horizontal_flip", args.Value.ToString());
     }

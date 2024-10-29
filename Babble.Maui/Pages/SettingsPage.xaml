@@ -17,9 +17,9 @@
             <Label Text="Location Prefix:" TextColor="White"/>
             <Entry BackgroundColor="#3D3D3D" TextColor="White"/>
             <Label Text="Address:" TextColor="White"/>
-            <Entry Text="127.0.0.1" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnAddressChanged"/>
+            <Entry Text="127.0.0.1" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnAddressChanged"/>
             <Label Text="Port:" TextColor="White"/>
-            <Entry Text="8888" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnPortChanged"/>
+            <Entry Text="8888" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnPortChanged"/>
             
             <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
                 <CheckBox/>
@@ -27,9 +27,9 @@
             </StackLayout>
             
             <Label Text="Receiver Port:" TextColor="White"/>
-            <Entry Text="9001" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnReceiverPortChanged"/>
+            <Entry Text="9001" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnReceiverPortChanged"/>
             <Label Text="Recalibrate Address:" TextColor="White"/>
-            <Entry Text="/avatar/parameters/babble_recalibrate" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnRecalibrateAddressChanged"/>
+            <Entry Text="/avatar/parameters/babble_recalibrate" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnRecalibrateAddressChanged"/>
 
             <Label Text="UVC Camera Settings:" TextColor="White" FontAttributes="Bold"/>
             
@@ -46,15 +46,15 @@
                 </Grid.ColumnDefinitions>
                 <StackLayout Grid.Column="0">
                     <Label Text="X Resolution:" TextColor="White"/>
-                    <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnXResChanged"/>
+                    <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnXResChanged"/>
                 </StackLayout>
                 <StackLayout Grid.Column="1">
                     <Label Text="Y Resolution:" TextColor="White"/>
-                    <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnYResChanged"/>
+                    <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnYResChanged"/>
                 </StackLayout>
                 <StackLayout Grid.Column="2">
                     <Label Text="Framerate:" TextColor="White"/>
-                    <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" TextChanged="OnFramerateChanged"/>
+                    <Entry Text="0" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnFramerateChanged"/>
                 </StackLayout>
             </Grid>
         </StackLayout>

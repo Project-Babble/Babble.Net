@@ -9,43 +9,43 @@ public partial class AlgorithmSettingsPage : ContentPage
 		InitializeComponent();
 	}
 
-    public async void OnInferenceThreadNumChanged(object sender, TextChangedEventArgs args)
+    public void OnInferenceThreadNumChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_inference_threads", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_inference_threads", ((Entry)sender).Text);
     }
 
-    public async void OnRuntimeChanged(object sender, EventArgs args)
+    public void OnRuntimeChanged(object sender, EventArgs args)
     {
         
     }
 
-    public async void OnGPUIndexChanged(object sender, TextChangedEventArgs args)
+    public void OnGPUIndexChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_gpu_index", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_gpu_index", ((Entry)sender).Text);
     }
 
-    public async void OnMultiplierChanged(object sender, TextChangedEventArgs args)
+    public void OnMultiplierChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_multiply", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_multiply", ((Entry)sender).Text);
     }
 
-    public async void OnUseGPUToggled(object sender, TextChangedEventArgs args)
+    public void OnUseGPUToggled(object sender, CheckedChangedEventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_use_gpu", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_use_gpu", args.Value.ToString());
     }
 
-    public async void OnCalibrationDeadzoneChanged(object sender, TextChangedEventArgs args)
+    public void OnCalibrationDeadzoneChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("calib_deadzone", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("calib_deadzone", ((Entry)sender).Text);
     }
 
-    public async void OnMinCutoffChanged(object sender, TextChangedEventArgs args)
+    public void OnMinCutoffChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_min_cutoff", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_min_cutoff", ((Entry)sender).Text);
     }
 
-    public async void OnSpeedCoeffChanged(object sender, TextChangedEventArgs args)
+    public void OnSpeedCoeffChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_speed_coefficient", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_speed_coefficient", ((Entry)sender).Text);
     }
 }

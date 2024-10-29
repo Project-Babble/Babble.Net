@@ -9,45 +9,17 @@
     <ScrollView>
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
             <Label Text="Camera Address" TextColor="White"/>
-            <Entry x:Name="CameraAddress" Text="" TextColor="White" BackgroundColor="#3D3D3D" TextChanged="OnCameraAddressChanged"/>
-            <Button Text="Save and Restart Tracking" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnSaveAndRestartTrackingClicked"/>
-            <Button Text="Preview Camera (Slow, 5s~)" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnPreviewCameraClicked"/>
+            <Entry x:Name="CameraAddress" Text="" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnCameraAddressChanged"/>
+            <Button Text="Preview Camera (Slow!)" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnPreviewCameraClicked"/>
 
             <skia:SKCanvasView 
                 x:Name="MouthCanvasView" 
                 PaintSurface="OnCanvasViewPaintSurface" 
                 HorizontalOptions="Center"
-                WidthRequest="640"
-                HeightRequest="480"/>
+                WidthRequest="0"
+                HeightRequest="0"/>
             <ActivityIndicator x:Name="MouthCanvasActivityView" IsRunning="false" />
 
-            <StackLayout Orientation="Horizontal"  Spacing="10" Margin="0,0,0,15">
-                <Button Text="Tracking Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnTrackingModeClicked"/>
-                <Button Text="Cropping Mode" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnCroppingModeClicked"/>
-            </StackLayout>
-            
-            <Label Text="Rotation" TextColor="White"/>
-            <Slider Maximum="360" Value="0" ValueChanged="OnSliderRotationChanged"/>
-            
-            <StackLayout Orientation="Horizontal"  Spacing="10" Margin="0,0,0,15">
-                <Button Text="Start Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnStartCalibrationClicked"/>
-                <Button Text="Stop Calibration" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnStopCalibrationClicked"/>
-            </StackLayout>
-            
-            <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
-                <CheckBox IsChecked="True" CheckedChanged="OnEnableCalibrationToggled"/>
-                <Label Text="Enable Calibration" TextColor="White" VerticalOptions="Center"/>
-            </StackLayout>
-            
-            <Label Text="Mode: Camera Connecting" TextColor="White"/>
-            
-            <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
-                <CheckBox CheckedChanged="OnVerticalFlipToggled"/>
-                <Label Text="Vertical Flip" TextColor="White" VerticalOptions="Center"/>
-                <CheckBox CheckedChanged="OnHorizontalFlipToggled" />
-                <Label Text="Horizontal Flip" TextColor="White" VerticalOptions="Center"/>
-            </StackLayout>
-            
         </StackLayout>
     </ScrollView>
 </ContentPage>

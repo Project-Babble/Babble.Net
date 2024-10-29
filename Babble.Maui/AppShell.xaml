@@ -21,9 +21,6 @@
         <Tab Title="Algo Settings">
             <ShellContent ContentTemplate="{DataTemplate local:AlgorithmSettingsPage}"/>
         </Tab>
-        <Tab Title="Calibration">
-            <ShellContent ContentTemplate="{DataTemplate local:CalibrationPage}"/>
-        </Tab>
 
     </TabBar>
 

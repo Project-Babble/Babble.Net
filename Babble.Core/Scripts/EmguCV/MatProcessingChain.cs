@@ -28,8 +28,8 @@ public class MatProcessingChain : IDisposable
          * Cringe. Oh well.
          */
 
-        // We always pass in a "color" image, BGR formatted
-        _currentMat = new Mat(dimensions.width, dimensions.height, DepthType.Cv8U, 3);
+        // We always pass in a "Rgb888x" image, 1 byte per pixel formatted
+        _currentMat = new Mat(dimensions.width, dimensions.height, DepthType.Cv8U, 1);
         _matsToDispose.Add(_currentMat);
         var matBytes = _currentMat.DataPointer;
         Marshal.Copy(frameData, 0, matBytes, frameData.Length);
@@ -60,11 +60,6 @@ public class MatProcessingChain : IDisposable
 
             // Assign this mat as current
             _currentMat = newMat;
-        }
-        else
-        {
-            // Decode as BGR (OpenCV's default format)
-            CvInvoke.CvtColor(_currentMat, _currentMat, ColorConversion.Rgb2Gray);
         }
         
         return this;
@@ -140,19 +135,6 @@ public class MatProcessingChain : IDisposable
         _matsToDispose.Add(newMat);
         CvInvoke.Resize(_currentMat, newMat, size);
         _currentMat = newMat;
-        return this;
-    }
-
-    public MatProcessingChain EnsureDepth(DepthType targetDepth)
-    {
-        EnsureCurrentMat();
-        if (_currentMat.Depth != targetDepth)
-        {
-            var newMat = new Mat();
-            _matsToDispose.Add(newMat);
-            _currentMat.ConvertTo(newMat, targetDepth);
-            _currentMat = newMat;
-        }
         return this;
     }
     

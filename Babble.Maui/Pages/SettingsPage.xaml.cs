@@ -9,48 +9,48 @@ public partial class SettingsPage : ContentPage
         InitializeComponent();
     }
 
-    private async void OnCheckForUpdatesToggled(object sender, CheckedChangedEventArgs args)
+    public void OnCheckForUpdatesToggled(object sender, CheckedChangedEventArgs args)
     {
         BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_update_check", args.Value.ToString());
     }
 
-    private async void OnAddressChanged(object sender, TextChangedEventArgs args)
+    public void OnAddressChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_osc_address", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_osc_address", ((Entry)sender).Text);
     }
 
-    private async void OnPortChanged(object sender, TextChangedEventArgs args)
+    public void OnPortChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_osc_port", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_osc_port", ((Entry)sender).Text);
     }
 
-    private async void OnReceiverPortChanged(object sender, TextChangedEventArgs args)
+    public void OnReceiverPortChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_osc_receiver_port", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_osc_receiver_port", ((Entry)sender).Text);
     }
 
-    private async void OnRecalibrateAddressChanged(object sender, CheckedChangedEventArgs args)
+    public void OnRecalibrateAddressChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_osc_recalibrate_address", args.Value.ToString());
+        BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_osc_recalibrate_address", ((Entry)sender).Text);
     }
 
-    private async void OnUseRedChannelToggled(object sender, CheckedChangedEventArgs args)
+    public void OnUseRedChannelToggled(object sender, CheckedChangedEventArgs args)
     {
         BabbleCore.Instance.Settings.UpdateSetting<bool>("gui_use_red_channel", args.Value.ToString());
     }
 
-    private async void OnXResChanged(object sender, TextChangedEventArgs args)
+    public void OnXResChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_cam_resolution_x", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_cam_resolution_x", ((Entry)sender).Text);
     }
 
-    private async void OnYResChanged(object sender, TextChangedEventArgs args)
+    public void OnYResChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_cam_resolution_y", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_cam_resolution_y", ((Entry)sender).Text);
     }
 
-    private async void OnFramerateChanged(object sender, TextChangedEventArgs args)
+    public void OnFramerateChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_cam_framerate", args.NewTextValue);
+        BabbleCore.Instance.Settings.UpdateSetting<int>("gui_cam_framerate", ((Entry)sender).Text);
     }
 }

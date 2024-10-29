@@ -1,4 +1,5 @@
-﻿using Babble.Core.Scripts;
+﻿using Babble.Core;
+using Babble.Core.Scripts;
 using Rug.Osc;
 using System.Net;
 
@@ -55,13 +56,14 @@ public partial class BabbleOSC
     {
         while (_loop)
         {
+            var mul = BabbleCore.Instance.Settings.GetSetting<float>("gui_multiply");
             try
             {
                 switch (_sender.State)
                 {
                     case OscSocketState.Connected:
                         foreach (var exp in Expressions.InnerKeys)
-                            _sender.Send(new OscMessage(exp, Expressions.GetByKey2(exp)));
+                            _sender.Send(new OscMessage(exp, Expressions.GetByKey2(exp) * mul));
                         break;
                     case OscSocketState.Closed:
                         _sender.Close();

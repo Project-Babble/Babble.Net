@@ -184,7 +184,14 @@ public class BabbleCore
         return true;
     }
 
-    public bool GetLipImage(out byte[] image, out (int width, int height) dimensions)
+    /// <summary>
+    /// Gets the normalized pre-transform lip image for this frame
+    /// This image will be (dimensions.width)px * (dimensions.height)px, Rgb888x
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="dimensions"></param>
+    /// <returns></returns>
+    public bool GetImage(out byte[] image, out (int width, int height) dimensions)
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
@@ -198,8 +205,8 @@ public class BabbleCore
             return false;
         }
 
-        image = _platformConnector.Capture.Frame;
         dimensions = _platformConnector.Capture.Dimensions;
+        image = _platformConnector.Capture.Frame;
         return true;
     }
 
