@@ -18,7 +18,7 @@ public class ImageCapture : Capture
             {
                 if (CvInvoke.HaveImageReader(Url))
                 {
-                    return CvInvoke.Imread(Url, ImreadModes.Color).GetRawData();
+                    return CvInvoke.Imread(Url, ImreadModes.Grayscale).GetRawData();
                 }
             }
 
@@ -34,7 +34,7 @@ public class ImageCapture : Capture
             {
                 if (CvInvoke.HaveImageReader(Url))
                 {
-                    var mat = CvInvoke.Imread(Url, ImreadModes.Color);
+                    var mat = CvInvoke.Imread(Url, ImreadModes.Grayscale);
                     return (mat.Width, mat.Height);
                 }
             }

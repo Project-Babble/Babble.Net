@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Babble.Avalonia.ViewModels;
 
 namespace Babble.Avalonia.Views;
 
@@ -13,6 +14,10 @@ public partial class MainWindow : Window
     public void SaveAndRestartTracking_Click(object sender, RoutedEventArgs e)
     {
         // Logic for saving and restarting tracking
+        // https://github.com/AvaloniaUI/Avalonia/issues/9835
+        // https://github.com/AvaloniaUI/Avalonia/discussions/12928
+        MainViewModel.Instance.UpdateLipImage();
+        InvalidateVisual();
     }
 
     private void TrackingMode_Click(object sender, RoutedEventArgs e)

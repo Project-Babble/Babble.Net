@@ -27,7 +27,9 @@ public class EmguCVCapture : Capture
                         var frame = _videoCapture.QueryFrame();
                         if (frame is not null)
                         {
-                            return frame.GetRawData();
+                            var recoloredFrame = new Mat();
+                            CvInvoke.CvtColor(frame, recoloredFrame, ColorConversion.Bgr2Gray);
+                            return recoloredFrame.GetRawData();
                         }
                     }
                 }

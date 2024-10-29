@@ -6,7 +6,7 @@
 		"roi_window_y": 10,
 		"roi_window_w": 100,
 		"roi_window_h": 100,
-		"capture_source": "http://192.168.0.117:4747/video",
+		"capture_source": "http://192.168.0.140:4747/video",
 		"gui_vertical_flip": false,
 		"gui_horizontal_flip": false,
 		"use_ffmpeg": false

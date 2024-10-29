@@ -1,7 +1,6 @@
-﻿using Babble.Core;
+﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Graphics.Platform;
-using System.Drawing;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace Babble.Maui;
 
@@ -12,6 +11,8 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseSkiaSharp()
+            .UseMauiCommunityToolkit()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

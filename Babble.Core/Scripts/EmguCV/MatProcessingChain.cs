@@ -37,12 +37,14 @@ public class MatProcessingChain : IDisposable
         return this;
     }
 
-    public MatProcessingChain Normalize(bool useRedChannel)
+    public MatProcessingChain UseRedChannel(bool useRedChannel)
     {
         EnsureCurrentMat();
 
         if (useRedChannel)
         {
+            // Firstly, we need to determine if 
+
             var newMat = new Mat();
             _matsToDispose.Add(newMat);
 

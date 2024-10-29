@@ -184,8 +184,9 @@ public class BabbleCore
         return true;
     }
 
-    public bool GetLipImage(out byte[] image)
+    public bool GetLipImage(out byte[] image, out (int width, int height) dimensions)
     {
+        dimensions = (0, 0);
         image = Array.Empty<byte>();
         if (_platformConnector.Capture.Frame is null)
         {
@@ -198,6 +199,7 @@ public class BabbleCore
         }
 
         image = _platformConnector.Capture.Frame;
+        dimensions = _platformConnector.Capture.Dimensions;
         return true;
     }
 

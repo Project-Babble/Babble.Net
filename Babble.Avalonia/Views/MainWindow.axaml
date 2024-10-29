@@ -24,7 +24,7 @@
 						<TextBlock Text="Camera Address" Foreground="White"/>
 						<TextBox Text="" Background="#2D2D2D" Foreground="White"/>
 
-						<Image Grid.Column="1" Source="{Binding MouthBitmap, Mode=TwoWay}" Width="256" Height="256" MaxWidth="256" MaxHeight="256" />
+						<Image Grid.Column="1" Source="{Binding MouthBitmap, Mode=TwoWay}" Width="640" Height="480" MaxWidth="640" MaxHeight="480" />
 
 						<Button Content="Save and Restart Tracking" 
 								Click="SaveAndRestartTracking_Click"

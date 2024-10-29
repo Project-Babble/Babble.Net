@@ -76,7 +76,7 @@ public abstract class PlatformConnector
         // Process the image through our chain of operations
         using Mat finalMat = processingChain
             .StartWith(Capture.Frame, Capture.Dimensions)
-            .Normalize(useRedChannel)
+            .UseRedChannel(useRedChannel) // TODO??
             .Rotate(rotationAngle)
             .Crop(roiX, roiY, roiWidth, roiHeight)
             .Resize(new System.Drawing.Size(256, 256))

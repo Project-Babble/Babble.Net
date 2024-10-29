@@ -5,9 +5,16 @@
 /// </summary>
 public abstract class Capture
 {
-    public const int BABBLE_FRAME_SIZE = 256;
-    public static readonly byte[] EmptyFrame = Array.Empty<byte>(); // BGR Color format
+    protected const int BABBLE_FRAME_SIZE = 256;
+
+    protected static readonly byte[] EmptyFrame = Array.Empty<byte>();
+
     public abstract string Url { get; set; }
+
+    /// <summary>
+    /// Represents the incoming frame data for this capture source. 
+    /// This image must be grayscale!
+    /// </summary>
     public abstract byte[] Frame { get; }
     public abstract (int width, int height) Dimensions { get; }
     public abstract bool IsReady { get; set; }

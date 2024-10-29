@@ -20,7 +20,7 @@ public class SerialCamera : Capture, IDisposable
 
     public override string Url { get; set; }
     public override byte[] Frame => GetNextFrame();
-    public override (int width, int height) Dimensions => (BABBLE_FRAME_SIZE, BABBLE_FRAME_SIZE);
+    public override (int width, int height) Dimensions => (240, 240);
     public override bool IsReady { get; set; }
 
     public SerialCamera(string portName) : base(portName)
@@ -65,7 +65,7 @@ public class SerialCamera : Capture, IDisposable
 
     private byte[] GetNextFrame()
     {
-        if (!IsReady || !_serialPort.IsOpen) return null;
+        if (!IsReady || !_serialPort.IsOpen) return Array.Empty<byte>();
 
         try
         {
@@ -73,6 +73,10 @@ public class SerialCamera : Capture, IDisposable
             {
                 // Get the packet boundaries which contain our JPEG data
                 var (start, jpegSize) = GetNextPacketBounds();
+                if (start == -1 || jpegSize == -1)
+                {
+                    return Array.Empty<byte>();
+                }
 
                 // Create a new array exactly sized for the JPEG data
                 byte[] jpegData = new byte[jpegSize];
@@ -85,6 +89,7 @@ public class SerialCamera : Capture, IDisposable
                 {
                     // Reset buffer position for next frame
                     _bufferPosition = 0;
+                    IsReady = true;
                     return jpegData;
                 }
 
@@ -112,6 +117,12 @@ public class SerialCamera : Capture, IDisposable
             // Read more data into our buffer
             int bytesRead = _serialPort.Read(_buffer, _bufferPosition,
                 Math.Min(2048, _buffer.Length - _bufferPosition));
+
+            if (bytesRead == 0)
+            {
+                return (-1, -1);
+            }
+
             _bufferPosition += bytesRead;
 
             // Search for the protocol header
