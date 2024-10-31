@@ -1,4 +1,4 @@
-﻿namespace Babble.Core.Scripts.Decoders;
+﻿ namespace Babble.Core.Scripts.Decoders;
 
 /// <summary>
 /// Base class for camera capture and frame processing
@@ -18,12 +18,10 @@ public class DesktopConnector : PlatformConnector
     {
     }
 
+    // TODO Add loading camera from saved config
     public override void Initialize()
     {
         base.Initialize();
-
-        // TODO Add loading camera from saved config
-        // TODO Add logic to reload camera on change
 
         // Determine if this is an IP Camera, Serial Camera, or something else
         if (SerialConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
@@ -34,14 +32,13 @@ public class DesktopConnector : PlatformConnector
         {
             Capture = new ImageCapture(Url);
         }
-        else if (IPConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
-        {
-            Capture = new IPCameraCapture(Url);
-        }
+        // On non-mobile platforms, we'll use EmguCVCapture for IP Cameras
+        //else if (IPConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+        //{
+        //    Capture = new IPCameraCapture(Url);
+        //}
         else
         {
-            // On non-mobile platforms, we'll use EmguCVCapture for IP Cameras
-            // Capture = new IPCameraCapture(Url);
             // Capture = new DummyCapture(Url);
             Capture = new EmguCVCapture(Url); 
         }

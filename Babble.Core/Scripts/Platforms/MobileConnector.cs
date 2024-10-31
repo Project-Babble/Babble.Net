@@ -18,6 +18,6 @@ public class MobileConnector : PlatformConnector
         base.Initialize();
         Capture = new IPCameraCapture(Url);
         Capture.StartCapture();
-        WaitForCamera();
+        // WaitForCamera();
     }
 }

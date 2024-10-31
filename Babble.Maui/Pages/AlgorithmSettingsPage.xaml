@@ -14,10 +14,10 @@
                 </Grid.ColumnDefinitions>
                 <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
                     <Label Text="Inference Threads:" TextColor="White"/>
-                    <Entry Text="2" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnInferenceThreadNumChanged" Keyboard="Numeric"/>
+                    <Entry x:Name="InferenceThreads" Text="2" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnInferenceThreadNumChanged" Keyboard="Numeric"/>
                 </StackLayout>
                 <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
-                    <Label Text="Runtime:" TextColor="White"/>
+                    <Label x:Name="Runtime" Text="Runtime:" TextColor="White"/>
                     <Picker TextColor="White" BackgroundColor="#3D3D3D" SelectedIndexChanged="OnRuntimeChanged">
                         <Picker.Items>
                             <x:String>ONNX</x:String>
@@ -30,7 +30,7 @@
             <Label Text="GPU Settings:" TextColor="White" FontAttributes="Bold"/>
             
             <StackLayout Orientation="Horizontal" Grid.Column="2" Spacing="10" Margin="0,0,0,15">
-                <CheckBox IsChecked="False" CheckedChanged="OnUseGPUToggled"/>
+                <CheckBox x:Name="UseGPU" IsChecked="False" CheckedChanged="OnUseGPUToggled"/>
                 <Label Text="Use GPU" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
 
@@ -43,12 +43,12 @@
                 
                 <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,0">
                     <Label Text="GPU Index:" TextColor="White"/>
-                    <Entry Text="0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnGPUIndexChanged" Keyboard="Numeric"/>
+                    <Entry x:Name="GPUIndex" Text="0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnGPUIndexChanged" Keyboard="Numeric"/>
                 </StackLayout>
 
                 <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
                     <Label Text="Model output multiplier:" TextColor="White"/>
-                    <Entry Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnMultiplierChanged" Keyboard="Numeric"/>
+                    <Entry x:Name="ModelMultiplier" Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnMultiplierChanged" Keyboard="Numeric"/>
                 </StackLayout>
             </Grid>
 

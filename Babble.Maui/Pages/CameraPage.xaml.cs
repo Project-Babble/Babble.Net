@@ -1,24 +1,19 @@
 using Babble.Core;
-using Microsoft.Maui.Controls;
 using SkiaSharp;
 using SkiaSharp.Views.Maui;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace Babble.Maui;
 
 public partial class CameraPage : ContentPage
 {
-    private byte[] frame;
-    private (int width, int height) dimensions;
+    private byte[] frame = Array.Empty<byte>();
+    private (int width, int height) dimensions = (0, 0);
     private CancellationTokenSource _cancellationTokenSource;
+
     public CameraPage()
     {
         InitializeComponent();
-        frame = Array.Empty<byte>();
-        dimensions = (0, 0);
         CameraAddress.Text = BabbleCore.Instance.Settings.GetSetting<string>("capture_source");
     }
 
@@ -28,42 +23,28 @@ public partial class CameraPage : ContentPage
         {
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource = null;
-            MouthCanvasActivityView.IsRunning = false;
         }
-        else
+        else if (BabbleCore.Instance.GetImage(out var retrivedFrame, out var retrievedDimensions))
         {
-                _cancellationTokenSource = new CancellationTokenSource();
-            MouthCanvasActivityView.IsRunning = true;
-            await StartVideoFeed(_cancellationTokenSource.Token);
-        }
-    }
+            _cancellationTokenSource = new CancellationTokenSource();
 
-    private async Task StartVideoFeed(CancellationToken cancellationToken)
-    {
-        while (!cancellationToken.IsCancellationRequested)
-        {
+            frame = retrivedFrame;
+            dimensions = retrievedDimensions;
 
-            await Task.Run(() =>
+            if (dimensions.width > 0 && dimensions.height > 0)
             {
-                if (BabbleCore.Instance.GetImage(out var retrivedFrame, out var retrievedDimensions))
-                {
-                    frame = retrivedFrame;
-                    dimensions = retrievedDimensions;
-                }
-            });
-
-            Dispatcher.Dispatch(() =>
-            {
-                if (dimensions.width > 0 && dimensions.height > 0)
-                {
-                    MouthCanvasView.HeightRequest = dimensions.height;
-                    MouthCanvasView.WidthRequest = dimensions.width;
-                    MouthCanvasView.InvalidateSurface();
-                }
-            });
-
-            await Task.Delay(30);
-        }
+                MouthCanvasActivityView.IsRunning = true;
+#if ANDROID || IOS
+                MouthCanvasView.HeightRequest = 256;
+                MouthCanvasView.WidthRequest = 256;
+#else
+                MouthCanvasView.HeightRequest = dimensions.height;
+                MouthCanvasView.WidthRequest = dimensions.width;
+#endif
+                MouthCanvasView.InvalidateSurface();
+                MouthCanvasActivityView.IsRunning = false;
+            }  
+        }        
     }
 
     public void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs e)
@@ -77,7 +58,6 @@ public partial class CameraPage : ContentPage
         canvas.Clear(SKColors.Transparent);
 
         var info = new SKImageInfo(dimensions.width, dimensions.height, SKColorType.Gray8);
-
         using var bitmap = new SKBitmap(info);
 
         // Pin the frame to an array to prevent GC from moving it.
@@ -96,35 +76,34 @@ public partial class CameraPage : ContentPage
         canvas.DrawBitmap(bitmap, new SKRect(0, 0, dimensions.width, dimensions.height));
     }
 
-
     public void OnSaveAndRestartTrackingClicked(object sender, EventArgs args)
     {
-        // Placeholder for tracking restart logic
+        BabbleCore.Instance.Settings.UpdateSetting<int>("capture_source", CameraAddress.Text);
     }
 
     public void OnTrackingModeClicked(object sender, EventArgs args)
     {
-        // Placeholder for tracking mode logic
+        
     }
 
     public void OnCroppingModeClicked(object sender, EventArgs args)
     {
-        // Placeholder for cropping mode logic
+        
     }
 
     public void OnStartCalibrationClicked(object sender, EventArgs args)
     {
-        // Placeholder for start calibration logic
+        
     }
 
     public void OnStopCalibrationClicked(object sender, EventArgs args)
     {
-        // Placeholder for stop calibration logic
+        
     }
 
     public void OnCameraAddressChanged(object sender, EventArgs args)
     {
-        BabbleCore.Instance.Settings.UpdateSetting<int>("capture_source", ((Entry)sender).Text);
+        
     }
 
     public void OnSliderRotationChanged(object sender, EventArgs args)

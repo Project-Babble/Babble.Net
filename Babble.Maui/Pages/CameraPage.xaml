@@ -10,16 +10,17 @@
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
             <Label Text="Camera Address" TextColor="White"/>
             <Entry x:Name="CameraAddress" Text="" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnCameraAddressChanged"/>
-            <Button Text="Preview Camera (Slow!)" BackgroundColor="#4CAF50" TextColor="White" Clicked="OnPreviewCameraClicked"/>
+            <Button x:Name="SaveRestart" Text="Save And Restart Tracking" Clicked="OnSaveAndRestartTrackingClicked"/>
+            <Button x:Name="Preview" Text="Preview Camera" Clicked="OnPreviewCameraClicked"/>
 
             <skia:SKCanvasView 
                 x:Name="MouthCanvasView" 
                 PaintSurface="OnCanvasViewPaintSurface" 
                 HorizontalOptions="Center"
-                WidthRequest="0"
-                HeightRequest="0"/>
+                WidthRequest="640"
+                HeightRequest="480"/>
             <ActivityIndicator x:Name="MouthCanvasActivityView" IsRunning="false" />
 
-        </StackLayout>
+            </StackLayout>
     </ScrollView>
 </ContentPage>

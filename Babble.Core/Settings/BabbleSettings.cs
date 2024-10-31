@@ -62,7 +62,6 @@ public class BabbleSettings
     public T GetSetting<T>(string propertyName)
     {
         propertyName = propertyName.Replace("_", string.Empty);
-        
         foreach (var p in prefixes)
         {
             var fullPropertyName = p + propertyName;

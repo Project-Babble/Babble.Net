@@ -7,6 +7,15 @@ public partial class SettingsPage : ContentPage
     public SettingsPage()
     {
         InitializeComponent();
+        CheckForUpdates.IsChecked = BabbleCore.Instance.Settings.GetSetting<bool>("gui_update_check");
+        IPAddress.Text = BabbleCore.Instance.Settings.GetSetting<string>("gui_osc_address");
+        SendPort.Text = BabbleCore.Instance.Settings.GetSetting<int>("gui_osc_port").ToString();
+        ReceiverPort.Text = BabbleCore.Instance.Settings.GetSetting<int>("gui_osc_receiver_port").ToString();
+        RecalibrateAddress.Text = BabbleCore.Instance.Settings.GetSetting<string>("gui_osc_recalibrate_address");
+        UseRedChannel.IsChecked = BabbleCore.Instance.Settings.GetSetting<bool>("gui_use_red_channel");
+        XRes.Text = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_x").ToString();
+        YRes.Text = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_y").ToString();
+        Framerate.Text = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_framerate").ToString();
     }
 
     public void OnCheckForUpdatesToggled(object sender, CheckedChangedEventArgs args)

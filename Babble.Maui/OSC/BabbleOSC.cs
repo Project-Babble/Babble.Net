@@ -56,14 +56,14 @@ public partial class BabbleOSC
     {
         while (_loop)
         {
-            var mul = BabbleCore.Instance.Settings.GetSetting<float>("gui_multiply");
+            var mul = BabbleCore.Instance.Settings.GetSetting<double>("gui_multiply");
             try
             {
                 switch (_sender.State)
                 {
                     case OscSocketState.Connected:
                         foreach (var exp in Expressions.InnerKeys)
-                            _sender.Send(new OscMessage(exp, Expressions.GetByKey2(exp) * mul));
+                            _sender.Send(new OscMessage($"/avatar/parameters/{exp}", Expressions.GetByKey2(exp) * mul));
                         break;
                     case OscSocketState.Closed:
                         _sender.Close();

@@ -28,7 +28,7 @@ public class MainViewModel
 
     public void UpdateLipImage()
     {
-        var hasHytes = BabbleCore.Instance.GetLipImage(out var image, out var dimensions);
+        var hasHytes = BabbleCore.Instance.GetImage(out var image, out var dimensions);
         if (hasHytes)
         {
             UpdateFrameBuffer(image);

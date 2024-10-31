@@ -1,5 +1,6 @@
 ﻿using Babble.Core;
 using Babble.OSC;
+using CommunityToolkit.Maui.Alerts;
 
 namespace Babble.Maui;
 
@@ -21,6 +22,15 @@ public partial class AppShell : Shell
         _sender = new BabbleOSC(ip, remotePort);
         _thread = new Thread(new ThreadStart(OSCLoop));
         _thread.Start();
+
+        Task.Run(async () =>
+        {
+            if (!await CheckPermissions())
+            {
+                await Toast.Make("Not all permissions were accepted. Application will close.").Show();
+                Application.Current.Quit();
+            }
+        });
     }
 
     private void OnUpdate(string name)
@@ -50,5 +60,42 @@ public partial class AppShell : Shell
             End:
             Thread.Sleep(10);
         }
+    }
+
+    private async Task<bool> CheckPermissions()
+    {
+        List<PermissionStatus> statuses = new List<PermissionStatus>();
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            statuses =
+           [
+#if ANDROID
+            await CheckPermissions<Permissions.StorageRead>(),
+            await CheckPermissions<Permissions.StorageWrite>(),
+            await CheckPermissions<Permissions.NetworkState>(),
+            await CheckPermissions<Permissions.NearbyWifiDevices>(),
+            await CheckPermissions<Permissions.Phone>(),
+#endif
+           ];
+        });
+
+        return statuses.All(IsGranted);
+    }
+
+    private async Task<PermissionStatus> CheckPermissions<TPermission>() where TPermission : Permissions.BasePermission, new()
+    {
+        PermissionStatus status = await Permissions.CheckStatusAsync<TPermission>();
+
+        if (status != PermissionStatus.Granted)
+        {
+            status = await Permissions.RequestAsync<TPermission>();
+        }
+
+        return status;
+    }
+
+    private static bool IsGranted(PermissionStatus status)
+    {
+        return status == PermissionStatus.Granted || status == PermissionStatus.Limited;
     }
 }
