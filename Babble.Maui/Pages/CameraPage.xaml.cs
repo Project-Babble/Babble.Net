@@ -1,32 +1,38 @@
 using Babble.Core;
+using Babble.Maui.Locale;
+using Microsoft.Maui.Media;
 using SkiaSharp;
 using SkiaSharp.Views.Maui;
 using System.Runtime.InteropServices;
 
 namespace Babble.Maui;
 
-public partial class CameraPage : ContentPage
+public partial class CameraPage : ContentPage, ILocalizable
 {
     private byte[] frame = Array.Empty<byte>();
     private (int width, int height) dimensions = (0, 0);
-    private CancellationTokenSource _cancellationTokenSource;
 
     public CameraPage()
     {
         InitializeComponent();
-        CameraAddress.Text = BabbleCore.Instance.Settings.GetSetting<string>("capture_source");
+
+        var settings = BabbleCore.Instance.Settings;
+        CameraAddress.Text = settings.GetSetting<string>("capture_source");
+
+        Localize();
+        LocaleManager.OnLocaleChanged += Localize;
     }
 
-    public async void OnPreviewCameraClicked(object sender, EventArgs args)
+    public void Localize()
     {
-        if (_cancellationTokenSource != null)
+        LocaleManager.SetLocalizedText(CameraAddressText, "camera.cameraAddress", "camera.cameraAddressTooltip");
+        SaveRestart.Text = LocaleManager.Instance["saveAndRestartTracking"];
+    }
+
+    public void OnPreviewCameraClicked(object sender, EventArgs args)
+    {
+        if (BabbleCore.Instance.GetImage(out var retrivedFrame, out var retrievedDimensions))
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource = null;
-        }
-        else if (BabbleCore.Instance.GetImage(out var retrivedFrame, out var retrievedDimensions))
-        {
-            _cancellationTokenSource = new CancellationTokenSource();
 
             frame = retrivedFrame;
             dimensions = retrievedDimensions;
@@ -110,7 +116,6 @@ public partial class CameraPage : ContentPage
     {
         BabbleCore.Instance.Settings.UpdateSetting<bool>("rotation_angle", ((Entry)sender).Text);
     }
-
 
     public void OnEnableCalibrationToggled(object sender, CheckedChangedEventArgs args)
     {

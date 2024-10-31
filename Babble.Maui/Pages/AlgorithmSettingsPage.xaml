@@ -5,7 +5,7 @@
              Title="Algo Settings">
     <ScrollView>
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
-            <Label Text="Model Settings:" TextColor="White" FontAttributes="Bold"/>
+            <Label x:Name="HeaderText" Text="Model Settings:" TextColor="White" FontAttributes="Bold"/>
 
             <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
                 <Grid.ColumnDefinitions>
@@ -13,12 +13,12 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,15">
-                    <Label Text="Inference Threads:" TextColor="White"/>
-                    <Entry x:Name="InferenceThreads" Text="2" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnInferenceThreadNumChanged" Keyboard="Numeric"/>
+                    <Label x:Name="InferenceThreadsText" ToolTipProperties.Text="" Text="" TextColor="White"/>
+                    <Entry x:Name="InferenceThreads" Text="" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnInferenceThreadNumChanged" Keyboard="Numeric"/>
                 </StackLayout>
                 <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
-                    <Label x:Name="Runtime" Text="Runtime:" TextColor="White"/>
-                    <Picker TextColor="White" BackgroundColor="#3D3D3D" SelectedIndexChanged="OnRuntimeChanged">
+                    <Label x:Name="RuntimeText" ToolTipProperties.Text="" Text="" TextColor="White"/>
+                    <Picker TextColor="White" BackgroundColor="#3D3D3D" SelectedIndexChanged="OnRuntimePicked">
                         <Picker.Items>
                             <x:String>ONNX</x:String>
                         </Picker.Items>
@@ -27,11 +27,11 @@
                 </StackLayout>
             </Grid>
 
-            <Label Text="GPU Settings:" TextColor="White" FontAttributes="Bold"/>
+            <Label x:Name="GPUSettingsText" Text="GPU Settings:" TextColor="White" FontAttributes="Bold"/>
             
             <StackLayout Orientation="Horizontal" Grid.Column="2" Spacing="10" Margin="0,0,0,15">
                 <CheckBox x:Name="UseGPU" IsChecked="False" CheckedChanged="OnUseGPUToggled"/>
-                <Label Text="Use GPU" TextColor="White" VerticalOptions="Center"/>
+                <Label x:Name="UseGPUText" ToolTipProperties.Text="" Text="" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
 
             <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
@@ -42,12 +42,12 @@
                 </Grid.ColumnDefinitions>
                 
                 <StackLayout Grid.Column="0" Spacing="10" Margin="0,0,0,0">
-                    <Label Text="GPU Index:" TextColor="White"/>
+                    <Label x:Name="GPUIndexText" ToolTipProperties.Text="" Text="GPU Index:" TextColor="White"/>
                     <Entry x:Name="GPUIndex" Text="0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnGPUIndexChanged" Keyboard="Numeric"/>
                 </StackLayout>
 
                 <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
-                    <Label Text="Model output multiplier:" TextColor="White"/>
+                    <Label x:Name="ModelMultiplierText" ToolTipProperties.Text="" Text="Model output multiplier:" TextColor="White"/>
                     <Entry x:Name="ModelMultiplier" Text="1.0" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnMultiplierChanged" Keyboard="Numeric"/>
                 </StackLayout>
             </Grid>

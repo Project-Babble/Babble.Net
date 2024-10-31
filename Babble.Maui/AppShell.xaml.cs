@@ -1,10 +1,11 @@
 ﻿using Babble.Core;
+using Babble.Maui.Locale;
 using Babble.OSC;
 using CommunityToolkit.Maui.Alerts;
 
 namespace Babble.Maui;
 
-public partial class AppShell : Shell
+public partial class AppShell : Shell, ILocalizable
 {
     private static readonly HashSet<string> Whitelist = ["gui_osc_location", "gui_osc_address", "gui_osc_port", "gui_osc_receiver_port"];
     private BabbleOSC _sender;
@@ -14,15 +15,6 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        BabbleCore.Instance.Start();
-        BabbleCore.Instance.Settings.OnUpdate += OnUpdate;
-
-        var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
-        var remotePort = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
-        _sender = new BabbleOSC(ip, remotePort);
-        _thread = new Thread(new ThreadStart(OSCLoop));
-        _thread.Start();
-
         Task.Run(async () =>
         {
             if (!await CheckPermissions())
@@ -31,6 +23,18 @@ public partial class AppShell : Shell
                 Application.Current.Quit();
             }
         });
+
+        BabbleCore.Instance.Start();
+        BabbleCore.Instance.Settings.OnUpdate += OnUpdate;
+
+        var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
+        var remotePort = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
+        _sender = new BabbleOSC(ip, remotePort);
+        _thread = new Thread(new ThreadStart(OSCLoop));
+        _thread.Start();
+        
+        Localize();
+        LocaleManager.OnLocaleChanged += Localize;
     }
 
     private void OnUpdate(string name)
@@ -68,15 +72,11 @@ public partial class AppShell : Shell
         await MainThread.InvokeOnMainThreadAsync(async () =>
         {
             statuses =
-           [
-#if ANDROID
-            await CheckPermissions<Permissions.StorageRead>(),
-            await CheckPermissions<Permissions.StorageWrite>(),
-            await CheckPermissions<Permissions.NetworkState>(),
-            await CheckPermissions<Permissions.NearbyWifiDevices>(),
-            await CheckPermissions<Permissions.Phone>(),
-#endif
-           ];
+            [
+                await CheckPermissions<Permissions.StorageRead>(),
+                await CheckPermissions<Permissions.StorageWrite>(),
+                await CheckPermissions<Permissions.NetworkState>(),
+            ];
         });
 
         return statuses.All(IsGranted);
@@ -97,5 +97,13 @@ public partial class AppShell : Shell
     private static bool IsGranted(PermissionStatus status)
     {
         return status == PermissionStatus.Granted || status == PermissionStatus.Limited;
+    }
+
+    public void Localize()
+    {
+        TitleText.Title = LocaleManager.Instance["babble.camPage"];
+        SettingsText.Title = LocaleManager.Instance["babble.settingsPage"];
+        AlgoSettingsText.Title = LocaleManager.Instance["babble.algoSettingsPage"];
+        // CalibSettingsText.Title = LocaleManager.Instance["babble.calibrationPage"];
     }
 }

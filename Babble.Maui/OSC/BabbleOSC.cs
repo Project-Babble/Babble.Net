@@ -56,6 +56,7 @@ public partial class BabbleOSC
     {
         while (_loop)
         {
+            var prefix = BabbleCore.Instance.Settings.GetSetting<double>("gui_multiply");
             var mul = BabbleCore.Instance.Settings.GetSetting<double>("gui_multiply");
             try
             {

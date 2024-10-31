@@ -1,5 +1,6 @@
 ﻿namespace Babble.Maui.Locale;
 
+using Babble.Core;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,30 +8,51 @@ using System.IO;
 
 public class LocaleManager
 {
-    private static readonly Lazy<LocaleManager> _instance =
-        new(() => new LocaleManager());
+    public static LocaleManager Instance { get; private set; }
 
-    private readonly HashSet<string> _languages;
-    private readonly Dictionary<string, Dictionary<string, string>> _strings;
-    private string _currentLanguage;
+    public static event Action OnLocaleChanged;
 
-    // Private constructor to prevent direct instantiation
-    private LocaleManager()
+    static LocaleManager()
     {
-        _languages = [];
-        _strings = [];
+        Instance = new LocaleManager();
     }
 
-    public static LocaleManager Instance => _instance.Value;
-
-    public static void Initialize(string language)
+    private LocaleManager()
     {
-        Instance.LoadLanguages(Path.Combine(
-            AppContext.BaseDirectory, 
-            "Locale", 
+        if (Instance is not null) return;
+        Instance = this;
+        
+        _currentLanguage = BabbleCore.Instance.Settings.GetSetting<string>("gui_language");
+        LoadLanguages(Path.Combine(
+            AppContext.BaseDirectory,
+            "Locale",
             "Strings"
             ));
-        Instance.LoadLanguage(language);
+        ChangeLanguage(_currentLanguage);
+    }
+
+    private readonly HashSet<string> _languages = [];
+    private readonly Dictionary<string, Dictionary<string, string>> _strings = [];
+    private string _currentLanguage;
+
+    public string this[string key] =>
+        Instance._strings[Instance._currentLanguage].ContainsKey($"locale.{key}") ?
+        Instance._strings[Instance._currentLanguage][$"locale.{key}"] :
+        key;
+
+    public string GetLanguage() => Instance._currentLanguage;
+    public HashSet<string> GetLanguages() => Instance._languages;
+
+    public void ChangeLanguage(string language)
+    {
+        Instance._currentLanguage = language;
+        OnLocaleChanged?.Invoke();
+    }
+
+    public void ChangeLanguage(int index)
+    {
+        Instance._currentLanguage = GetLanguages().ElementAt(index);
+        OnLocaleChanged?.Invoke();
     }
 
     private void LoadLanguages(string localeDirectory)
@@ -39,53 +61,30 @@ public class LocaleManager
         foreach (var dir in Directory.GetDirectories(localeDirectory))
         {
             var lang = Path.GetFileName(dir);
-            _languages.Add(lang);
-            _strings[lang] = [];
+            Instance._languages.Add(lang);
+            Instance._strings[lang] = [];
 
             foreach (var file in Directory.GetFiles(dir, "*.json"))
             {
                 var fileContent = File.ReadAllText(file);
-                var fileStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(fileContent);
+                var fileStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(fileContent)!;
                 var fileName = Path.GetFileNameWithoutExtension(file);
 
                 foreach (var kvp in fileStrings)
                 {
-                    _strings[lang][$"{fileName}.{kvp.Key}"] = kvp.Value;
+                    Instance._strings[lang][$"{fileName}.{kvp.Key}"] = kvp.Value;
                 }
             }
         }
     }
 
-    private void LoadLanguage(string language)
+    public static void SetLocalizedText(Label textBlock, string localeKey, string? tooltipKey = null)
     {
-        _currentLanguage = language;
-
-        if (!_languages.Contains(_currentLanguage))
+        textBlock.Text = Instance[localeKey];
+        if (tooltipKey != null)
         {
-            throw new ArgumentException($"Language '{_currentLanguage}' is not supported");
+            ToolTipProperties.SetText(textBlock, Instance[tooltipKey]);
         }
-    }
-
-    public static HashSet<string> GetLanguages()
-    {
-        return Instance._languages;
-    }
-
-    public static string GetString(string pattern)
-    {
-        var key = $"locale.{pattern}";
-
-        if (!Instance._strings[Instance._currentLanguage].TryGetValue(key, out string? value))
-        {
-            throw new KeyNotFoundException($"String pattern '{key}' not found for language '{Instance._currentLanguage}'");
-        }
-
-        return value;
-    }
-
-    public static void UpdateLanguage(string language)
-    {
-        Instance.LoadLanguage(language);
     }
 }
 

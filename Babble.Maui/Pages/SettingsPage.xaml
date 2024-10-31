@@ -5,37 +5,37 @@
              Title="Settings">
     <ScrollView>
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
-            
-            <Label Text="General Settings:" TextColor="White" FontAttributes="Bold"/>
-            
+
+            <Label x:Name="GeneralSettingsText" ToolTipProperties.Text="" Text="" TextColor="White" FontAttributes="Bold"/>
+
             <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
                 <CheckBox x:Name="CheckForUpdates" IsChecked="True" CheckedChanged="OnCheckForUpdatesToggled"/>
-                <Label Text="Check For Updates" TextColor="White" VerticalOptions="Center"/>
+                <Label x:Name="CheckForUpdatesText" Text="" ToolTipProperties.Text="" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
 
-            <Label Text="OSC Settings:" TextColor="White" FontAttributes="Bold"/>
-            <Label Text="Location Prefix:" TextColor="White"/>
-            <Entry BackgroundColor="#3D3D3D" TextColor="White"/>
-            <Label Text="Address:" TextColor="White"/>
-            <Entry x:Name="IPAddress" Text="127.0.0.1" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnAddressChanged"/>
-            <Label Text="Port:" TextColor="White"/>
-            <Entry x:Name="SendPort" Text="8888" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnPortChanged"/>
+            <Label x:Name="OSCSettingsText" ToolTipProperties.Text="" Text="" TextColor="White" FontAttributes="Bold"/>
+            <Label x:Name="LocationPrefixText" ToolTipProperties.Text="" Text="" TextColor="White"/>
+            <Entry x:Name="LocationPrefix" Text="" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnLocationPrefixChanged"/>
+            <Label x:Name="IPAddressText" ToolTipProperties.Text="" Text="" TextColor="White"/>
+            <Entry x:Name="IPAddress" Text="" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnAddressChanged"/>
+            <Label x:Name="SendPortText" ToolTipProperties.Text="" Text="" TextColor="White"/>
+            <Entry x:Name="SendPort" Text="" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnPortChanged"/>
             
             <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
                 <CheckBox/>
-                <Label Text="Receive functions" TextColor="White" VerticalOptions="Center"/>
+                <Label x:Name="ReceiveFunctionsText" ToolTipProperties.Text="" Text="" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
-            
-            <Label Text="Receiver Port:" TextColor="White"/>
-            <Entry x:Name="ReceiverPort" Text="9001" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnReceiverPortChanged"/>
-            <Label Text="Recalibrate Address:" TextColor="White"/>
+
+            <Label x:Name="ReceiverPortText" ToolTipProperties.Text="" Text="" TextColor="White"/>
+            <Entry x:Name="ReceiverPort" Text="" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnReceiverPortChanged"/>
+            <Label x:Name="RecalibrateAddressText" ToolTipProperties.Text="" Text="" TextColor="White"/>
             <Entry x:Name="RecalibrateAddress" Text="/avatar/parameters/babble_recalibrate" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnRecalibrateAddressChanged"/>
 
-            <Label Text="UVC Camera Settings:" TextColor="White" FontAttributes="Bold"/>
+            <Label x:Name="UVCCameraSettingsText" ToolTipProperties.Text="" Text="UVC Camera Settings:" TextColor="White" FontAttributes="Bold"/>
             
             <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,15">
                 <CheckBox x:Name="UseRedChannel" CheckedChanged="OnUseRedChannelToggled"/>
-                <Label Text="Use Red Channel" TextColor="White" VerticalOptions="Center"/>
+                <Label x:Name="UseRedChannelText" ToolTipProperties.Text="" Text="" TextColor="White" VerticalOptions="Center"/>
             </StackLayout>
             
             <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,0,0,15">
@@ -45,18 +45,28 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <StackLayout Grid.Column="0">
-                    <Label Text="X Resolution:" TextColor="White"/>
+                    <Label x:Name="XResText" ToolTipProperties.Text="" Text="X Resolution:" TextColor="White"/>
                     <Entry x:Name="XRes" Text="0" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnXResChanged"/>
                 </StackLayout>
                 <StackLayout Grid.Column="1">
-                    <Label Text="Y Resolution:" TextColor="White"/>
+                    <Label x:Name="YResText" ToolTipProperties.Text="" Text="Y Resolution:" TextColor="White"/>
                     <Entry x:Name="YRes" Text="0" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnYResChanged"/>
                 </StackLayout>
                 <StackLayout Grid.Column="2">
-                    <Label Text="Framerate:" TextColor="White"/>
+                    <Label x:Name="FramerateText" ToolTipProperties.Text="" Text="Framerate:" TextColor="White"/>
                     <Entry x:Name="Framerate" Text="0" BackgroundColor="#3D3D3D" TextColor="White" Completed="OnFramerateChanged"/>
                 </StackLayout>
             </Grid>
+
+            <StackLayout Grid.Column="1" Spacing="10" Margin="0,0,0,15">
+                <Label x:Name="LanguagePickerText" ToolTipProperties.Text="" Text="Language:" TextColor="White"/>
+                <Picker x:Name="LanguagePicker" TextColor="White" BackgroundColor="#3D3D3D" SelectedIndexChanged="OnLanguagePicked">
+                    <Picker.Items>
+                    </Picker.Items>
+                    <Picker.SelectedIndex>0</Picker.SelectedIndex>
+                </Picker>
+            </StackLayout>
+
         </StackLayout>
     </ScrollView>
 </ContentPage>

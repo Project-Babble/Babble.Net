@@ -12,13 +12,13 @@
     Title="Babble.Maui">
 
     <TabBar>
-        <Tab Title="Cam">
+        <Tab x:Name="TitleText" Title="Cam">
             <ShellContent ContentTemplate="{DataTemplate local:CameraPage}"/>
         </Tab>
-        <Tab Title="Settings">
+        <Tab x:Name="SettingsText" Title="Settings">
             <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}"/>
         </Tab>
-        <Tab Title="Algo Settings">
+        <Tab x:Name="AlgoSettingsText" Title="Algo Settings">
             <ShellContent ContentTemplate="{DataTemplate local:AlgorithmSettingsPage}"/>
         </Tab>
     </TabBar>

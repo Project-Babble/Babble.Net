@@ -8,10 +8,10 @@
 
     <ScrollView>
         <StackLayout Padding="20" Spacing="15" BackgroundColor="#2D2D2D">
-            <Label Text="Camera Address" TextColor="White"/>
+            <Label x:Name="CameraAddressText" ToolTipProperties.Text="" Text="" TextColor="White"/>
             <Entry x:Name="CameraAddress" Text="" TextColor="White" BackgroundColor="#3D3D3D" Completed="OnCameraAddressChanged"/>
-            <Button x:Name="SaveRestart" Text="Save And Restart Tracking" Clicked="OnSaveAndRestartTrackingClicked"/>
-            <Button x:Name="Preview" Text="Preview Camera" Clicked="OnPreviewCameraClicked"/>
+            <Button x:Name="SaveRestart" ToolTipProperties.Text="" Text="" Clicked="OnSaveAndRestartTrackingClicked"/>
+            <Button x:Name="Preview" ToolTipProperties.Text="" Text="" Clicked="OnPreviewCameraClicked"/>
 
             <skia:SKCanvasView 
                 x:Name="MouthCanvasView" 
