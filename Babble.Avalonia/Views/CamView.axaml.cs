@@ -7,6 +7,7 @@ using Babble.Avalonia.ReactiveObjects;
 using Babble.Core;
 using System;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Babble.Avalonia;
@@ -36,7 +37,7 @@ public partial class CamView : UserControl
         switch (e.PropertyName)
         {
             case nameof(_viewModel.CameraAddressEntryText):
-                BabbleCore.Instance.Settings.UpdateSetting<string>(e.PropertyName, _viewModel.CameraAddressEntryText);
+                BabbleCore.Instance.Settings.UpdateSetting<string>(nameof(settings.Cam.CaptureSource), _viewModel.CameraAddressEntryText);
                 break;
             case nameof(_viewModel.Rotation):
                 BabbleCore.Instance.Settings.UpdateSetting<double>(nameof(settings.Cam.RotationAngle), _viewModel.Rotation.ToString());
@@ -86,11 +87,16 @@ public partial class CamView : UserControl
                 _currentBitmap = new WriteableBitmap(
                     new PixelSize(dims.width, dims.height),
                     new Vector(96, 96),
-                    PixelFormat.Rgba8888,
-                    AlphaFormat.Unpremul);
+                    PixelFormats.Gray8,
+                    AlphaFormat.Opaque);
             }
 
-            BitmapConverter.WriteGrayscaleToWriteableBitmap(image, _currentBitmap, dims.width, dims.height);
+            using var frameBuffer = _currentBitmap.Lock();
+            {
+                Marshal.Copy(image, 0, frameBuffer.Address, image.Length);
+            }
+
+            // BitmapConverter.WriteGrayscaleToWriteableBitmap(image, _currentBitmap, dims.width, dims.height);
 
             // Force update by creating a new reference
             _viewModel.MouthBitmap = null;
