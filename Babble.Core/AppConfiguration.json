@@ -35,7 +35,7 @@
 		"gui_cam_framerate": 0,
 		"use_calibration": true,
 		"calibration_mode": "Neutral",
-		"gui_language": "OwO"
+		"gui_language": "English"
 	},
 	"cam_display_id": 0
 }

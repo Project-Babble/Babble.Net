@@ -6,105 +6,162 @@
              mc:Ignorable="d">
 	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5">
-			<TextBlock Text="General Settings:"
+			<TextBlock Text="{Binding GeneralSettingsText}"
+					 ToolTip.Tip="{Binding GeneralSettingsTextTooltip}"
 					 x:Name="GeneralSettingsText"
 					 Foreground="White"
 					 FontWeight="Bold"/>
-			<CheckBox Content="Check For Updates"
+			<CheckBox Content="{Binding CheckForUpdatesText}"
+					 ToolTip.Tip="{Binding CheckForUpdatesTextTooltip}"
 					 x:Name="CheckForUpdatesText"
 					 Foreground="White"
 					 IsChecked="True"
 					 Margin="0,10,0,0"/>
 
-			<TextBlock Text="OSC Settings:"
+			<TextBlock Text="{Binding OSCSettingsText}"
+					 ToolTip.Tip="{Binding OSCSettingsTextTooltip}"
 					 x:Name="OSCSettingsText"
 					 Foreground="White"
 					 FontWeight="Bold"
 					 Margin="0,10,0,0"/>
 
-			<TextBlock Text="Location Prefix:" Margin="0,0,0,0" Foreground="White"/>
-			<TextBox Background="#2D2D2D" Foreground="White"/>
+			<TextBlock Text="{Binding LocationPrefixText}" 
+					   ToolTip.Tip="{Binding LocationPrefixTextTooltip}"
+					   x:Name="LocationPrefixText"
+					   Margin="0,0,0,0" 
+					   Foreground="White"/>
+			<TextBox Background="#2D2D2D"
+					 Text="{Binding LocationPrefix}"
+					 ToolTip.Tip="{Binding LocationPrefixTextTooltip}"
+					 x:Name="LocationPrefix"
+					 Foreground="White"/>
 
 			<Grid ColumnDefinitions="Auto,*">
-				<TextBlock Text="Address:"
-						 x:Name="AddressText"
+				<TextBlock Text="{Binding IpAddressText}"
+						 ToolTip.Tip="{Binding IpAddressTextTooltip}"
+						 x:Name="IpAddressText"
 						 Grid.Column="0"
 						 Foreground="White"
 						 Margin="0,0,10,0"
 						 VerticalAlignment="Center"/>
-				<TextBox Text=""
-						x:Name="AddressEntryText"
+				<TextBox Text="{Binding IpAddress}"
+						ToolTip.Tip="{Binding IpAddressTextTooltip}"
+						x:Name="IpAddress"
 						Grid.Column="1"
 						Background="#2D2D2D"
 						Foreground="White"/>
 			</Grid>
 
 			<Grid ColumnDefinitions="Auto,*">
-				<TextBlock Text="Port:"
+				<TextBlock Text="{Binding PortText}"
+						 ToolTip.Tip="{Binding PortTextTooltip}"
 						 x:Name="PortText"
 						 Grid.Column="0"
 						 Foreground="White"
 						 Margin="0,0,10,0"
 						 VerticalAlignment="Center"/>
-				<TextBox Text=""
-						x:Name="PortEntryText"
+				<TextBox Text="{Binding Port}"
+						ToolTip.Tip="{Binding PortTextTooltip}"
+						x:Name="Port"
 						Grid.Column="1"
 						Background="#2D2D2D"
 						Foreground="White"/>
 			</Grid>
 
-			<CheckBox Content="Receive functions" x:Name="ReceiveFunctionsText" Foreground="White"/>
+			<CheckBox Content="{Binding ReceiveFunctionsText}" 
+					  ToolTip.Tip="{Binding ReceiveFunctionsTextTooltip}"
+					  x:Name="ReceiveFunctionsText" 
+					  Foreground="White"/>
 
-			<TextBlock Text="Receiver Port:" x:Name="ReceiverPortText" Foreground="White"/>
-			<TextBox Text=""
-					x:Name="ReceiverPortEntryText"
+			<TextBlock Text="{Binding ReceiverPortText}" 
+					   ToolTip.Tip="{Binding ReceiverPortTextTooltip}"
+					   x:Name="ReceiverPortText" 
+					   Foreground="White"/>
+			<TextBox Text="{Binding ReceiverPort}"
+					 ToolTip.Tip="{Binding ReceiverPortTextTooltip}"
+					x:Name="ReceiverPort"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
-			<TextBlock Text="Recalibrate Address:" x:Name="RecalibrateAddressText" Foreground="White"/>
-			<TextBox Text=""
-					x:Name="RecalibrateAddressEntryText"
+			<TextBlock Text="{Binding RecalibrateAddressText}" 
+					   ToolTip.Tip="{Binding RecalibrateAddressTextTooltip}"
+					   x:Name="RecalibrateAddressText" 
+					   Foreground="White"/>
+			<TextBox Text="{Binding RecalibrateAddress}"
+					 ToolTip.Tip="{Binding RecalibrateAddressTextTooltip}"
+					x:Name="RecalibrateAddress"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
-			<TextBlock Text="UVC Camera Settings:"
+			<TextBlock Text="{Binding UVCCameraSettingsText}"
+					 ToolTip.Tip="{Binding UVCCameraSettingsTextTooltip}"
 					 x:Name="UVCCameraSettingsText"
 					 Foreground="White"
 					 FontWeight="Bold"
 					 Margin="0,10,0,0"/>
-			<CheckBox Content="Use Red Channel" x:Name="UseRedChannelText" Foreground="White"/>
+			<CheckBox Content="{Binding UseRedChannelText}" 
+					  ToolTip.Tip="{Binding UseRedChannelTextTooltip}"
+					  x:Name="UseRedChannelText" 
+					  IsChecked="{Binding UseRedChannel}"
+					  Foreground="White"/>
 
 			<Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto">
-				<TextBlock Text="X Resolution:"
+				<TextBlock Text="{Binding XResolutionText}"
+						 ToolTip.Tip="{Binding XResolutionTextTooltip}"
 						 x:Name="XResolutionText"
 						 Grid.Column="0"
-						 Foreground="White"/>
-				<TextBox Text=""
+						 Foreground="White"/>		
+				<TextBox Text="{Binding XResolution}"
+						ToolTip.Tip="{Binding XResolutionTextTooltip}"
 						Grid.Row="1"
 						Grid.Column="0"
 						Background="#2D2D2D"
 						Foreground="White"/>
 
-				<TextBlock Text="Y Resolution:"
+				<TextBlock Text="{Binding YResolutionText}"
+						 ToolTip.Tip="{Binding YResolutionTextTooltip}"
 						 x:Name="YResolutionText"
 						 Grid.Column="1"
 						 Foreground="White"/>
-				<TextBox Text=""
+				<TextBox Text="{Binding YResolution}"
+						ToolTip.Tip="{Binding YResolutionTextTooltip}"
 						Grid.Row="1"
 						Grid.Column="1"
 						Background="#2D2D2D"
 						Foreground="White"/>
 
-				<TextBlock Text="Framerate:"
+				<TextBlock Text="{Binding FramerateText}"
+						 ToolTip.Tip="{Binding FramerateTextTooltip}"
 						 x:Name="FramerateText"
 						 Grid.Column="2"
 						 Foreground="White"/>
-				<TextBox Text=""
+				<TextBox Text="{Binding Framerate}"
+						ToolTip.Tip="{Binding FramerateTextTooltip}"
 						Grid.Row="1"
 						Grid.Column="2"
 						Background="#2D2D2D"
 						Foreground="White"/>
 			</Grid>
+
+			<StackPanel Grid.Column="1" Spacing="5">
+				<TextBlock Text="{Binding LanguageText}" 
+						   x:Name="LanguageComboText" 
+						   ToolTip.Tip="{Binding LanguageTextTooltip}" 
+						   Foreground="White"/>
+				<TextBlock Text="{Binding LanguageInstructions}"
+						   x:Name="LanguageComboInstructionsText"
+						   ToolTip.Tip="{Binding LanguageTextTooltip}"
+						   Foreground="White"/>
+				<ComboBox SelectedIndex="{Binding SelectedIndex}"
+						x:Name="LanguageCombo"
+						SelectedItem="{Binding SelectedLanguage}"
+						Background="#2D2D2D"
+						Foreground="White">
+					<ComboBoxItem>English</ComboBoxItem>
+					<ComboBoxItem>OwO</ComboBoxItem>
+					<ComboBoxItem>Pirate Speak</ComboBoxItem>
+				</ComboBox>
+			</StackPanel>
 		</StackPanel>
 	</Border>
 </UserControl>

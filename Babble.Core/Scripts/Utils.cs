@@ -1,5 +1,6 @@
 ﻿using Babble.Core.Enums;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using System.Reflection;
 
 namespace Babble.Core.Scripts;
 
@@ -176,5 +177,28 @@ public static class Utils
         }
 
         return input;
+    }
+
+    public static void ExtractEmbeddedResource(Assembly assembly, string pathName, string fileName, string @namespace = "Babble.Core.", bool overwrite = false)
+    {
+        // Extract the embedded model if it isn't already present
+        if (!File.Exists(pathName) || overwrite)
+        {
+            using var stm = assembly
+                .GetManifestResourceStream($"{@namespace}{fileName}");
+
+            using Stream outFile = File.Create(pathName);
+
+            const int sz = 4096;
+            var buf = new byte[sz];
+            while (true)
+            {
+                if (stm == null) throw new FileNotFoundException();
+                var nRead = stm.Read(buf, 0, sz);
+                if (nRead < 1)
+                    break;
+                outFile.Write(buf, 0, nRead);
+            }
+        }
     }
 }

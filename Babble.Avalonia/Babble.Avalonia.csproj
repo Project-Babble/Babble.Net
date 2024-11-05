@@ -12,16 +12,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+    <PackageReference Include="Avalonia" Version="11.2.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
 
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Meadow.Foundation" Version="1.2" />
-    <PackageReference Include="Meadow.Linux" Version="1.2" />
-    <PackageReference Include="Meadow.Windows" Version="1.2" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.0" />
+    <PackageReference Include="Meadow.Foundation" Version="1.15.0" />
+    <PackageReference Include="Meadow.Linux" Version="1.15.0" />
+    <PackageReference Include="Meadow.Windows" Version="1.15.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +36,12 @@
     </Compile>
     <Compile Update="Views\CalibrationView.axaml.cs">
       <DependentUpon>CalibrationView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\MobileMainWindow.axaml.cs">
+      <DependentUpon>MobileMainWindow.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DesktopMainWindow.axaml.cs">
+      <DependentUpon>DesktopMainWindow.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\SettingsView.axaml.cs">
       <DependentUpon>SettingsView.axaml</DependentUpon>

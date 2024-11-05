@@ -9,6 +9,7 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
+	<UseMaui>true</UseMaui>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,11 +19,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia.Android" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1" />
+    <PackageReference Include="Avalonia.Android" Version="11.2.0" />
+    <PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.4" />
+    <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.4.4" />
+    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.12" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Babble.Avalonia\Babble.Avalonia.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.92" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.92" />
   </ItemGroup>
 </Project>

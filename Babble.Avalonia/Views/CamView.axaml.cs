@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using Babble.Avalonia.ReactiveObjects;
 using Babble.Core;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace Babble.Avalonia;
@@ -21,9 +22,38 @@ public partial class CamView : UserControl
 
         _viewModel = new CamViewModel();
         DataContext = _viewModel;
+        _viewModel.PropertyChanged += OnPropertyChanged;
 
         // Start update loop immediately
         StartImageUpdates();
+    }
+
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(_viewModel.MouthBitmap)) return;
+
+        var settings = BabbleCore.Instance.Settings;
+        switch (e.PropertyName)
+        {
+            case nameof(_viewModel.CameraAddressEntryText):
+                BabbleCore.Instance.Settings.UpdateSetting<string>(e.PropertyName, _viewModel.CameraAddressEntryText);
+                break;
+            case nameof(_viewModel.Rotation):
+                BabbleCore.Instance.Settings.UpdateSetting<double>(nameof(settings.Cam.RotationAngle), _viewModel.Rotation.ToString());
+                break;
+            case nameof(_viewModel.EnableCalibration):
+                BabbleCore.Instance.Settings.UpdateSetting<bool>(nameof(settings.GeneralSettings.UseCalibration), _viewModel.EnableCalibration.ToString());
+                break;
+            case nameof(_viewModel.IsVerticalFlip):
+                BabbleCore.Instance.Settings.UpdateSetting<bool>(nameof(settings.Cam.GuiVerticalFlip), _viewModel.IsVerticalFlip.ToString());
+                break;
+            case nameof(_viewModel.HorizontalFlipText):
+                BabbleCore.Instance.Settings.UpdateSetting<bool>(nameof(settings.Cam.GuiHorizontalFlip), _viewModel.IsHorizontalFlip.ToString());
+                break;
+
+        }
+        
+        settings.Save();
     }
 
     private void StartImageUpdates()

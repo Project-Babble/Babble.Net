@@ -89,27 +89,7 @@ public class BabbleCore
         // Model manifest on Github?
         const string modelName = "model.onnx";
         string modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
-
-        // Extract the embedded model if it isn't already present
-        if (!File.Exists(modelPath))
-        {
-            using var stm = Assembly
-                .GetExecutingAssembly()
-                .GetManifestResourceStream($"Babble.Core.{modelName}");
-
-            using Stream outFile = File.Create(modelPath);
-
-            const int sz = 4096;
-            var buf = new byte[sz];
-            while (true)
-            {
-                if (stm == null) continue;
-                var nRead = stm.Read(buf, 0, sz);
-                if (nRead < 1)
-                    break;
-                outFile.Write(buf, 0, nRead);
-            }
-        }
+        Utils.ExtractEmbeddedResource(Assembly.GetExecutingAssembly(), modelPath, modelName);
 
         SessionOptions sessionOptions = SetupSessionOptions();
 

@@ -14,9 +14,17 @@
 	
 	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5">
-			<TextBlock Text="{Binding CameraAddressText}" x:Name="CameraAddressText" Foreground="White"/>
-			<TextBox Text="" x:Name="CameraAddressEntryText" Background="#2D2D2D" Foreground="White"/>
+			<TextBlock Text="{Binding CameraAddressText}" 
+					   ToolTip.Tip="{Binding CameraAddressTextTooltip}"
+					   x:Name="CameraAddressText" 
+					   Foreground="White"/>
+			<TextBox Text="{Binding CameraAddressEntryText}" 
+					 ToolTip.Tip="{Binding CameraAddressTextTooltip}"
+					 x:Name="CameraAddressEntryText" 
+					 Background="#2D2D2D" 
+					 Foreground="White"/>
 			<Button Content="{Binding SaveAndRestartTrackingText}"
+					ToolTip.Tip="{Binding SaveAndRestartTrackingText}"
 					x:Name="SaveAndRestartTrackingText"
                     Background="#4CAF50"
                     Foreground="White"/>
@@ -28,33 +36,52 @@
 			<StackPanel Orientation="Horizontal" Spacing="5">
 				<Button Content="{Binding TrackingModeText}"
 						x:Name="TrackingModeText"
+						ToolTip.Tip="{Binding TrackingModeTextTooltip}"
                         Background="#4CAF50"
                         Foreground="White"/>
 				<Button Content="{Binding CroppingModeText}"
 						x:Name="CroppingModeText"
+						ToolTip.Tip="{Binding CroppingModeTextTooltip}"
                         Background="#4CAF50"
                         Foreground="White"/>
 			</StackPanel>
 			<TextBlock Text="{Binding RotationText}" x:Name="RotationText" Foreground="White"/>
-			<Slider Maximum="360" Value="0"/>
+			<Slider x:Name="RotationSlider" 
+					Minimum="0" 
+					Maximum="360" 
+					Value="0" />
 			<StackPanel Orientation="Horizontal" Spacing="5">
 				<Button Content="{Binding StartCalibrationText}"
 						x:Name="StartCalibrationText"
+						ToolTip.Tip="{Binding StartCalibrationTextTooltip}"
                         Background="#4CAF50"
                         Foreground="White"/>
 				<Button Content="{Binding StopCalibrationText}"
 						x:Name="StopCalibrationText"
+						ToolTip.Tip="{Binding StopCalibrationTextTooltip}"
                         Background="#4CAF50"
                         Foreground="White"/>
 			</StackPanel>
 			<CheckBox Content="{Binding EnableCalibrationText}"
 					  x:Name="EnableCalibrationText"
+				      ToolTip.Tip="{Binding EnableCalibrationTextTooltip}"
                       Foreground="White"
-                      IsChecked="True"/>
-			<TextBlock Text="{Binding ModeText}" x:Name="ModeText" Foreground="White"/>
+                      IsChecked="{Binding EnableCalibration}"/>
+			<TextBlock Text="{Binding ModeText}" 
+					   x:Name="ModeText" 
+					   ToolTip.Tip="{Binding ModeTextTooltip}"
+					   Foreground="White"/>
 			<StackPanel Orientation="Horizontal" Spacing="10">
-				<CheckBox Content="{Binding VerticalFlipText}" x:Name="VerticalFlipText" Foreground="White"/>
-				<CheckBox Content="{Binding HorizontalFlipText}" x:Name="HorizontalFlipText" Foreground="White"/>
+				<CheckBox Content="{Binding VerticalFlipText}" 
+						  x:Name="VerticalFlipText" 
+						  IsChecked="{Binding IsVerticalFlip}"
+						  ToolTip.Tip="{Binding VerticalFlipTextTooltip}"
+						  Foreground="White"/>
+				<CheckBox Content="{Binding HorizontalFlipText}" 
+						  x:Name="HorizontalFlipText" 
+						  IsChecked="{Binding IsHorizontalFlip}"
+						  ToolTip.Tip="{Binding HorizontalFlipTextTooltip}"
+						  Foreground="White"/>
 			</StackPanel>
 		</StackPanel>
 	</Border>

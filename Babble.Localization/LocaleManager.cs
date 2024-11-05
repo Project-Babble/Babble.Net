@@ -1,10 +1,12 @@
 ﻿namespace Babble.Locale;
 
 using Babble.Core;
+using Babble.Core.Scripts;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 public class LocaleManager
 {
@@ -30,7 +32,7 @@ public class LocaleManager
         ChangeLanguage(_currentLanguage);
     }
 
-    private readonly HashSet<string> _languages = [];
+    private readonly List<string> _languages = [];
     private readonly Dictionary<string, Dictionary<string, string>> _strings = [];
     private string _currentLanguage;
 
@@ -40,7 +42,7 @@ public class LocaleManager
         key;
 
     public string GetLanguage() => Instance._currentLanguage;
-    public HashSet<string> GetLanguages() => Instance._languages;
+    public List<string> GetLanguages() => Instance._languages;
 
     public void ChangeLanguage(string language)
     {
@@ -56,7 +58,20 @@ public class LocaleManager
 
     private void LoadLanguages(string localeDirectory)
     {
-        // Load available languages (directories)
+        // Android-stuff
+        Directory.CreateDirectory(localeDirectory);
+        var locales = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+        foreach (var locale in locales)
+        {
+            var simpleName = locale.Replace("Babble.Localization.Locale.", string.Empty);
+            simpleName = simpleName.Replace(".locale.json", string.Empty);
+            var localePath = Directory.CreateDirectory(Path.Combine(localeDirectory, simpleName)).FullName;
+            Utils.ExtractEmbeddedResource(Assembly.GetExecutingAssembly(), Path.Combine(localePath, "locale.json"), locale, string.Empty, true);
+        }
+        //if (!Directory.Exists(localeDirectory))
+        //{
+        //}
+
         foreach (var dir in Directory.GetDirectories(localeDirectory))
         {
             var lang = Path.GetFileName(dir);

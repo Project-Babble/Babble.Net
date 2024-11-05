@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Babble.Avalonia.ReactiveObjects;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace Babble.Avalonia.ReactiveObjects;
+namespace Babble.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {

@@ -2,9 +2,9 @@
 
 namespace Babble.Avalonia.Views;
 
-public partial class MainView : UserControl
+public partial class DesktopMainWindow : Window
 {
-    public MainView()
+    public DesktopMainWindow()
     {
         InitializeComponent();
     }

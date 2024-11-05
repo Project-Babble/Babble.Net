@@ -1,5 +1,5 @@
 using Babble.Core;
-using Babble.Maui.Locale;
+using Babble.Locale;
 using Babble.Maui.Scripts;
 
 namespace Babble.Maui;

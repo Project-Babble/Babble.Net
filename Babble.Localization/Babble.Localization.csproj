@@ -7,6 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Locale\English\locale.json" />
+    <None Remove="Locale\OwO\locale.json" />
+    <None Remove="Locale\Pirate Speak\locale.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Locale\English\locale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locale\OwO\locale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locale\Pirate Speak\locale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
@@ -15,15 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Locale\English\locale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Locale\OwO\locale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Locale\Pirate Speak\locale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Strings\English\locale.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

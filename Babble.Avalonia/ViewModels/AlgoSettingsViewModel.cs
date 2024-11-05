@@ -1,72 +1,89 @@
-﻿using Babble.Locale;
+﻿using Babble.Core;
+using Babble.Locale;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Babble.Avalonia.ReactiveObjects;
+namespace Babble.Avalonia.ViewModels;
 
 public partial class AlgoSettingsViewModel : ObservableObject, ILocalizable
 {
     [ObservableProperty]
-    public string modelFile;
+    public string modelFileEntryText;
 
     [ObservableProperty]
-    public int inferenceThreads;
+    public int inferenceThreadsEntryText;
 
     [ObservableProperty]
-    public string runtime;
+    public string runtimeEntryText;
 
     [ObservableProperty]
-    public int gpuIndex;
+    public int gpuIndexEntryText;
 
     [ObservableProperty]
     public bool useGpu;
 
     [ObservableProperty]
-    public double modelOutputMultiplier;
+    public double modelOutputMultiplierEntryText;
 
     [ObservableProperty]
-    public double calibrationDeadzone;
+    public double calibrationDeadzoneEntryText;
 
     [ObservableProperty]
-    public double minFrequencyCutoff;
+    public double minFrequencyCutoffEntryText;
 
     [ObservableProperty]
-    public double speedCoefficient;
+    public double speedCoefficientEntryText;
 
-    public string ModelSettingsText => LocaleManager.Instance["algorithm.header"];
+    public string ModelSettingsText { get; private set; }
 
-    public string ModelFileText => LocaleManager.Instance["algorithm.modelFile"];
+    public string ModelFileText { get; private set; }
 
-    public string InferenceThreadsText => LocaleManager.Instance["algorithm.inferenceThreads"];
+    public string InferenceThreadsText { get; private set; }
 
-    public string RuntimeText => LocaleManager.Instance["algorithm.runtime"];
+    public string RuntimeText { get; private set; }
 
-    public string UseGPUText => LocaleManager.Instance["algorithm.useGPU"];
+    public string UseGPUText { get; private set; }
 
-    public string ModelOutputMultiplierText => LocaleManager.Instance["algorithm.modelOutputMultiplier"];
+    public string GPUIndexText { get; private set; }
 
-    public string CalibrationDeadzoneText => LocaleManager.Instance["algorithm.calibrationDeadzone"];
+    public string ModelOutputMultiplierText { get; private set; }
 
-    public string OneEuroFilterText => LocaleManager.Instance["algorithm.oneEuroFilterParameters"];
+    public string CalibrationDeadzoneText { get; private set; }
 
-    public string MinFrequencyCutoffText => LocaleManager.Instance["algorithm.minFrequencyCutoff"];
+    public string OneEuroFilterText { get; private set; }
 
-    public string SpeedCoefficientText => LocaleManager.Instance["algorithm.speedCoefficient"];
+    public string MinFrequencyCutoffText { get; private set; }
+
+    public string SpeedCoefficientText { get; private set; }
 
     public AlgoSettingsViewModel()
     {
-        ModelFile = "Models/3MEFFB0E7MSE/";
-        InferenceThreads = 2;
-        Runtime = "ONNX";
-        GpuIndex = 0;
-        UseGpu = true;
-        ModelOutputMultiplier = 1.0;
-        CalibrationDeadzone = -0.1;
-        MinFrequencyCutoff = 0.9;
-        SpeedCoefficient = 0.9;
+        var settings = BabbleCore.Instance.Settings;
+        
+        modelFileEntryText = settings.GeneralSettings.GuiModelFile;
+        inferenceThreadsEntryText = settings.GeneralSettings.GuiInferenceThreads;
+        useGpu = settings.GeneralSettings.GuiUseGpu;
+        gpuIndexEntryText = settings.GeneralSettings.GuiGpuIndex;
+        modelOutputMultiplierEntryText = settings.GeneralSettings.GuiMultiply;
+        calibrationDeadzoneEntryText = settings.GeneralSettings.CalibDeadzone;
+        minFrequencyCutoffEntryText = double.Parse(settings.GeneralSettings.GuiMinCutoff);
+        speedCoefficientEntryText = double.Parse(settings.GeneralSettings.GuiSpeedCoefficient);
+
+        Localize();
+        LocaleManager.OnLocaleChanged += Localize;
     }
 
     public void Localize()
     {
-        
+        ModelSettingsText = LocaleManager.Instance["algorithm.header"];
+        ModelFileText = LocaleManager.Instance["algorithm.modelFile"];
+        InferenceThreadsText = LocaleManager.Instance["algorithm.inferenceThreads"];
+        RuntimeText = LocaleManager.Instance["algorithm.runtime"];
+        UseGPUText = LocaleManager.Instance["algorithm.useGPU"];
+        GPUIndexText = LocaleManager.Instance["algorithm.GPUIndex"];
+        ModelOutputMultiplierText = LocaleManager.Instance["algorithm.modelOutputMultiplier"];
+        CalibrationDeadzoneText = LocaleManager.Instance["algorithm.calibrationDeadzone"];
+        OneEuroFilterText = LocaleManager.Instance["algorithm.oneEuroFilterParameters"];
+        MinFrequencyCutoffText = LocaleManager.Instance["algorithm.minFrequencyCutoff"];
+        SpeedCoefficientText = LocaleManager.Instance["algorithm.speedCoefficient"];
     }
 }

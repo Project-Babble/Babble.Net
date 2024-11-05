@@ -1,12 +1,10 @@
-<Window xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:Babble.Avalonia"
         mc:Ignorable="d"
-        x:Class="Babble.Avalonia.Views.MainWindow"
-        Title="Babble v2.0.6 Alpha"
-        Width="800" Height="600"
+        x:Class="Babble.Avalonia.Views.MobileMainWindow"
         Background="#2D2D2D">
 
 	<Grid Margin="10">
@@ -14,9 +12,7 @@
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
-
-		<!-- Tab buttons -->
-		<TabControl Grid.Row="1" Margin="0,10,0,0">
+		<TabControl Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<TabItem Header="Cam" x:Name="CameraHeaderText">
 				<views:CamView/>
 			</TabItem>
@@ -26,12 +22,6 @@
 			<TabItem Header="Setting" x:Name="SettingsHeaderText">
 				<views:SettingsView/>
 			</TabItem>
-			<TabItem Header="Calibration" x:Name="CalibrationHeaderText">
-				<views:CalibrationView/>
-			</TabItem>
-			<TabItem Header="About" x:Name="AboutHeaderText">
-				<views:About/>
-			</TabItem>
 		</TabControl>
 	</Grid>
-</Window>
+</UserControl>

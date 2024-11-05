@@ -1,22 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
-
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
 using Babble.OSC;
 using Meadow;
-using Meadow.Pinouts;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Babble.Avalonia;
 
-public partial class App : AvaloniaMeadowApplication<Linux<RaspberryPi>>
+public partial class App : AvaloniaMeadowApplication<Linux>
 {
     private static readonly HashSet<string> Whitelist = ["gui_osc_location", "gui_osc_address", "gui_osc_port", "gui_osc_receiver_port"];
     private BabbleOSC _sender;
@@ -28,7 +24,7 @@ public partial class App : AvaloniaMeadowApplication<Linux<RaspberryPi>>
         LoadMeadowOS();
 
         BabbleCore.Instance.Start();
-        BabbleCore.Instance.Settings.OnUpdate += OnUpdate;
+        BabbleCore.Instance.Settings.OnUpdate += NeedRestartOSC;
 
         var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
         var remotePort = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
@@ -62,23 +58,37 @@ public partial class App : AvaloniaMeadowApplication<Linux<RaspberryPi>>
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            desktop.MainWindow = new DesktopMainWindow
             {
-                DataContext = new MainViewModel()
+                DataContext = new MainWindowViewModel()
             };
+
+            desktop.Startup += OnStartup;
+            desktop.Exit += OnExit;
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
-            singleViewPlatform.MainView = new MainView
+            singleViewPlatform.MainView = new MobileMainWindow
             {
-                DataContext = new MainViewModel()
+                DataContext = new MainWindowViewModel()
             };
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void OnUpdate(string name)
+    private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)
+    {
+        
+    }
+
+    private void OnExit(object sender, ControlledApplicationLifetimeExitEventArgs e)
+    {
+        _sender.Teardown();
+        _thread.Join();
+    }
+
+    private void NeedRestartOSC(string name)
     {
         if (Whitelist.Contains(name))
         {

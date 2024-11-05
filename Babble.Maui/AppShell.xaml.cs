@@ -1,5 +1,5 @@
 ﻿using Babble.Core;
-using Babble.Maui.Locale;
+using Babble.Locale;
 using Babble.OSC;
 using CommunityToolkit.Maui.Alerts;
 

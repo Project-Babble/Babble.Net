@@ -12,7 +12,7 @@
 					 FontWeight="Bold"/>
 
 			<TextBlock Text="{Binding ModelFileText}" x:Name="ModelFileText" Foreground="White"/>
-			<TextBox Text=""
+			<TextBox Text="{Binding ModelFileEntryText}"
 					x:Name="ModelFileEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
@@ -22,7 +22,7 @@
 					<TextBlock Text="{Binding InferenceThreadsText}"
 							 x:Name="InferenceThreadsText"
 							 Foreground="White"/>
-					<TextBox Text=""
+					<TextBox Text="{Binding InferenceThreadsEntryText}"
 							x:Name="InferenceThreadsEntryText"
 							Background="#2D2D2D"
 							Foreground="White"/>
@@ -36,19 +36,29 @@
 						<ComboBoxItem>ONNX</ComboBoxItem>
 					</ComboBox>
 				</StackPanel>
-
-				<CheckBox Grid.Column="2"
-						 Content="{Binding UseGPUText}"
-						 x:Name="UseGPUText"
-						 IsChecked="True"
-						 Foreground="White"
-						 VerticalAlignment="Bottom"/>
 			</Grid>
+
+			<StackPanel Grid.Column="0" Spacing="5">
+				<CheckBox Grid.Column="2"
+					 Content="{Binding UseGPUText}"
+					 x:Name="UseGPUText"
+					 IsChecked="{Binding UseGPU}"
+					 Foreground="White"
+					 VerticalAlignment="Bottom"/>
+
+				<TextBlock Text="{Binding GPUIndexText}"
+					 x:Name="GPUIndexText"
+					 Foreground="White"/>
+				<TextBox Text="{Binding GpuIndexEntryText}"
+					 x:Name="GpuIndexEntryText"
+					 Background="#2D2D2D"
+					 Foreground="White"/>
+			</StackPanel>
 
 			<TextBlock Text="{Binding ModelOutputMultiplierText}"
 					 x:Name="ModelOutputMultiplierText"
 					 Foreground="White"/>
-			<TextBox Text=""
+			<TextBox Text="{Binding ModelOutputMultiplierEntryText}"
 					x:Name="ModelOutputMultiplierEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
@@ -56,7 +66,7 @@
 			<TextBlock Text="{Binding CalibrationDeadzoneText}"
 					 x:Name="CalibrationDeadzoneText"
 					 Foreground="White"/>
-			<TextBox Text=""
+			<TextBox Text="{Binding CalibrationDeadzoneEntryText}"
 					x:Name="CalibrationDeadzoneEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
@@ -72,7 +82,7 @@
 					<TextBlock Text="{Binding MinFrequencyCutoffText}"
 							 x:Name="MinFrequencyCutoffText"
 							 Foreground="White"/>
-					<TextBox Text=""
+					<TextBox Text="{Binding MinFrequencyCutoffEntryText}"
 							x:Name="MinFrequencyCutoffEntryText"
 							Background="#2D2D2D"
 							Foreground="White"/>
@@ -82,7 +92,7 @@
 					<TextBlock Text="{Binding SpeedCoefficientText}"
 							 x:Name="SpeedCoefficientText"
 							 Foreground="White"/>
-					<TextBox Text=""
+					<TextBox Text="{Binding SpeedCoefficientEntryText}"
 							x:Name="SpeedCoefficientEntryText"
 							Background="#2D2D2D"
 							Foreground="White"/>
