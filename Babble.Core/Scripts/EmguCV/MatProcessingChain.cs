@@ -16,14 +16,28 @@ public class MatProcessingChain : IDisposable
 
     public Mat Result => _currentMat ?? throw new InvalidOperationException("No processing has been started");
     
-    public MatProcessingChain StartWith(byte[] frameData, (int width, int height) dimensions)
+    public MatProcessingChain StartWith(Mat frameData, (int width, int height) dimensions)
     {
-        // We always pass in a "Rgb888x" image, 1 byte per pixel formatted
         _currentMat = new Mat(dimensions.width, dimensions.height, DepthType.Cv8U, 1);
-        _matsToDispose.Add(_currentMat);
-        var matBytes = _currentMat.DataPointer;
-        Marshal.Copy(frameData, 0, matBytes, frameData.Length);
 
+        // Previously, Captures always passed in a "Rgb888x" image, 1 byte per pixel.
+        // This was problematic for a couple of reasons. It mainly caused confusion, so 
+        // Insetad we do the Mat conversion here because we aren't sadists.
+
+        // _matsToDispose.Add(_currentMat);
+        // var matBytes = _currentMat.DataPointer;
+        // Marshal.Copy(frameData, 0, matBytes, frameData.Length);
+
+        if (frameData.NumberOfChannels != 3)
+        {
+            throw new InvalidOperationException("Input Mat must be in BGR format!");
+        }
+
+        var grayMat = new Mat();
+        _matsToDispose.Add(grayMat);
+        CvInvoke.CvtColor(frameData, grayMat, ColorConversion.Bgr2Gray);
+
+        _currentMat = grayMat;
         return this;
     }
 
@@ -107,7 +121,7 @@ public class MatProcessingChain : IDisposable
             x + width > _currentMat.Cols || y + height > _currentMat.Rows)
         {
             throw new ArgumentException($"Invalid crop parameters: x={x}, y={y}, width={width}, height={height}. " +
-                                      $"Image size is {_currentMat.Cols}x{_currentMat.Rows}");
+                                        $"Image size is {_currentMat.Cols}x{_currentMat.Rows}");
         }
 
         var rect = new Rectangle(x, y, width, height);

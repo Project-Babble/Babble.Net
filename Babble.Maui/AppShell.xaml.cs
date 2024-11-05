@@ -20,7 +20,7 @@ public partial class AppShell : Shell, ILocalizable
             if (!await CheckPermissions())
             {
                 await Toast.Make("Not all permissions were accepted. Application will close.").Show();
-                Application.Current.Quit();
+                Application.Current!.Quit();
             }
         });
 

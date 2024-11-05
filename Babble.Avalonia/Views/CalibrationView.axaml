@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Babble.Avalonia.CalibrationView"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+		<StackPanel Spacing="5">
+			<Grid ColumnDefinitions="Auto,*">
+				<TextBlock Text="Calibration Mode:"
+						 Grid.Column="0"
+						 Foreground="White"
+						 VerticalAlignment="Center"/>
+				<ComboBox Grid.Column="1"
+						SelectedIndex="0"
+						Background="#2D2D2D"
+						Foreground="White">
+					<ComboBoxItem>Neutral</ComboBoxItem>
+				</ComboBox>
+			</Grid>
+
+			<Grid ColumnDefinitions="*,2*,*" Margin="0,10">
+				<TextBlock Text="Left"
+						 Grid.Column="0"
+						 Foreground="White"
+						 HorizontalAlignment="Center"/>
+				<TextBlock Text="Shape"
+						 Grid.Column="1"
+						 Foreground="White"
+						 HorizontalAlignment="Center"/>
+				<TextBlock Text="Right"
+						 Grid.Column="2"
+						 Foreground="White"
+						 HorizontalAlignment="Center"/>
+			</Grid>
+
+			<StackPanel Orientation="Horizontal"
+					  Spacing="10"
+					  HorizontalAlignment="Center"
+					  Margin="0,10,0,0">
+				<Button Content="Reset Min"
+						Background="#4CAF50"
+						Foreground="White"/>
+				<Button Content="Reset Max"
+						Background="#4CAF50"
+						Foreground="White"/>
+			</StackPanel>
+		</StackPanel>
+	</Border>
+</UserControl>

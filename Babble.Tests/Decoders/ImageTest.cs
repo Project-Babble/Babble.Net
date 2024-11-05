@@ -40,10 +40,9 @@ public class ImageCaptureTests : IDisposable
     {
         // Arrange
         Assert.True(_connector.Capture.StartCapture());
-        _connector.WaitForCamera();
 
         // Act
-        float[] frameData = _connector.GetFrameData();
+        float[] frameData = _connector.ExtractFrameData();
 
         // Assert
         Assert.NotNull(frameData);
@@ -60,7 +59,7 @@ public class ImageCaptureTests : IDisposable
 
         // Act/Assert
         Assert.Throws<FileNotFoundException>(() =>
-            _connector.GetFrameData());
+            _connector.ExtractFrameData());
     }
 
     [Fact]

@@ -1,4 +1,6 @@
-﻿namespace Babble.Core.Scripts.Decoders;
+﻿using Emgu.CV;
+
+namespace Babble.Core.Scripts.Decoders;
 
 /// <summary>
 /// Wrapper class for EmguCV. We use this class when we know our camera isn't a:
@@ -10,9 +12,9 @@ public class DummyCapture : Capture
 {
     public override string Url { get; set; }
 
-    public override byte[] Frame { get => EmptyFrame; }
+    public override Mat Frame { get => EmptyMat; }
 
-    public override (int width, int height) Dimensions => FrameDimensions;
+    public override (int width, int height) Dimensions => DefaultFrameDimensions;
 
     public override bool IsReady { get; set; }
 

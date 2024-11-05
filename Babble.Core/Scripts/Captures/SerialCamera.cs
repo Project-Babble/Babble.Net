@@ -1,4 +1,5 @@
-﻿using System.IO.Ports;
+﻿using Emgu.CV;
+using System.IO.Ports;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -19,7 +20,7 @@ public class SerialCamera : Capture, IDisposable
     private bool _isDisposed;
 
     public override string Url { get; set; }
-    public override byte[] Frame => GetNextFrame();
+    public override Mat Frame => GetNextFrame();
     public override (int width, int height) Dimensions => (240, 240);
     public override bool IsReady { get; set; }
 
@@ -63,9 +64,9 @@ public class SerialCamera : Capture, IDisposable
         }
     }
 
-    private byte[] GetNextFrame()
+    private Mat GetNextFrame()
     {
-        if (!IsReady || !_serialPort.IsOpen) return Array.Empty<byte>();
+        if (!IsReady || !_serialPort.IsOpen) return EmptyMat;
 
         try
         {
@@ -75,7 +76,7 @@ public class SerialCamera : Capture, IDisposable
                 var (start, jpegSize) = GetNextPacketBounds();
                 if (start == -1 || jpegSize == -1)
                 {
-                    return Array.Empty<byte>();
+                    return EmptyMat;
                 }
 
                 // Create a new array exactly sized for the JPEG data
@@ -90,7 +91,9 @@ public class SerialCamera : Capture, IDisposable
                     // Reset buffer position for next frame
                     _bufferPosition = 0;
                     IsReady = true;
-                    return jpegData;
+                    var jpegMat = new Mat();
+                    CvInvoke.Imdecode(jpegData, Emgu.CV.CvEnum.ImreadModes.Color, jpegMat);
+                    return jpegMat;
                 }
 
                 // If we didn't find valid JPEG data, reset and return null

@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Babble.Avalonia.CamView"
+             xmlns:vm="clr-namespace:Babble.Avalonia"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+
+	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+		<StackPanel Spacing="5">
+			<TextBlock Text="Camera Address" Foreground="White"/>
+			<TextBox Text="COM6" Background="#2D2D2D" Foreground="White"/>
+			<Button Content="Save and Restart Tracking"
+                    Background="#4CAF50"
+                    Foreground="White"/>
+			<Image x:Name="MouthWindow"
+                   Source="{Binding MouthBitmap}"
+                   Grid.Column="0"
+                   Grid.Row="0"
+                   Stretch="None"/>
+			<StackPanel Orientation="Horizontal" Spacing="5">
+				<Button Content="Tracking Mode"
+                        Background="#4CAF50"
+                        Foreground="White"/>
+				<Button Content="Cropping Mode"
+                        Background="#4CAF50"
+                        Foreground="White"/>
+			</StackPanel>
+			<TextBlock Text="Rotation" Foreground="White"/>
+			<Slider Maximum="360" Value="0"/>
+			<StackPanel Orientation="Horizontal" Spacing="5">
+				<Button Content="Start Calibration"
+                        Background="#4CAF50"
+                        Foreground="White"/>
+				<Button Content="Stop Calibration"
+                        Background="#4CAF50"
+                        Foreground="White"/>
+			</StackPanel>
+			<CheckBox Content="Enable Calibration"
+                      Foreground="White"
+                      IsChecked="True"/>
+			<TextBlock Text="Mode: Camera Connecting" Foreground="White"/>
+			<StackPanel Orientation="Horizontal" Spacing="10">
+				<CheckBox Content="Vertical Flip" Foreground="White"/>
+				<CheckBox Content="Horizontal Flip" Foreground="White"/>
+			</StackPanel>
+		</StackPanel>
+	</Border>
+</UserControl>

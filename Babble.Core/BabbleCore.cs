@@ -3,6 +3,8 @@ using Babble.Core.Scripts;
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Scripts.EmguCV;
 using Babble.Core.Settings;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using System.Reflection;
@@ -11,17 +13,14 @@ namespace Babble.Core;
 
 /// <summary>
 /// The singleton entrypoint for our library
-/// The EmguCV CUDA runtime BLOWS UP how much ram we use?? Like 150mb to 1.2GB!!
 /// </summary>
 public class BabbleCore
 {
-    private static readonly HashSet<string> Whitelist = new(StringComparer.OrdinalIgnoreCase) { "capture_source" };
-
     public static BabbleCore Instance { get; private set; }
 
     public BabbleSettings Settings { get; private set; }
 
-    public ILogger Logger { get; private set; }
+    internal ILogger Logger { get; private set; }
     
     private PlatformConnector _platformConnector;
     private InferenceSession _session;
@@ -34,24 +33,25 @@ public class BabbleCore
     }
 
     private BabbleCore()
-    {
-        //var dummyCamera = DeviceEnumerator.EnumerateCameras(out var cameraMap) ?
-        //    cameraMap.ElementAt(Random.Shared.Next(cameraMap.Count)).Key.ToString() : "0";
-        
+    {       
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
 
         Logger = factory.CreateLogger(nameof(BabbleCore));
         Settings = new BabbleSettings();
-        Settings.OnUpdate += ConfigureCaptureSource;
-
-        // LocaleManager.Initialize(_lang);
+        Settings.OnUpdate += (setting) =>
+        {
+            if (setting == "capture_source")
+            {
+                _platformConnector!.Terminate();
+                ConfigurePlatformConnector();
+            }
+        };
     }
     
-
     /// <summary>
-    /// Big bang. True to load settings, false to use default.
+    /// Big bang. True to load saved settings, false to use default ones.
     /// </summary>
-    /// <param name="settings"></param>
+    /// <param name="loadConfig">Load saved config, else supply defaults.</param>
     /// <exception cref="InvalidOperationException"></exception>
     public void Start(bool loadConfig = true)
     {
@@ -66,9 +66,8 @@ public class BabbleCore
         }
     }
 
-
     /// <summary>
-    /// Big bang, but with custom parameters.
+    /// Big bang, but with custom BabbleSettings.
     /// </summary>
     /// <param name="settings"></param>
     /// <exception cref="InvalidOperationException"></exception>
@@ -87,10 +86,11 @@ public class BabbleCore
 
         // TODO Support a multi-model system
         // For the time being one model is enough
+        // Model manifest on Github?
         const string modelName = "model.onnx";
         string modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
 
-        // Extract the embedded model
+        // Extract the embedded model if it isn't already present
         if (!File.Exists(modelPath))
         {
             using var stm = Assembly
@@ -111,8 +111,9 @@ public class BabbleCore
             }
         }
 
-        SessionOptions sessionOptions = ParseSettings();
-        ConfigurePlatformSpecificGpu(sessionOptions);
+        SessionOptions sessionOptions = SetupSessionOptions();
+
+        ConfigurePlatformSpecificGPU(sessionOptions);
         ConfigurePlatformConnector();
 
         _session = new InferenceSession(modelPath, sessionOptions);
@@ -120,7 +121,6 @@ public class BabbleCore
         _isRunning = true;
 
         Logger.LogInformation("Babble.Core started.");
-
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class BabbleCore
         var arKitExpressions = Utils.ARKitExpressions;
 
         // Camera not ready, or connecting to new source
-        var data = _platformConnector.GetFrameData();
+        var data = _platformConnector.ExtractFrameData();
         if (data is null)
         {
             return false;
@@ -197,14 +197,18 @@ public class BabbleCore
             return false;
         }
 
-        if (_platformConnector.Capture.Frame.Length == 0)
-        {
-            return false;
-        }
-
-        image = _platformConnector.Capture.Frame;
         dimensions = _platformConnector.Capture.Dimensions;
-
+        if (_platformConnector.Capture.Frame.NumberOfChannels != 1)
+        {
+            using var grayMat = new Mat();
+            CvInvoke.CvtColor(_platformConnector.Capture.Frame, grayMat, ColorConversion.Bgr2Gray);
+            image = grayMat.GetRawData();
+        }
+        else
+        {
+            image = _platformConnector.Capture.Frame.GetRawData();
+        }
+        
         return true;
     }
 
@@ -224,8 +228,12 @@ public class BabbleCore
         _platformConnector.Terminate();
         Logger.LogInformation("Babble.Core stopped");
     }
-    
-    private SessionOptions ParseSettings()
+
+    /// <summary>
+    /// Make our SessionOptions *fancy*
+    /// </summary>
+    /// <returns></returns>
+    private SessionOptions SetupSessionOptions()
     {
         // Random environment variable(s) to speed up webcam opening on the MSMF backend.
         // https://github.com/opencv/opencv/issues/17687
@@ -242,13 +250,15 @@ public class BabbleCore
         sessionOptions.EnableMemoryPattern = true;
         return sessionOptions;
     }
-    
+
+    /// <summary>
+    /// Creates the proper video streaming classes based on the platform we're deploying to.
+    /// EmguCV doesn't have support for VideoCapture on Android, iOS, or UWP
+    /// We have a custom implementations for IP Cameras, the de-facto use case on mobile
+    /// As well as SerialCameras (not tested on mobile yet)
+    /// </summary>
     private void ConfigurePlatformConnector()
     {
-        // Creates the proper video streaming classes based on the platform we're deploying to.
-        // EmguCV doesn't have support for VideoCapture on Android, iOS, or UWP
-        // We have a custom implementations for IP Cameras, the de-facto use case on mobile
-        // As well as SerialCameras (not tested on mobile yet)
         if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
         {
             _platformConnector = new MobileConnector(Settings.Cam.CaptureSource);
@@ -263,47 +273,39 @@ public class BabbleCore
         _platformConnector.Initialize();
     }
 
-    private void ConfigureCaptureSource(string setting)
+    /// <summary>
+    /// Per-platform hardware accel. detection/activation
+    /// </summary>
+    /// <param name="sessionOptions"></param>
+    private void ConfigurePlatformSpecificGPU(SessionOptions sessionOptions)
     {
-        if (Whitelist.Contains(setting))
+        if (Settings.GetSetting<bool>("gui_use_gpu"))
         {
-            _platformConnector.Terminate();
-            ConfigurePlatformConnector();
-        }
-    }
-
-    private void ConfigurePlatformSpecificGpu(SessionOptions options)
-    {
-        try
-        {
-            if (Settings.GetSetting<bool>("gui_use_gpu"))
+            if (OperatingSystem.IsAndroid())
             {
-                if (OperatingSystem.IsAndroid())
-                {
-                    options.AppendExecutionProvider_Nnapi();
-                }
-                else if (OperatingSystem.IsIOS() || 
-                         OperatingSystem.IsMacCatalyst() || 
-                         OperatingSystem.IsMacOS() || 
-                         OperatingSystem.IsWatchOS() || 
-                         OperatingSystem.IsTvOS())
-                {
-                    options.AppendExecutionProvider_CoreML();
-                }
-                else if (RuntimeDetector.IsRuntimeSupported(Runtime.CUDA))
-                {
-                    var gpuIndex = Settings.GetSetting<int>("gui_gpu_index");
-                    options.AppendExecutionProvider_CUDA(gpuIndex);
-                }
+                // This will be deprecated in Android 15+
+                // EmguCV TF might be a good option here
+                sessionOptions.AppendExecutionProvider_Nnapi();
             }
-            else
+            else if (OperatingSystem.IsIOS() ||
+                     OperatingSystem.IsMacCatalyst() ||
+                     OperatingSystem.IsMacOS() ||
+                     OperatingSystem.IsWatchOS() ||
+                     OperatingSystem.IsTvOS())
             {
-                options.AppendExecutionProvider_CPU();
+                sessionOptions.AppendExecutionProvider_CoreML();
+            }
+            else if (RuntimeDetector.IsRuntimeSupported(Runtime.CUDA))
+            {
+                // The EmguCV CUDA runtime BLOWS UP how much ram we use?!
+                // Like 150mb to 1.2GB!!
+                var gpuIndex = Settings.GetSetting<int>("gui_gpu_index");
+                sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
             }
         }
-        catch (Exception ex) 
+        else
         {
-            Logger.LogError(ex.Message);
+            sessionOptions.AppendExecutionProvider_CPU();
         }
     }
 }

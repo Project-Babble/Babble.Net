@@ -9,15 +9,12 @@ public class MobileConnector : PlatformConnector
     public MobileConnector(string Url) : base(Url)
     {
     }
-
-    /// <summary>
-    /// Always use IPCameraCapture on mobile
-    /// </summary>
+    
     public override void Initialize()
     {
+        // Always uses IPCameraCapture on mobile
         base.Initialize();
         Capture = new IPCameraCapture(Url);
         Capture.StartCapture();
-        // WaitForCamera();
     }
 }

@@ -85,7 +85,7 @@ public class SerialCameraTests : IDisposable
             // Act
             _camera.StartCapture();
             await Task.Delay(1000); // Wait for potential frame capture
-            byte[] updatedFrame = _camera.Frame;
+            var updatedFrame = _camera.Frame;
 
             // Assert
             // In real testing with actual hardware or mocks,

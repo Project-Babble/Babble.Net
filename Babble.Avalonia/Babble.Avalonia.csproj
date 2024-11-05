@@ -3,6 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -14,11 +15,13 @@
     <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Rug.Osc" Version="1.2.5" />
+    <PackageReference Include="Meadow.Foundation" Version="1.2" />
+    <PackageReference Include="Meadow.Linux" Version="1.2" />
+    <PackageReference Include="Meadow.Windows" Version="1.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,14 +29,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Locale\Strings\English\locale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Locale\Strings\OwO\locale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Locale\Strings\Pirate Speak\locale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Compile Update="Views\About.axaml.cs">
+      <DependentUpon>About.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CalibrationView.axaml.cs">
+      <DependentUpon>CalibrationView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\SettingsView.axaml.cs">
+      <DependentUpon>SettingsView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\AlgoView.axaml.cs">
+      <DependentUpon>AlgoView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\CamView.axaml.cs">
+      <DependentUpon>CamView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

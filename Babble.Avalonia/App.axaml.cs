@@ -1,27 +1,34 @@
-﻿using Avalonia;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
-using Babble.Core.Scripts;
 using Babble.OSC;
-using System.Collections.Generic;
-using System.Threading;
+using Meadow;
+using Meadow.Pinouts;
 
 namespace Babble.Avalonia;
 
-public partial class App : Application
+public partial class App : AvaloniaMeadowApplication<Linux<RaspberryPi>>
 {
     private static readonly HashSet<string> Whitelist = ["gui_osc_location", "gui_osc_address", "gui_osc_port", "gui_osc_receiver_port"];
     private BabbleOSC _sender;
     private Thread _thread;
 
-    public App()
+    public override void Initialize()
     {
+        AvaloniaXamlLoader.Load(this);
+        LoadMeadowOS();
+
         BabbleCore.Instance.Start();
-        BabbleCore.Instance.Settings.OnUpdate += OnSettingsUpdate;
+        BabbleCore.Instance.Settings.OnUpdate += OnUpdate;
 
         var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
         var remotePort = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
@@ -30,13 +37,29 @@ public partial class App : Application
         _thread.Start();
     }
 
-    public override void Initialize()
+    public override Task InitializeMeadow()
     {
-        AvaloniaXamlLoader.Load(this);
+        var r = Resolver.Services.Get<IMeadowDevice>();
+
+        if (r == null)
+        {
+            Resolver.Log.Info("IMeadowDevice is null");
+        }
+        else
+        {
+            Resolver.Log.Info($"IMeadowDevice is {r.GetType().Name}");
+        }
+
+        return Task.CompletedTask;
+
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // Line below is needed to remove Avalonia data validation.
+        // Without this line you will get duplicate validations from both Avalonia and CT
+        BindingPlugins.DataValidators.RemoveAt(0);
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow
@@ -55,7 +78,7 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void OnSettingsUpdate(string name)
+    private void OnUpdate(string name)
     {
         if (Whitelist.Contains(name))
         {
@@ -80,7 +103,7 @@ public partial class App : Application
                 BabbleOSC.Expressions.SetByKey1(exp.Key, exp.Value);
 
             End:
-            Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
+            Thread.Sleep(10);
         }
     }
 }

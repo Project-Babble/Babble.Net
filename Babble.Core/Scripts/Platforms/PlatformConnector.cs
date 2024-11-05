@@ -9,6 +9,9 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public abstract class PlatformConnector
 {
+    /// <summary>
+    /// The path to where the "data" lies
+    /// </summary>
     public string Url { get; set; }
 
     /// <summary>
@@ -32,39 +35,27 @@ public abstract class PlatformConnector
     }
 
     /// <summary>
-    /// Converts our raw frame byte[] into something Babble can understand
+    /// Converts Capture.Frame into something Babble can understand
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public float[] GetFrameData()
+    public float[] ExtractFrameData()
     {
-        try
+        // Fail *fast*
+        if (Capture is null)
         {
-            // Fail fast
-            if (Capture is null)
-            {
-                return Array.Empty<float>();
-            }
-            if (!Capture.IsReady)
-            {
-                return Array.Empty<float>();
-            }
-            if (Capture.Frame is null)
-            {
-                return Array.Empty<float>();
-            }
-            if (Capture.Frame.Length == 0)
-            {
-                return Array.Empty<float>();
-            }
+            return Array.Empty<float>();
         }
-        catch
+        if (!Capture.IsReady)
+        {
+            return Array.Empty<float>();
+        }
+        if (Capture.Frame is null)
         {
             return Array.Empty<float>();
         }
 
         using var processingChain = new MatProcessingChain();
 
-        // Get ROI settings
         var roiX = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_x");
         var roiY = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_y");
         var roiWidth = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_w");
@@ -73,21 +64,20 @@ public abstract class PlatformConnector
         var useRedChannel = BabbleCore.Instance.Settings.GetSetting<bool>("gui_use_red_channel");
 
         // Process the image through our chain of operations
-        // In IPCameraCapture, the frame is passed in as a 640x480 1 byte per pixel
         using Mat resultMat = processingChain
             .StartWith(Capture.Frame, Capture.Dimensions)
             .UseRedChannel(useRedChannel)
             .Rotate(rotationAngle)
-            .Crop(roiX, roiY, roiWidth, roiHeight)
+            // .Crop(roiX, roiY, roiWidth, roiHeight)
             .Resize(new System.Drawing.Size(256, 256))
             .ApplyFlip("gui_vertical_flip", FlipType.Vertical)
             .ApplyFlip("gui_horizontal_flip", FlipType.Horizontal)
             .Result;
 
-        // Verify That the matrix is in continous memory layout - xlinka
+        // Verify That the matrix is in continuous memory layout - xlinka
         if (!resultMat.IsContinuous)
         {
-            throw new InvalidOperationException("Image Matrix is not continious in memory layout");
+            throw new InvalidOperationException("Image Matrix is not continuous in memory layout");
         }
 
         var finalMat = new Mat();
@@ -110,7 +100,7 @@ public abstract class PlatformConnector
     /// Shuts down any and all current Capture sources
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public void Terminate()
+    public virtual void Terminate()
     {
         if (Capture is null)
         {
@@ -118,16 +108,5 @@ public abstract class PlatformConnector
         }
 
         Capture.StopCapture();
-    }
-
-    /// <summary>
-    /// Blocks this thread until Capture's Camera is ready. No timeout ATM
-    /// </summary>
-    public void WaitForCamera()
-    {
-        //while (!Capture.IsReady)
-        //{
-        //    Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
-        //}
     }
 }

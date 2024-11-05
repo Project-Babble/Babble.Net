@@ -10,7 +10,7 @@ public class ImageCapture : Capture
         
     }
 
-    public override byte[] Frame
+    public override Mat Frame
     {
         get
         {
@@ -18,7 +18,7 @@ public class ImageCapture : Capture
             {
                 if (CvInvoke.HaveImageReader(Url))
                 {
-                    return CvInvoke.Imread(Url, ImreadModes.Grayscale).GetRawData();
+                    return CvInvoke.Imread(Url, ImreadModes.Color);
                 }
             }
 
@@ -34,7 +34,7 @@ public class ImageCapture : Capture
             {
                 if (CvInvoke.HaveImageReader(Url))
                 {
-                    var mat = CvInvoke.Imread(Url, ImreadModes.Grayscale);
+                    var mat = CvInvoke.Imread(Url, ImreadModes.Color);
                     return (mat.Width, mat.Height);
                 }
             }

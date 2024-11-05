@@ -6,8 +6,6 @@ public partial class MainView : UserControl
 {
     public MainView()
     {
-
-        // Not much to be done here
         InitializeComponent();
     }
 }

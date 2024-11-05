@@ -13,12 +13,12 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class IPCameraCapture : Capture
 {
-    public override byte[] Frame { get => finalFrameBuffer; }
+    public override Mat Frame { get => _frame; }
     public override (int width, int height) Dimensions => (640, 480);
     public override bool IsReady { get; set; }
     public override string Url { get; set; }
 
-    private byte[] finalFrameBuffer;
+    private Mat _frame;
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -131,44 +131,18 @@ public class IPCameraCapture : Capture
             // JPEG picture end ?
             if (previous == picMarker && current == picEnd)
             {
-                // Using a memorystream this way prevent arrays copy and allocations
+                // Using a memory stream this way prevent arrays copy and allocations
                 using (var s = new MemoryStream(frameBuffer, 0, frameIdx))
                 {
                     try
                     {
-                        var trimmedBuffer = TrimEnd(frameBuffer);
-
-                        // Desktop mode -This code
-                        var mat = new Mat();
-                        CvInvoke.Imdecode(trimmedBuffer, ImreadModes.Color, mat);
-                        var grayMat = new Mat();
-                        CvInvoke.CvtColor(mat, grayMat, ColorConversion.Bgr2Gray);
-                        finalFrameBuffer = grayMat.GetRawData();
-
-                        //var skbitmap = SKBitmap.Decode(trimmedBuffer);
-
-                        //var pixelSpan = skbitmap.Pixels;
-
-                        //// Allocate buffer for grayscale image
-                        //var grayscaleBuffer = new byte[Dimensions.width * Dimensions.height];
-
-                        //// Process each pixel directly from RGB8888 to grayscale Rgb888x
-                        //for (int i = 0; i < pixelSpan.Length; i++)
-                        //{
-                        //    // Extract RGB values from the RGB888 format
-                        //    byte red = pixelSpan[i].Red;
-                        //    byte green = pixelSpan[i].Green;
-                        //    byte blue = pixelSpan[i].Blue;
-
-                        //    // Calculate grayscale value
-                        //    grayscaleBuffer[i] = (byte)(0.3 * red + 0.59 * green + 0.11 * blue);
-                        //}
-
-                        // finalFrameBuffer = grayscaleBuffer;
+                        using var mat = new Mat();
+                        CvInvoke.Imdecode(TrimEnd(frameBuffer), ImreadModes.Color, mat);
+                        _frame = mat;
                     }
                     catch (Exception e)
                     {
-                        // We dont care about badly decoded pictures
+                        // We don't care about badly decoded pictures
                     }
                 }
 

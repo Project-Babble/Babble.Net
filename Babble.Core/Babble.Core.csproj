@@ -15,6 +15,15 @@
     <PackageReference Include="Emgu.CV.Bitmap" Version="4.9.0.5494" />
     <PackageReference Include="Emgu.CV.runtime.mini.windows" Version="4.9.0.5494" />
     <PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />
+    <PackageReference Include="Emgu.TF" Version="2.16.1.1620" />
+    <PackageReference Include="Emgu.TF.Lite" Version="2.16.1.1623" />
+    <PackageReference Include="Emgu.TF.Lite.Models" Version="2.16.1.1623" />
+    <PackageReference Include="Emgu.TF.Lite.runtime.mac" Version="2.8.0.1418" />
+    <PackageReference Include="Emgu.TF.Lite.runtime.windows" Version="2.16.1.1623" />
+    <PackageReference Include="Emgu.TF.Models" Version="2.16.1.1620" />
+    <PackageReference Include="Emgu.TF.Protobuf" Version="2.16.1.1620" />
+    <PackageReference Include="Emgu.TF.runtime.mac" Version="2.15.0.1583" />
+    <PackageReference Include="Emgu.TF.runtime.windows" Version="2.16.1.1620" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="8.0.1" />

@@ -11,10 +11,9 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class EmguCVCapture : Capture
 {
-
     private static readonly object lockObject = new();
 
-    public override byte[] Frame
+    public override Mat Frame
     {
         get
         {
@@ -27,16 +26,14 @@ public class EmguCVCapture : Capture
                         var frame = _videoCapture.QueryFrame();
                         if (frame is not null)
                         {
-                            var recoloredFrame = new Mat();
-                            CvInvoke.CvtColor(frame, recoloredFrame, ColorConversion.Bgr2Gray);
-                            return recoloredFrame.GetRawData();
+                            return frame;
                         }
                     }
                 }
 
-                return EmptyFrame;
+                return EmptyMat;
             }
-        }
+        }   
     }
 
     public override (int width, int height) Dimensions
@@ -57,9 +54,9 @@ public class EmguCVCapture : Capture
                     }
                 }
 
-                return FrameDimensions;
+                return DefaultFrameDimensions;
             }
-        }
+        }  
     }
 
     public override bool IsReady { get; set; }
