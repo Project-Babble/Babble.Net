@@ -1,15 +1,17 @@
 using Avalonia.Controls;
+using Babble.Avalonia.ViewModels;
 
 namespace Babble.Avalonia;
 
 public partial class CalibrationView : UserControl
 {
-    public string LeftValue => "Welcome to Avalonia!";
-    public string ShapeName => "Welcome to Avalonia!";
-    public string RightValue => "Welcome to Avalonia!";
+    private readonly CalibrationViewModel _viewModel;
 
     public CalibrationView()
     {
         InitializeComponent();
+
+        _viewModel = new CalibrationViewModel();
+        DataContext = _viewModel;
     }
 }

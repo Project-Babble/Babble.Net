@@ -1,5 +1,6 @@
 using Babble.Core;
 using Babble.Maui.Locale;
+using Babble.Maui.Scripts;
 
 namespace Babble.Maui;
 
@@ -35,22 +36,22 @@ public partial class SettingsPage : ContentPage, ILocalizable
     public void Localize()
     {
         GeneralSettingsText.Text = LocaleManager.Instance["general.header"];
-        LocaleManager.SetLocalizedText(CheckForUpdatesText, "general.checkForUpdates", "general.tooltip");
-        LocaleManager.SetLocalizedText(GeneralSettingsText, "general.header");
-        LocaleManager.SetLocalizedText(CheckForUpdatesText, "general.checkForUpdates", "general.tooltip");
-        LocaleManager.SetLocalizedText(OSCSettingsText, "general.oscSettings");
-        LocaleManager.SetLocalizedText(LocationPrefixText, "general.locationPrefix", "general.locationTooltip");
-        LocaleManager.SetLocalizedText(IPAddressText, "general.address", "general.addressTooltip");
-        LocaleManager.SetLocalizedText(ReceiveFunctionsText, "general.receiver", "general.receiverTooltip");
-        LocaleManager.SetLocalizedText(ReceiverPortText, "general.receiverPort", "general.receiverPortTooltip");
-        LocaleManager.SetLocalizedText(RecalibrateAddressText, "general.recalibrate", "general.recalibrateTooltip");
-        LocaleManager.SetLocalizedText(RecalibrateAddressText, "general.recalibrate", "general.recalibrateTooltip");
+        LocaleExtensions.SetLocalizedText(CheckForUpdatesText, "general.checkForUpdates", "general.tooltip");
+        LocaleExtensions.SetLocalizedText(GeneralSettingsText, "general.header");
+        LocaleExtensions.SetLocalizedText(CheckForUpdatesText, "general.checkForUpdates", "general.tooltip");
+        LocaleExtensions.SetLocalizedText(OSCSettingsText, "general.oscSettings");
+        LocaleExtensions.SetLocalizedText(LocationPrefixText, "general.locationPrefix", "general.locationTooltip");
+        LocaleExtensions.SetLocalizedText(IPAddressText, "general.address", "general.addressTooltip");
+        LocaleExtensions.SetLocalizedText(ReceiveFunctionsText, "general.receiver", "general.receiverTooltip");
+        LocaleExtensions.SetLocalizedText(ReceiverPortText, "general.receiverPort", "general.receiverPortTooltip");
+        LocaleExtensions.SetLocalizedText(RecalibrateAddressText, "general.recalibrate", "general.recalibrateTooltip");
+        LocaleExtensions.SetLocalizedText(RecalibrateAddressText, "general.recalibrate", "general.recalibrateTooltip");
         UVCCameraSettingsText.Text = LocaleManager.Instance["general.uvcCameraSettings"];
-        LocaleManager.SetLocalizedText(UseRedChannelText, "general.useRedChannel", "general.useRedChannelTooltip");
-        LocaleManager.SetLocalizedText(XResText, "general.xResolution", "general.xResolutionTooltip");
-        LocaleManager.SetLocalizedText(YResText, "general.yResolution", "general.yResolutionTooltip");
-        LocaleManager.SetLocalizedText(FramerateText, "general.framerate", "general.framerateTooltip");
-        LocaleManager.SetLocalizedText(LanguagePickerText, "general.language", "general.languageTooltip");
+        LocaleExtensions.SetLocalizedText(UseRedChannelText, "general.useRedChannel", "general.useRedChannelTooltip");
+        LocaleExtensions.SetLocalizedText(XResText, "general.xResolution", "general.xResolutionTooltip");
+        LocaleExtensions.SetLocalizedText(YResText, "general.yResolution", "general.yResolutionTooltip");
+        LocaleExtensions.SetLocalizedText(FramerateText, "general.framerate", "general.framerateTooltip");
+        LocaleExtensions.SetLocalizedText(LanguagePickerText, "general.language", "general.languageTooltip");
     }
 
     public void OnCheckForUpdatesToggled(object sender, CheckedChangedEventArgs args)

@@ -14,8 +14,6 @@ public static class Utils
     /// </summary>
     private const int EXPECTED_SIZE = 256 * 256;
 
-    public const int THREAD_TIMEOUT_MS = 10;
-
     internal static readonly Dictionary<ARKitExpression, List<UnifiedExpression>> ExpressionMapping = new()
     {
         { ARKitExpression.CheekPuffLeft, new List<UnifiedExpression>() { UnifiedExpression.CheekPuffLeft } },

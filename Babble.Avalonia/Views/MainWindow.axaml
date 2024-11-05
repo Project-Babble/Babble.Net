@@ -17,19 +17,19 @@
 
 		<!-- Tab buttons -->
 		<TabControl Grid.Row="1" Margin="0,10,0,0">
-			<TabItem Header="Cam">
+			<TabItem Header="Cam" x:Name="CameraHeaderText">
 				<views:CamView/>
 			</TabItem>
-			<TabItem Header="Algo Settings">
+			<TabItem Header="Algo Settings" x:Name="AlgoHeaderText">
 				<views:AlgoView/>
 			</TabItem>
-			<TabItem Header="Setting">
+			<TabItem Header="Setting" x:Name="SettingsHeaderText">
 				<views:SettingsView/>
 			</TabItem>
-			<TabItem Header="Calibration">
+			<TabItem Header="Calibration" x:Name="CalibrationHeaderText">
 				<views:CalibrationView/>
 			</TabItem>
-			<TabItem Header="About">
+			<TabItem Header="About" x:Name="AboutHeaderText">
 				<views:About/>
 			</TabItem>
 		</TabControl>

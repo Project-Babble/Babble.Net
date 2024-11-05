@@ -22,7 +22,7 @@ public class MatProcessingChain : IDisposable
 
         // Previously, Captures always passed in a "Rgb888x" image, 1 byte per pixel.
         // This was problematic for a couple of reasons. It mainly caused confusion, so 
-        // Insetad we do the Mat conversion here because we aren't sadists.
+        // Instead we do the Mat conversion here because we aren't sadists.
 
         // _matsToDispose.Add(_currentMat);
         // var matBytes = _currentMat.DataPointer;

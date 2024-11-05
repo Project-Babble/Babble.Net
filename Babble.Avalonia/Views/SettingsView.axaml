@@ -7,26 +7,33 @@
 	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5">
 			<TextBlock Text="General Settings:"
+					 x:Name="GeneralSettingsText"
 					 Foreground="White"
 					 FontWeight="Bold"/>
 			<CheckBox Content="Check For Updates"
+					 x:Name="CheckForUpdatesText"
 					 Foreground="White"
-					 IsChecked="True"/>
+					 IsChecked="True"
+					 Margin="0,10,0,0"/>
 
 			<TextBlock Text="OSC Settings:"
+					 x:Name="OSCSettingsText"
 					 Foreground="White"
 					 FontWeight="Bold"
 					 Margin="0,10,0,0"/>
 
-			<TextBlock Text="Location Prefix:" Foreground="White"/>
+			<TextBlock Text="Location Prefix:" Margin="0,0,0,0" Foreground="White"/>
 			<TextBox Background="#2D2D2D" Foreground="White"/>
 
 			<Grid ColumnDefinitions="Auto,*">
 				<TextBlock Text="Address:"
+						 x:Name="AddressText"
 						 Grid.Column="0"
 						 Foreground="White"
+						 Margin="0,0,10,0"
 						 VerticalAlignment="Center"/>
-				<TextBox Text="127.0.0.1"
+				<TextBox Text=""
+						x:Name="AddressEntryText"
 						Grid.Column="1"
 						Background="#2D2D2D"
 						Foreground="White"/>
@@ -34,56 +41,65 @@
 
 			<Grid ColumnDefinitions="Auto,*">
 				<TextBlock Text="Port:"
+						 x:Name="PortText"
 						 Grid.Column="0"
 						 Foreground="White"
+						 Margin="0,0,10,0"
 						 VerticalAlignment="Center"/>
-				<TextBox Text="8888"
+				<TextBox Text=""
+						x:Name="PortEntryText"
 						Grid.Column="1"
 						Background="#2D2D2D"
 						Foreground="White"/>
 			</Grid>
 
-			<CheckBox Content="Receive functions" Foreground="White"/>
+			<CheckBox Content="Receive functions" x:Name="ReceiveFunctionsText" Foreground="White"/>
 
-			<TextBlock Text="Receiver Port:" Foreground="White"/>
-			<TextBox Text="9001"
+			<TextBlock Text="Receiver Port:" x:Name="ReceiverPortText" Foreground="White"/>
+			<TextBox Text=""
+					x:Name="ReceiverPortEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
-			<TextBlock Text="Recalibrate Address:" Foreground="White"/>
-			<TextBox Text="/avatar/parameters/babble_recalibrate"
+			<TextBlock Text="Recalibrate Address:" x:Name="RecalibrateAddressText" Foreground="White"/>
+			<TextBox Text=""
+					x:Name="RecalibrateAddressEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
 			<TextBlock Text="UVC Camera Settings:"
+					 x:Name="UVCCameraSettingsText"
 					 Foreground="White"
 					 FontWeight="Bold"
 					 Margin="0,10,0,0"/>
-			<CheckBox Content="Use Red Channel" Foreground="White"/>
+			<CheckBox Content="Use Red Channel" x:Name="UseRedChannelText" Foreground="White"/>
 
 			<Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto">
 				<TextBlock Text="X Resolution:"
+						 x:Name="XResolutionText"
 						 Grid.Column="0"
 						 Foreground="White"/>
-				<TextBox Text="0"
+				<TextBox Text=""
 						Grid.Row="1"
 						Grid.Column="0"
 						Background="#2D2D2D"
 						Foreground="White"/>
 
 				<TextBlock Text="Y Resolution:"
+						 x:Name="YResolutionText"
 						 Grid.Column="1"
 						 Foreground="White"/>
-				<TextBox Text="0"
+				<TextBox Text=""
 						Grid.Row="1"
 						Grid.Column="1"
 						Background="#2D2D2D"
 						Foreground="White"/>
 
 				<TextBlock Text="Framerate:"
+						 x:Name="FramerateText"
 						 Grid.Column="2"
 						 Foreground="White"/>
-				<TextBox Text="0"
+				<TextBox Text=""
 						Grid.Row="1"
 						Grid.Column="2"
 						Background="#2D2D2D"

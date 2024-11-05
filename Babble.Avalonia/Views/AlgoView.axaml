@@ -6,26 +6,30 @@
              mc:Ignorable="d">
 	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5">
-			<TextBlock Text="Model Settings:"
+			<TextBlock Text="{Binding ModelSettingsText}"
+					 x:Name="ModelSettingsText"
 					 Foreground="White"
 					 FontWeight="Bold"/>
 
-			<TextBlock Text="Model file:" Foreground="White"/>
-			<TextBox Text="Models/3MEFFB0E7MSE/"
+			<TextBlock Text="{Binding ModelFileText}" x:Name="ModelFileText" Foreground="White"/>
+			<TextBox Text=""
+					x:Name="ModelFileEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
 			<Grid ColumnDefinitions="*,*,Auto">
 				<StackPanel Grid.Column="0" Spacing="5">
-					<TextBlock Text="Inference Threads:"
+					<TextBlock Text="{Binding InferenceThreadsText}"
+							 x:Name="InferenceThreadsText"
 							 Foreground="White"/>
-					<TextBox Text="2"
+					<TextBox Text=""
+							x:Name="InferenceThreadsEntryText"
 							Background="#2D2D2D"
 							Foreground="White"/>
 				</StackPanel>
 
 				<StackPanel Grid.Column="1" Spacing="5">
-					<TextBlock Text="Runtime:" Foreground="White"/>
+					<TextBlock Text="{Binding RuntimeText}" x:Name="RuntimeText" Foreground="White"/>
 					<ComboBox SelectedIndex="0"
 							Background="#2D2D2D"
 							Foreground="White">
@@ -34,42 +38,52 @@
 				</StackPanel>
 
 				<CheckBox Grid.Column="2"
-						 Content="Use GPU"
+						 Content="{Binding UseGPUText}"
+						 x:Name="UseGPUText"
 						 IsChecked="True"
 						 Foreground="White"
 						 VerticalAlignment="Bottom"/>
 			</Grid>
 
-			<TextBlock Text="Model output multiplier:"
+			<TextBlock Text="{Binding ModelOutputMultiplierText}"
+					 x:Name="ModelOutputMultiplierText"
 					 Foreground="White"/>
-			<TextBox Text="1.0"
+			<TextBox Text=""
+					x:Name="ModelOutputMultiplierEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
-			<TextBlock Text="Calibration Deadzone:"
+			<TextBlock Text="{Binding CalibrationDeadzoneText}"
+					 x:Name="CalibrationDeadzoneText"
 					 Foreground="White"/>
-			<TextBox Text="-0.1"
+			<TextBox Text=""
+					x:Name="CalibrationDeadzoneEntryText"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
-			<TextBlock Text="One Euro Filter Parameters:"
+			<TextBlock Text="{Binding OneEuroFilterText}"
+					 x:Name="OneEuroFilterText"
 					 Foreground="White"
 					 FontWeight="Bold"
 					 Margin="0,10,0,0"/>
 
 			<Grid ColumnDefinitions="*,*">
 				<StackPanel Grid.Column="0" Spacing="5">
-					<TextBlock Text="Min Frequency Cutoff:"
+					<TextBlock Text="{Binding MinFrequencyCutoffText}"
+							 x:Name="MinFrequencyCutoffText"
 							 Foreground="White"/>
-					<TextBox Text="0.9"
+					<TextBox Text=""
+							x:Name="MinFrequencyCutoffEntryText"
 							Background="#2D2D2D"
 							Foreground="White"/>
 				</StackPanel>
 
 				<StackPanel Grid.Column="1" Spacing="5">
-					<TextBlock Text="Speed Coefficient:"
+					<TextBlock Text="{Binding SpeedCoefficientText}"
+							 x:Name="SpeedCoefficientText"
 							 Foreground="White"/>
-					<TextBox Text="0.9"
+					<TextBox Text=""
+							x:Name="SpeedCoefficientEntryText"
 							Background="#2D2D2D"
 							Foreground="White"/>
 				</StackPanel>

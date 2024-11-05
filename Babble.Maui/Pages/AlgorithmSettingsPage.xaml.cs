@@ -1,6 +1,6 @@
 using Babble.Core;
 using Babble.Maui.Locale;
-using Microsoft.Maui.Media;
+using Babble.Maui.Scripts;
 
 namespace Babble.Maui;
 
@@ -23,11 +23,10 @@ public partial class AlgorithmSettingsPage : ContentPage, ILocalizable
     public void Localize()
     {
         HeaderText.Text = LocaleManager.Instance["algorithm.header"];
-        LocaleManager.SetLocalizedText(InferenceThreadsText, "algorithm.inferenceThreads", "algorithm.inferenceThreadsTooltip");
-        LocaleManager.SetLocalizedText(RuntimeText, "algorithm.modelFile", "algorithm.modelFileTooptip");
-        // GPUSettingsText
-        LocaleManager.SetLocalizedText(UseGPUText, "algorithm.useGPU", "algorithm.useGPUTooltip");
-        LocaleManager.SetLocalizedText(GPUIndexText, "algorithm.GPUIndex", "algorithm.GPUIndexTooltip");
+        LocaleExtensions.SetLocalizedText(InferenceThreadsText, "algorithm.inferenceThreads", "algorithm.inferenceThreadsTooltip");
+        LocaleExtensions.SetLocalizedText(RuntimeText, "algorithm.modelFile", "algorithm.modelFileTooptip");
+        LocaleExtensions.SetLocalizedText(UseGPUText, "algorithm.useGPU", "algorithm.useGPUTooltip");
+        LocaleExtensions.SetLocalizedText(GPUIndexText, "algorithm.GPUIndex", "algorithm.GPUIndexTooltip");
     }
 
     public void OnInferenceThreadNumChanged(object sender, EventArgs args)

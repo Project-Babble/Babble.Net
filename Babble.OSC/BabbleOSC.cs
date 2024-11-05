@@ -1,9 +1,7 @@
 ﻿using Babble.Core;
 using Babble.Core.Scripts;
 using Rug.Osc;
-using System;
 using System.Net;
-using System.Threading;
 
 namespace Babble.OSC;
 
@@ -66,7 +64,7 @@ public partial class BabbleOSC
                 {
                     case OscSocketState.Connected:
                         foreach (var exp in Expressions.InnerKeys)
-                            _sender.Send(new OscMessage($"/{exp}", Expressions.GetByKey2(exp) * mul));
+                            _sender.Send(new OscMessage($"/avatar/parameters/{exp}", Expressions.GetByKey2(exp) * mul));
                         break;
                     case OscSocketState.Closed:
                         _sender.Close();
@@ -80,7 +78,7 @@ public partial class BabbleOSC
                 // Ignore network exceptions
             }
 
-            Thread.Sleep(Utils.THREAD_TIMEOUT_MS);
+            Thread.Sleep(10);
         }
     }
 

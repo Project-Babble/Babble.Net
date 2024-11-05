@@ -1,4 +1,4 @@
-﻿namespace Babble.Maui.Locale;
+﻿namespace Babble.Locale;
 
 using Babble.Core;
 using Newtonsoft.Json;
@@ -25,8 +25,7 @@ public class LocaleManager
         _currentLanguage = BabbleCore.Instance.Settings.GetSetting<string>("gui_language");
         LoadLanguages(Path.Combine(
             AppContext.BaseDirectory,
-            "Locale",
-            "Strings"
+            "Locale"
             ));
         ChangeLanguage(_currentLanguage);
     }
@@ -75,15 +74,6 @@ public class LocaleManager
                     Instance._strings[lang][$"{fileName}.{kvp.Key}"] = kvp.Value;
                 }
             }
-        }
-    }
-
-    public static void SetLocalizedText(Label textBlock, string localeKey, string? tooltipKey = null)
-    {
-        textBlock.Text = Instance[localeKey];
-        if (tooltipKey != null)
-        {
-            ToolTipProperties.SetText(textBlock, Instance[tooltipKey]);
         }
     }
 }

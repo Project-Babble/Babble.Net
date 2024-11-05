@@ -1,6 +1,6 @@
 using Babble.Core;
 using Babble.Maui.Locale;
-using Microsoft.Maui.Media;
+using Babble.Maui.Scripts;
 using SkiaSharp;
 using SkiaSharp.Views.Maui;
 using System.Runtime.InteropServices;
@@ -25,8 +25,8 @@ public partial class CameraPage : ContentPage, ILocalizable
 
     public void Localize()
     {
-        LocaleManager.SetLocalizedText(CameraAddressText, "camera.cameraAddress", "camera.cameraAddressTooltip");
-        SaveRestart.Text = LocaleManager.Instance["saveAndRestartTracking"];
+        LocaleExtensions.SetLocalizedText(CameraAddressText, "camera.cameraAddress", "camera.cameraAddressTooltip");
+        SaveRestart.Text = LocaleManager.Instance["camera.saveAndRestartTracking"];
     }
 
     public void OnPreviewCameraClicked(object sender, EventArgs args)

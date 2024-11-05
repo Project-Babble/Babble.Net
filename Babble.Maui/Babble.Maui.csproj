@@ -82,22 +82,8 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Babble.Core\Babble.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Locale\Strings\English\locale.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Locale\Strings\OwO\locale.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Locale\Strings\Pirate Speak\locale.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Pages\" />
+	  <ProjectReference Include="..\Babble.Localization\Babble.Localization.csproj" />
+	  <ProjectReference Include="..\Babble.OSC\Babble.OSC.csproj" />
 	</ItemGroup>
 
 </Project>

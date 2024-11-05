@@ -8,6 +8,7 @@
 		<StackPanel Spacing="5">
 			<Grid ColumnDefinitions="Auto,*">
 				<TextBlock Text="Calibration Mode:"
+						 x:Name="CalibrationModeText"
 						 Grid.Column="0"
 						 Foreground="White"
 						 VerticalAlignment="Center"/>
@@ -21,14 +22,17 @@
 
 			<Grid ColumnDefinitions="*,2*,*" Margin="0,10">
 				<TextBlock Text="Left"
+						 x:Name="LeftTitleText"
 						 Grid.Column="0"
 						 Foreground="White"
 						 HorizontalAlignment="Center"/>
 				<TextBlock Text="Shape"
+						 x:Name="ShapeTitleText"
 						 Grid.Column="1"
 						 Foreground="White"
 						 HorizontalAlignment="Center"/>
 				<TextBlock Text="Right"
+						 x:Name="RightTitleText"
 						 Grid.Column="2"
 						 Foreground="White"
 						 HorizontalAlignment="Center"/>
@@ -39,9 +43,11 @@
 					  HorizontalAlignment="Center"
 					  Margin="0,10,0,0">
 				<Button Content="Reset Min"
+						x:Name="ResetMinText"
 						Background="#4CAF50"
 						Foreground="White"/>
 				<Button Content="Reset Max"
+						x:Name="ResetMaxText"
 						Background="#4CAF50"
 						Foreground="White"/>
 			</StackPanel>
