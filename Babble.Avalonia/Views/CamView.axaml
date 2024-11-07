@@ -27,6 +27,7 @@
 					ToolTip.Tip="{Binding SaveAndRestartTrackingText}"
 					x:Name="SaveAndRestartTrackingText"
                     Background="#4CAF50"
+					Click="OnSaveAndRestartClicked"
                     Foreground="White"/>
 			<Image x:Name="MouthWindow"
                    Source="{Binding MouthBitmap}"
@@ -38,10 +39,12 @@
 						x:Name="TrackingModeText"
 						ToolTip.Tip="{Binding TrackingModeTextTooltip}"
                         Background="#4CAF50"
+						Click="OnTrackingModeClicked"
                         Foreground="White"/>
 				<Button Content="{Binding CroppingModeText}"
 						x:Name="CroppingModeText"
 						ToolTip.Tip="{Binding CroppingModeTextTooltip}"
+						Click="OnCroppingModeClicked"
                         Background="#4CAF50"
                         Foreground="White"/>
 			</StackPanel>
@@ -49,17 +52,19 @@
 			<Slider x:Name="RotationSlider" 
 					Minimum="0" 
 					Maximum="360" 
-					Value="0" />
+					Value="{Binding Rotation}" />
 			<StackPanel Orientation="Horizontal" Spacing="5">
 				<Button Content="{Binding StartCalibrationText}"
 						x:Name="StartCalibrationText"
 						ToolTip.Tip="{Binding StartCalibrationTextTooltip}"
                         Background="#4CAF50"
+						Click="StartCalibrationClicked"
                         Foreground="White"/>
 				<Button Content="{Binding StopCalibrationText}"
 						x:Name="StopCalibrationText"
 						ToolTip.Tip="{Binding StopCalibrationTextTooltip}"
                         Background="#4CAF50"
+						Click="StopCalibrationClicked"
                         Foreground="White"/>
 			</StackPanel>
 			<CheckBox Content="{Binding EnableCalibrationText}"

@@ -10,7 +10,7 @@ public class ImageCapture : Capture
         
     }
 
-    public override Mat Frame
+    public override Mat RawFrame
     {
         get
         {
@@ -24,6 +24,7 @@ public class ImageCapture : Capture
 
             throw new FileNotFoundException();
         }
+        set => throw new NotImplementedException();
     }
 
     public override (int width, int height) Dimensions

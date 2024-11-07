@@ -69,7 +69,7 @@ public class MatProcessingChain : IDisposable
         return this;
     }
 
-    public MatProcessingChain Rotate(int angle)
+    public MatProcessingChain Rotate(double angle)
     {
         EnsureCurrentMat();
 

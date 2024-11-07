@@ -49,23 +49,69 @@ public abstract class PlatformConnector
         {
             return Array.Empty<float>();
         }
-        if (Capture.Frame is null)
+        if (Capture.RawFrame is null)
+        {
+            return Array.Empty<float>();
+        }
+        if (Capture.RawFrame.GetRawData() is null)
         {
             return Array.Empty<float>();
         }
 
-        using var processingChain = new MatProcessingChain();
+        using Mat resultMat = TransformRawImage();
 
-        var roiX = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_x");
-        var roiY = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_y");
-        var roiWidth = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_w");
-        var roiHeight = BabbleCore.Instance.Settings.GetSetting<int>("roi_window_h");
-        var rotationAngle = BabbleCore.Instance.Settings.GetSetting<int>("rotation_angle");
-        var useRedChannel = BabbleCore.Instance.Settings.GetSetting<bool>("gui_use_red_channel");
+        using var finalMat = new Mat();
+        resultMat.ConvertTo(finalMat, DepthType.Cv32F);
+
+        // Convert to float array and normalize
+        float[] floatArray = new float[finalMat.Rows * finalMat.Cols];
+        finalMat.CopyTo(floatArray);
+
+        // Normalize pixel values to [0, 1]
+        for (int i = 0; i < floatArray.Length; i++)
+        {
+            floatArray[i] /= 255f;
+        }
+
+        return floatArray;
+    }
+    
+    public Mat TransformRawImage()
+    {
+        // If this method is called from above, then the below checks don't apply
+        // We need this in case we poll from Babble.Core.cs, in which the developer
+        // Just wants the frame data, not expression data
+
+        var emptyMat = Mat.Zeros(0, 0, DepthType.Cv8U, 1);
+        if (Capture is null)
+        {
+            return emptyMat;
+        }
+        if (!Capture.IsReady)
+        {
+            return emptyMat;
+        }
+        if (Capture.RawFrame is null)
+        {
+            return emptyMat;
+        }
+        if (Capture.RawFrame.GetRawData() is null)
+        {
+            return emptyMat;
+        }
+
+        using var processingChain = new MatProcessingChain();
+        var settings = BabbleCore.Instance.Settings;
+        var roiX = settings.GetSetting<int>("roi_window_x");
+        var roiY = settings.GetSetting<int>("roi_window_y");
+        var roiWidth = settings.GetSetting<int>("roi_window_w");
+        var roiHeight = settings.GetSetting<int>("roi_window_h");
+        var rotationAngle = settings.GetSetting<double>("rotation_angle");
+        var useRedChannel = settings.GetSetting<bool>("gui_use_red_channel");
 
         // Process the image through our chain of operations
         using Mat resultMat = processingChain
-            .StartWith(Capture.Frame, Capture.Dimensions)
+            .StartWith(Capture.RawFrame, Capture.Dimensions)
             .UseRedChannel(useRedChannel)
             .Rotate(rotationAngle)
             // .Crop(roiX, roiY, roiWidth, roiHeight)
@@ -80,20 +126,8 @@ public abstract class PlatformConnector
             throw new InvalidOperationException("Image Matrix is not continuous in memory layout");
         }
 
-        var finalMat = new Mat();
-        resultMat.ConvertTo(finalMat, DepthType.Cv32F);
-
-        // Convert to float array and normalize
-        float[] floatArray = new float[finalMat.Rows * finalMat.Cols];
-        finalMat.CopyTo(floatArray);
-
-        // Normalize pixel values to [0, 1]
-        for (int i = 0; i < floatArray.Length; i++)
-        {
-            floatArray[i] /= 255f;
-        }
-
-        return floatArray;
+        var clone = resultMat.Clone();
+        return clone;
     }
 
     /// <summary>

@@ -1,5 +1,4 @@
 ﻿using Babble.Core;
-using Babble.Core.Scripts;
 using Rug.Osc;
 using System.Net;
 
@@ -54,17 +53,20 @@ public partial class BabbleOSC
 
     private void SendLoop()
     {
+        var settings = BabbleCore.Instance.Settings;
+
         while (_loop)
         {
-            var prefix = BabbleCore.Instance.Settings.GetSetting<double>("gui_multiply");
-            var mul = BabbleCore.Instance.Settings.GetSetting<double>("gui_multiply");
+            var prefix = settings.GetSetting<string>("gui_osc_location");
+            var mul = settings.GetSetting<double>("gui_multiply");
+            
             try
             {
                 switch (_sender.State)
                 {
                     case OscSocketState.Connected:
                         foreach (var exp in Expressions.InnerKeys)
-                            _sender.Send(new OscMessage($"/avatar/parameters/{exp}", Expressions.GetByKey2(exp) * mul));
+                            _sender.Send(new OscMessage($"{prefix}/{exp}", Expressions.GetByKey2(exp) * mul));
                         break;
                     case OscSocketState.Closed:
                         _sender.Close();
@@ -78,6 +80,7 @@ public partial class BabbleOSC
                 // Ignore network exceptions
             }
 
+            End:
             Thread.Sleep(10);
         }
     }

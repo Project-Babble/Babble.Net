@@ -12,12 +12,12 @@ public abstract class Capture
     /// Represents the size of a "default" Babble frame 
     /// Pulled from the Babble Board ESP32 cam
     /// </summary>
-    public static readonly (int width, int height) DefaultFrameDimensions = (240, 240);
+    public virtual (int width, int height) DefaultFrameDimensions => (240, 240);
 
     /// <summary>
     /// Empty frame, used when data is bad and we need to return something
     /// </summary>
-    protected static readonly Mat EmptyMat = Mat.Zeros(DefaultFrameDimensions.width, DefaultFrameDimensions.height, DepthType.Cv8U, 1);
+    protected virtual Mat EmptyMat => Mat.Zeros(DefaultFrameDimensions.width, DefaultFrameDimensions.height, DepthType.Cv8U, 3);
 
     public abstract string Url { get; set; }
 
@@ -25,7 +25,7 @@ public abstract class Capture
     /// Represents the incoming frame data for this capture source. 
     /// Can be any dimension, BGR color space
     /// </summary>
-    public abstract Mat Frame { get; }
+    public abstract Mat RawFrame { get; set;  }
 
     /// <summary>
     /// Dimensions for this frame. Needs to be explicitly defined when dealing with 

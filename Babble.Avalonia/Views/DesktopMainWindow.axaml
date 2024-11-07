@@ -5,8 +5,8 @@
         xmlns:views="clr-namespace:Babble.Avalonia"
         mc:Ignorable="d"
         x:Class="Babble.Avalonia.Views.DesktopMainWindow"
-        Title="Babble v2.0.6 Alpha"
-        Width="800" Height="600"
+        Title="Babble v2.0.6"
+        Width="700" Height="700"
         Background="#2D2D2D">
     <Grid Margin="10">
         <Grid.RowDefinitions>

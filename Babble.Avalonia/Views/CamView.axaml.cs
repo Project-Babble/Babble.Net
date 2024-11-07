@@ -1,21 +1,23 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using Babble.Avalonia.ReactiveObjects;
+using Babble.Avalonia.Scripts.Enums;
 using Babble.Core;
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Babble.Avalonia;
 
 public partial class CamView : UserControl
 {
     private readonly CamViewModel _viewModel;
-    private WriteableBitmap? _currentBitmap;
+    private CamViewMode camViewMode = CamViewMode.Tracking;
+    private bool ShouldDraw;
 
     public CamView()
     {
@@ -25,8 +27,20 @@ public partial class CamView : UserControl
         DataContext = _viewModel;
         _viewModel.PropertyChanged += OnPropertyChanged;
 
-        // Start update loop immediately
+        Loaded += CamView_OnLoaded;
+        Unloaded += CamView_Unloaded;
+        
         StartImageUpdates();
+    }
+
+    private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
+    {
+        ShouldDraw = true;
+    }
+
+    private void CamView_Unloaded(object? sender, RoutedEventArgs e)
+    {
+        ShouldDraw = false;
     }
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -36,22 +50,18 @@ public partial class CamView : UserControl
         var settings = BabbleCore.Instance.Settings;
         switch (e.PropertyName)
         {
-            case nameof(_viewModel.CameraAddressEntryText):
-                BabbleCore.Instance.Settings.UpdateSetting<string>(nameof(settings.Cam.CaptureSource), _viewModel.CameraAddressEntryText);
-                break;
             case nameof(_viewModel.Rotation):
-                BabbleCore.Instance.Settings.UpdateSetting<double>(nameof(settings.Cam.RotationAngle), _viewModel.Rotation.ToString());
+                settings.UpdateSetting<double>(nameof(settings.Cam.RotationAngle), _viewModel.Rotation.ToString());
                 break;
             case nameof(_viewModel.EnableCalibration):
-                BabbleCore.Instance.Settings.UpdateSetting<bool>(nameof(settings.GeneralSettings.UseCalibration), _viewModel.EnableCalibration.ToString());
+                settings.UpdateSetting<bool>(nameof(settings.GeneralSettings.UseCalibration), _viewModel.EnableCalibration.ToString());
                 break;
             case nameof(_viewModel.IsVerticalFlip):
-                BabbleCore.Instance.Settings.UpdateSetting<bool>(nameof(settings.Cam.GuiVerticalFlip), _viewModel.IsVerticalFlip.ToString());
+                settings.UpdateSetting<bool>(nameof(settings.Cam.GuiVerticalFlip), _viewModel.IsVerticalFlip.ToString());
                 break;
-            case nameof(_viewModel.HorizontalFlipText):
-                BabbleCore.Instance.Settings.UpdateSetting<bool>(nameof(settings.Cam.GuiHorizontalFlip), _viewModel.IsHorizontalFlip.ToString());
+            case nameof(_viewModel.IsHorizontalFlip):
+                settings.UpdateSetting<bool>(nameof(settings.Cam.GuiHorizontalFlip), _viewModel.IsHorizontalFlip.ToString());
                 break;
-
         }
         
         settings.Save();
@@ -59,58 +69,103 @@ public partial class CamView : UserControl
 
     private void StartImageUpdates()
     {
-        // Run the update loop at 30fps
-        DispatcherTimer timer = new()
+        // Start a timer to draw our face image
+        // Note: In Debug mode this is slow af to update. Release isn't!
+        DispatcherTimer drawTimer = new()
         {
-            Interval = TimeSpan.FromMilliseconds(1000.0 / 30.0) // 30fps
+            Interval = TimeSpan.FromMilliseconds(10)
         };
-
-        timer.Tick += async (s, e) => await UpdateImageAsync();
-        timer.Start();
+        drawTimer.Tick += (s, e) => UpdateImage();
+        drawTimer.Start();
     }
 
-    private async Task UpdateImageAsync()
+    private void UpdateImage()
     {
-        if (!BabbleCore.Instance.GetImage(out var image, out var dims))
+        byte[] image;
+        (int width, int height) dims;
+        bool valid;
+        switch (camViewMode)
         {
-            return;
+            case CamViewMode.Tracking:
+                valid = BabbleCore.Instance.GetImage(out image, out dims);
+                break;
+            case CamViewMode.Cropping:
+                valid = BabbleCore.Instance.GetRawImage(out image, out dims);
+                break;
+            default:
+                return;
         }
 
-        await Dispatcher.UIThread.InvokeAsync(() =>
+        if (valid && ShouldDraw)
         {
-            if (_currentBitmap is null ||
-                _currentBitmap.PixelSize.Width != dims.width ||
-                _currentBitmap.PixelSize.Height != dims.height)
+            if (dims.width == 0 || dims.height == 0)
+            {
+                MouthWindow.Width = 0;
+                MouthWindow.Height = 0;
+                Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
+                return;
+            }
+
+            if (_viewModel.MouthBitmap is null ||
+                _viewModel.MouthBitmap.PixelSize.Width != dims.width ||
+                _viewModel.MouthBitmap.PixelSize.Height != dims.height)
             {
                 // On other versions of Avalonia there is support for Gray8 PixelFormats
                 // But for the time being we'll roll our own converter
-                _currentBitmap = new WriteableBitmap(
+                _viewModel.MouthBitmap = new WriteableBitmap(
                     new PixelSize(dims.width, dims.height),
                     new Vector(96, 96),
                     PixelFormats.Gray8,
                     AlphaFormat.Opaque);
             }
 
-            using var frameBuffer = _currentBitmap.Lock();
+            // BitmapConverter.WriteGrayscaleToWriteableBitmap(image, _viewModel.MouthBitmap, dims.width, dims.height);
+            // https://github.com/AvaloniaUI/Avalonia/issues/9092
+            using var frameBuffer = _viewModel.MouthBitmap.Lock();
             {
                 Marshal.Copy(image, 0, frameBuffer.Address, image.Length);
             }
 
-            // BitmapConverter.WriteGrayscaleToWriteableBitmap(image, _currentBitmap, dims.width, dims.height);
-
-            // Force update by creating a new reference
-            _viewModel.MouthBitmap = null;
-            _viewModel.MouthBitmap = _currentBitmap;
-
-            // Update control dimensions if needed
             if (MouthWindow.Width != dims.width || MouthWindow.Height != dims.height)
             {
                 MouthWindow.Width = dims.width;
                 MouthWindow.Height = dims.height;
             }
 
-            // Ensure the image control is invalidated
-            MouthWindow.InvalidateVisual();
-        }, DispatcherPriority.Render);
+            Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
+        }
+        else
+        {
+            MouthWindow.Width = 0;
+            MouthWindow.Height = 0;
+            Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
+        }
+    }
+
+    public void OnSaveAndRestartClicked(object sender, RoutedEventArgs args)
+    {
+        var settings = BabbleCore.Instance.Settings;
+        settings.UpdateSetting<string>(nameof(settings.Cam.CaptureSource), _viewModel.CameraAddressEntryText);
+        settings.Save();
+    }
+
+    public void OnTrackingModeClicked(object sender, RoutedEventArgs args)
+    {
+        camViewMode = CamViewMode.Tracking;
+    }
+
+    public void OnCroppingModeClicked(object sender, RoutedEventArgs args)
+    {
+        camViewMode = CamViewMode.Cropping;
+    }
+
+    public void StartCalibrationClicked(object sender, RoutedEventArgs args)
+    {
+        
+    }
+
+    public void StopCalibrationClicked(object sender, RoutedEventArgs args)
+    {
+        
     }
 }

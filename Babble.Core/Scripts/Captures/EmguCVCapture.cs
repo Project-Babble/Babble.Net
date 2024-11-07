@@ -11,53 +11,52 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class EmguCVCapture : Capture
 {
-    private static readonly object lockObject = new();
-
-    public override Mat Frame
+    public override Mat RawFrame
     {
         get
         {
-            lock (lockObject)
+            if (_videoCapture is not null && _videoCapture.IsOpened)
             {
-                if (_videoCapture is not null)
+                // Call QueryFrame with a 100ms timeout
+                var frameTask = Task.Run(() => _videoCapture.QueryFrame());
+                if (frameTask.Wait(TimeSpan.FromMilliseconds(100)))
                 {
-                    if (_videoCapture.IsOpened)
+                    var frame = frameTask.Result;
+                    if (frame is not null)
                     {
-                        var frame = _videoCapture.QueryFrame();
-                        if (frame is not null)
-                        {
-                            return frame;
-                        }
+                        return frame;
                     }
                 }
-
-                return EmptyMat;
             }
-        }   
+
+            return EmptyMat;
+        }
+        set => throw new NotImplementedException();
     }
 
     public override (int width, int height) Dimensions
     {
         get
         {
-            lock (lockObject)
+            if (_videoCapture is not null && _videoCapture.IsOpened)
             {
-                if (_videoCapture is not null)
+                // Call QueryFrame with a 100ms timeout
+                var frameTask = Task.Run(() => _videoCapture.QueryFrame());
+                if (frameTask.Wait(TimeSpan.FromMilliseconds(100)))
                 {
-                    if (_videoCapture.IsOpened)
+                    var frame = frameTask.Result;
+                    if (frame is not null)
                     {
-                        var frame = _videoCapture.QueryFrame();
-                        if (frame is not null)
-                        {
-                            return (frame.Width, frame.Height);
-                        }
+                        return (frame.Width, frame.Height);
                     }
                 }
-
-                return DefaultFrameDimensions;
             }
-        }  
+
+            return DefaultFrameDimensions;
+        }
     }
+
+    private (int width, int height) _dimensions;
 
     public override bool IsReady { get; set; }
     public override string Url { get; set; }

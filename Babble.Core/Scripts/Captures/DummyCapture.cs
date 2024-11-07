@@ -12,7 +12,7 @@ public class DummyCapture : Capture
 {
     public override string Url { get; set; }
 
-    public override Mat Frame { get => EmptyMat; }
+    public override Mat RawFrame { get => EmptyMat; set => throw new NotImplementedException(); }
 
     public override (int width, int height) Dimensions => DefaultFrameDimensions;
 

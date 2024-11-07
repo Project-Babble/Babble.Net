@@ -5,7 +5,7 @@ namespace Babble.Core.Settings.Models;
 public sealed class CameraSettings
 {
     [JsonProperty("rotation_angle")]
-    public int RotationAngle { get; set; }
+    public double RotationAngle { get; set; }
 
     [JsonProperty("roi_window_x")]
     public int RoiWindowX { get; set; }

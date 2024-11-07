@@ -14,7 +14,7 @@ public partial class CamViewModel : ObservableObject, ILocalizable
     private WriteableBitmap? mouthBitmap;
 
     [ObservableProperty]
-    private float rotation;
+    private double rotation;
 
     [ObservableProperty]
     private bool enableCalibration;
@@ -63,8 +63,8 @@ public partial class CamViewModel : ObservableObject, ILocalizable
 
     public void Localize()
     {
-        CameraAddressText = LocaleManager.Instance["camera.address"];
-        CameraAddressTextTooltip = LocaleManager.Instance["camera.addressTooltip"];
+        CameraAddressText = LocaleManager.Instance["general.address"];
+        CameraAddressTextTooltip = LocaleManager.Instance["general.addressTooltip"];
         SaveAndRestartTrackingText = LocaleManager.Instance["camera.saveAndRestartTracking"];
         SaveAndRestartTrackingTextTooltip = LocaleManager.Instance["camera.saveAndRestartTrackingTooltip"];
         TrackingModeText = LocaleManager.Instance["camera.trackingMode"];

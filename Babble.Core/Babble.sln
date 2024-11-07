@@ -19,9 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Avalonia.Desktop", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Avalonia.iOS", "..\Babble.Avalonia.iOS\Babble.Avalonia.iOS.csproj", "{231DDCFE-0931-465F-87C4-8D79D9CEECB2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.OSC", "..\Babble.OSC\Babble.OSC.csproj", "{20E199AB-7A4F-49F2-9203-647F50894DD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.OSC", "..\Babble.OSC\Babble.OSC.csproj", "{20E199AB-7A4F-49F2-9203-647F50894DD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Babble.Localization", "..\Babble.Localization\Babble.Localization.csproj", "{F783830E-C1D8-4956-AE09-1E4AE4113D53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Localization", "..\Babble.Localization\Babble.Localization.csproj", "{F783830E-C1D8-4956-AE09-1E4AE4113D53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

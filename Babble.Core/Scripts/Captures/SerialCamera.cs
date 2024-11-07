@@ -20,7 +20,7 @@ public class SerialCamera : Capture, IDisposable
     private bool _isDisposed;
 
     public override string Url { get; set; }
-    public override Mat Frame => GetNextFrame();
+    public override Mat RawFrame { get; set; }
     public override (int width, int height) Dimensions => (240, 240);
     public override bool IsReady { get; set; }
 
@@ -91,9 +91,7 @@ public class SerialCamera : Capture, IDisposable
                     // Reset buffer position for next frame
                     _bufferPosition = 0;
                     IsReady = true;
-                    var jpegMat = new Mat();
-                    CvInvoke.Imdecode(jpegData, Emgu.CV.CvEnum.ImreadModes.Color, jpegMat);
-                    return jpegMat;
+                    CvInvoke.Imdecode(jpegData, Emgu.CV.CvEnum.ImreadModes.Color, RawFrame);
                 }
 
                 // If we didn't find valid JPEG data, reset and return null

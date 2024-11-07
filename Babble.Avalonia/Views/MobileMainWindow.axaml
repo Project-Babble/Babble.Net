@@ -13,13 +13,13 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<TabControl Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-			<TabItem Header="Cam" x:Name="CameraHeaderText">
+			<TabItem Header="Cam" x:Name="CameraHeaderText" Foreground="White">
 				<views:CamView/>
 			</TabItem>
-			<TabItem Header="Algo Settings" x:Name="AlgoHeaderText">
+			<TabItem Header="Algo Settings" x:Name="AlgoHeaderText" Foreground="White">
 				<views:AlgoView/>
 			</TabItem>
-			<TabItem Header="Setting" x:Name="SettingsHeaderText">
+			<TabItem Header="Setting" x:Name="SettingsHeaderText" Foreground="White">
 				<views:SettingsView/>
 			</TabItem>
 		</TabControl>

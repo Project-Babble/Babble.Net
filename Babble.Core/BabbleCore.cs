@@ -40,7 +40,9 @@ public class BabbleCore
         Settings = new BabbleSettings();
         Settings.OnUpdate += (setting) =>
         {
-            if (setting == "capture_source")
+            // Hacky but it works
+            var normalizedSetting = setting.Replace("_", string.Empty).ToLower();
+            if (normalizedSetting == "capturesource")
             {
                 _platformConnector!.Terminate();
                 ConfigurePlatformConnector();
@@ -104,7 +106,7 @@ public class BabbleCore
     }
 
     /// <summary>
-    /// Poll expression data
+    /// Poll expression data, frames
     /// </summary>
     /// <param name="UnifiedExpressions"></param>
     /// <returns></returns>
@@ -157,13 +159,47 @@ public class BabbleCore
             }
         }
 
-
         return true;
     }
 
     /// <summary>
-    /// Gets the normalized pre-transform lip image for this frame
+    /// Gets the pre-transform lip image for this frame
     /// This image will be (dimensions.width)px * (dimensions.height)px, Rgb888x
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="dimensions"></param>
+    /// <returns></returns>
+    public bool GetRawImage(out byte[] image, out (int width, int height) dimensions)
+    {
+        dimensions = (0, 0);
+        image = Array.Empty<byte>();
+        if (_platformConnector.Capture.RawFrame is null)
+        {
+            return false;
+        }
+
+        dimensions = _platformConnector.Capture.Dimensions;
+        if (_platformConnector.Capture.RawFrame.NumberOfChannels == 3)
+        {
+            using var grayMat = new Mat();
+            CvInvoke.CvtColor(_platformConnector.Capture.RawFrame, grayMat, ColorConversion.Bgr2Gray);
+            image = grayMat.GetRawData();
+            return true;
+        }
+        else if (_platformConnector.Capture.RawFrame.NumberOfChannels == 1)
+        {
+            image = _platformConnector.Capture.RawFrame.GetRawData();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Gets the prost-transform lip image for this frame
+    /// This image will be 256*256px, Rgb888x
     /// </summary>
     /// <param name="image"></param>
     /// <param name="dimensions"></param>
@@ -172,21 +208,21 @@ public class BabbleCore
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
-        if (_platformConnector.Capture.Frame is null)
+        using var transformedImageCandidate = _platformConnector.TransformRawImage();
+        if (transformedImageCandidate is null)
         {
             return false;
         }
 
-        dimensions = _platformConnector.Capture.Dimensions;
-        if (_platformConnector.Capture.Frame.NumberOfChannels != 1)
+        dimensions = (256, 256);
+        image = transformedImageCandidate.GetRawData();
+        if (image is null)
         {
-            using var grayMat = new Mat();
-            CvInvoke.CvtColor(_platformConnector.Capture.Frame, grayMat, ColorConversion.Bgr2Gray);
-            image = grayMat.GetRawData();
+            return false;
         }
-        else
+        if (image.Length == 0)
         {
-            image = _platformConnector.Capture.Frame.GetRawData();
+            return false;
         }
         
         return true;

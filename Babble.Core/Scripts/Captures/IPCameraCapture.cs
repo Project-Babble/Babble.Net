@@ -1,5 +1,6 @@
 using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -13,12 +14,10 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class IPCameraCapture : Capture
 {
-    public override Mat Frame { get => _frame; }
-    public override (int width, int height) Dimensions => (640, 480);
+    public override Mat RawFrame { get; set; }
+    public override (int width, int height) Dimensions => (240, 240);
     public override bool IsReady { get; set; }
     public override string Url { get; set; }
-
-    private Mat _frame;
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -27,12 +26,16 @@ public class IPCameraCapture : Capture
     private const byte picStart = 0xD8;
     private const byte picEnd = 0xD9;
 
+    // Determine if we've got stuck on the same frame
+    private Mat _prevMat = new Mat();
+
     public IPCameraCapture(string Url) : base(Url)
     {
     }
 
     public override bool StartCapture()
     {
+        RawFrame = new Mat();
         Task.Run(() => StartStreaming(Url, null, null, _cancellationTokenSource.Token, 1024, Dimensions.width * Dimensions.height));
         IsReady = true;
         return true;
@@ -53,31 +56,27 @@ public class IPCameraCapture : Capture
     {
         var tok = token ?? CancellationToken.None;
 
-        using (var cli = new HttpClient())
+        using var cli = new HttpClient();
+
+        if (!string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(password))
+            cli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{login}:{password}")));
+
+        using var stream = await cli.GetStreamAsync(url).ConfigureAwait(false);
+
+        var streamBuffer = new byte[chunkMaxSize];      // Stream chunk read
+        var frameBuffer = new byte[frameBufferSize];    // Frame buffer
+
+        var frameIdx = 0;       // Last written byte location in the frame buffer
+        var inPicture = false;  // Are we currently parsing a picture ?
+        byte current = 0x00;    // The last byte read
+        byte previous = 0x00;   // The byte before
+
+        // Continuously pump the stream. The cancellation token is used to get out of there
+        while (true)
         {
-            if (!string.IsNullOrEmpty(login) && !string.IsNullOrEmpty(password))
-                cli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{login}:{password}")));
-
-            using (var stream = await cli.GetStreamAsync(url).ConfigureAwait(false))
-            {
-
-                var streamBuffer = new byte[chunkMaxSize];      // Stream chunk read
-                var frameBuffer = new byte[frameBufferSize];    // Frame buffer
-
-                var frameIdx = 0;       // Last written byte location in the frame buffer
-                var inPicture = false;  // Are we currently parsing a picture ?
-                byte current = 0x00;    // The last byte read
-                byte previous = 0x00;   // The byte before
-
-                // Continuously pump the stream. The cancellationtoken is used to get out of there
-                while (true)
-                {
-                    var streamLength = await stream.ReadAsync(streamBuffer, 0, chunkMaxSize, tok).ConfigureAwait(false);
-                    ParseStreamBuffer(frameBuffer, ref frameIdx, streamLength, streamBuffer, ref inPicture, ref previous, ref current);
-                    await Task.Delay(100);
-                };
-            }
-        }
+            var streamLength = await stream.ReadAsync(streamBuffer, 0, chunkMaxSize, tok).ConfigureAwait(false);
+            ParseStreamBuffer(frameBuffer, ref frameIdx, streamLength, streamBuffer, ref inPicture, ref previous, ref current);
+        };
     }
 
     // Parse the stream buffer
@@ -136,17 +135,15 @@ public class IPCameraCapture : Capture
                 {
                     try
                     {
-                        using var mat = new Mat();
-                        CvInvoke.Imdecode(TrimEnd(frameBuffer), ImreadModes.Color, mat);
-                        _frame = mat;
+                        CvInvoke.Imdecode(TrimEnd(frameBuffer), ImreadModes.Color, RawFrame);
                     }
                     catch (Exception e)
                     {
                         // We don't care about badly decoded pictures
+                        BabbleCore.Instance.Logger.LogError(e.Message);
                     }
                 }
 
- 
                 inPicture = false;
                 return;
             }
@@ -155,6 +152,7 @@ public class IPCameraCapture : Capture
 
     public override bool StopCapture()
     {
+        RawFrame = null;
         _cancellationTokenSource.Cancel();
         IsReady = false;
         return true;

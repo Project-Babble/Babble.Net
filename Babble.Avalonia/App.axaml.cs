@@ -14,9 +14,12 @@ namespace Babble.Avalonia;
 
 public partial class App : AvaloniaMeadowApplication<Linux>
 {
-    private static readonly HashSet<string> Whitelist = ["gui_osc_location", "gui_osc_address", "gui_osc_port", "gui_osc_receiver_port"];
+    private static readonly HashSet<string> Whitelist = ["guiosclocation", "guioscaddress", "guioscport", "guioscreceiverport"];
     private BabbleOSC _sender;
-    private Thread _thread;
+
+    private Task _task;
+    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private CancellationToken _cancellationToken;
 
     public override void Initialize()
     {
@@ -24,13 +27,15 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         LoadMeadowOS();
 
         BabbleCore.Instance.Start();
-        BabbleCore.Instance.Settings.OnUpdate += NeedRestartOSC;
+        var settings = BabbleCore.Instance.Settings;
+        settings.OnUpdate += NeedRestartOSC;
 
-        var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
-        var remotePort = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
+        var ip = settings.GeneralSettings.GuiOscAddress;
+        var remotePort = settings.GeneralSettings.GuiOscPort;
         _sender = new BabbleOSC(ip, remotePort);
-        _thread = new Thread(new ThreadStart(OSCLoop));
-        _thread.Start();
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+        _task = Task.Run(OSCLoop, _cancellationToken);
     }
 
     public override Task InitializeMeadow()
@@ -62,9 +67,6 @@ public partial class App : AvaloniaMeadowApplication<Linux>
             {
                 DataContext = new MainWindowViewModel()
             };
-
-            desktop.Startup += OnStartup;
-            desktop.Exit += OnExit;
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
@@ -77,28 +79,18 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void OnStartup(object s, ControlledApplicationLifetimeStartupEventArgs e)
-    {
-        
-    }
-
-    private void OnExit(object sender, ControlledApplicationLifetimeExitEventArgs e)
-    {
-        _sender.Teardown();
-        _thread.Join();
-    }
-
     private void NeedRestartOSC(string name)
     {
-        if (Whitelist.Contains(name))
+        var normalizedSetting = name.ToLower().Replace("_", string.Empty);
+        if (Whitelist.Contains(normalizedSetting))
         {
             _sender.Teardown();
-            _thread.Join();
             var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
             var remotePort = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
             _sender = new BabbleOSC(ip, remotePort);
-            _thread = new Thread(new ThreadStart(OSCLoop));
-            _thread.Start();
+            _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationToken = _cancellationTokenSource.Token;
+            _task = Task.Run(OSCLoop, _cancellationToken);
         }
     }
 
@@ -113,7 +105,7 @@ public partial class App : AvaloniaMeadowApplication<Linux>
                 BabbleOSC.Expressions.SetByKey1(exp.Key, exp.Value);
 
             End:
-            Thread.Sleep(10);
+            Thread.Sleep(50);
         }
     }
 }

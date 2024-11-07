@@ -4,6 +4,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
+
+	<UserControl.Resources>
+		
+	</UserControl.Resources>
+
 	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5">
 			<TextBlock Text="{Binding ModelSettingsText}"
@@ -20,8 +25,7 @@
 			<Grid ColumnDefinitions="*,*,Auto">
 				<StackPanel Grid.Column="0" Spacing="5">
 					<TextBlock Text="{Binding InferenceThreadsText}"
-							 x:Name="InferenceThreadsText"
-							 Foreground="White"/>
+							 x:Name="InferenceThreadsText"/>
 					<TextBox Text="{Binding InferenceThreadsEntryText}"
 							x:Name="InferenceThreadsEntryText"
 							Background="#2D2D2D"
