@@ -1,4 +1,6 @@
 ﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Microsoft.Extensions.Logging;
 using System.IO.Ports;
 
 namespace Babble.Core.Scripts.Decoders;
@@ -43,8 +45,9 @@ public class SerialCamera : Capture, IDisposable
             IsReady = true;
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            BabbleCore.Instance.Logger.LogError($"Failed to open serial port {Url}: {ex.Message}");
             IsReady = false;
             return false;
         }
@@ -58,11 +61,13 @@ public class SerialCamera : Capture, IDisposable
             IsReady = false;
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            BabbleCore.Instance.Logger.LogError($"Failed to close serial port {Url}: {ex.Message}");
             return false;
         }
     }
+
 
     private Mat GetNextFrame()
     {
@@ -72,40 +77,36 @@ public class SerialCamera : Capture, IDisposable
         {
             if (_serialPort.BytesToRead > 0)
             {
-                // Get the packet boundaries which contain our JPEG data
                 var (start, jpegSize) = GetNextPacketBounds();
-                if (start == -1 || jpegSize == -1)
-                {
-                    return EmptyMat;
-                }
+                if (start == -1 || jpegSize == -1) return EmptyMat;
 
-                // Create a new array exactly sized for the JPEG data
                 byte[] jpegData = new byte[jpegSize];
-
-                // Copy just the JPEG portion (skipping protocol headers)
                 Array.Copy(_buffer, start + ETVR_HEADER_LEN, jpegData, 0, jpegSize);
 
-                // Verify JPEG header (0xFF 0xD8)
                 if (jpegData.Length >= 2 && jpegData[0] == 0xFF && jpegData[1] == 0xD8)
                 {
-                    // Reset buffer position for next frame
                     _bufferPosition = 0;
-                    IsReady = true;
-                    CvInvoke.Imdecode(jpegData, Emgu.CV.CvEnum.ImreadModes.Color, RawFrame);
+                    CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawFrame);
+                    return RawFrame;
                 }
 
-                // If we didn't find valid JPEG data, reset and return null
+                Array.Clear(_buffer, 0, _buffer.Length);
                 _bufferPosition = 0;
+                //Clear _buffer after each frame is processed by using Array.Clear(_buffer, 0, _buffer.Length); to prevent leftover data from impacting the next read.
             }
         }
-        catch
+        catch (Exception ex)
         {
             IsReady = false;
             _serialPort.Close();
+            BabbleCore.Instance.Logger.LogError($"Error reading frame on port {Url} at buffer position {_bufferPosition}: {ex.Message}");
         }
+        //Log more context about the frame data, such as current buffer position, byte count, and port status.
 
-        return null;
+
+        return EmptyMat;
     }
+
 
     private (int start, int size) GetNextPacketBounds()
     {
@@ -169,13 +170,27 @@ public class SerialCamera : Capture, IDisposable
         return true;
     }
 
-    public void Dispose()
+    protected virtual void Dispose(bool disposing)
     {
         if (!_isDisposed)
         {
-            StopCapture();
-            _serialPort?.Dispose();
+            if (disposing)
+            {
+                StopCapture();
+                _serialPort?.Dispose();
+            }
             _isDisposed = true;
         }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    ~SerialCamera()
+    {
+        Dispose(false);
     }
 }
