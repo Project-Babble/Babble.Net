@@ -9,7 +9,7 @@ public class DesktopConnector : PlatformConnector
         = new(StringComparer.OrdinalIgnoreCase) { "com" };
 
     private static readonly HashSet<string> IPConnections 
-        = new(StringComparer.OrdinalIgnoreCase) { "local" };
+        = new(StringComparer.OrdinalIgnoreCase) { "local", "local/" };
 
     private static readonly HashSet<string> ImageConnections 
         = new(StringComparer.OrdinalIgnoreCase) { "bmp", "gif", "ico", "jpeg", "jpg", "png", "psd", "tiff" };

@@ -11,8 +11,9 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
 		<vm:CamView />
 	</Design.DataContext>
-	
-	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+
+	<ScrollViewer VerticalScrollBarVisibility="Auto">
+		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5">
 			<TextBlock Text="{Binding CameraAddressText}" 
 					   ToolTip.Tip="{Binding CameraAddressTextTooltip}"
@@ -20,14 +21,13 @@
 					   Foreground="White"/>
 			<TextBox Text="{Binding CameraAddressEntryText}" 
 					 ToolTip.Tip="{Binding CameraAddressTextTooltip}"
-					 x:Name="CameraAddressEntryText" 
+					 x:Name="CameraAddressEntry" 
 					 Background="#2D2D2D" 
 					 Foreground="White"/>
 			<Button Content="{Binding SaveAndRestartTrackingText}"
 					ToolTip.Tip="{Binding SaveAndRestartTrackingText}"
 					x:Name="SaveAndRestartTrackingText"
                     Background="#4CAF50"
-					Click="OnSaveAndRestartClicked"
                     Foreground="White"/>
 			<Image x:Name="MouthWindow"
                    Source="{Binding MouthBitmap}"
@@ -39,12 +39,10 @@
 						x:Name="TrackingModeText"
 						ToolTip.Tip="{Binding TrackingModeTextTooltip}"
                         Background="#4CAF50"
-						Click="OnTrackingModeClicked"
                         Foreground="White"/>
 				<Button Content="{Binding CroppingModeText}"
 						x:Name="CroppingModeText"
 						ToolTip.Tip="{Binding CroppingModeTextTooltip}"
-						Click="OnCroppingModeClicked"
                         Background="#4CAF50"
                         Foreground="White"/>
 			</StackPanel>
@@ -58,17 +56,15 @@
 						x:Name="StartCalibrationText"
 						ToolTip.Tip="{Binding StartCalibrationTextTooltip}"
                         Background="#4CAF50"
-						Click="StartCalibrationClicked"
                         Foreground="White"/>
 				<Button Content="{Binding StopCalibrationText}"
 						x:Name="StopCalibrationText"
 						ToolTip.Tip="{Binding StopCalibrationTextTooltip}"
                         Background="#4CAF50"
-						Click="StopCalibrationClicked"
                         Foreground="White"/>
 			</StackPanel>
 			<CheckBox Content="{Binding EnableCalibrationText}"
-					  x:Name="EnableCalibrationText"
+					  x:Name="EnableCalibration"
 				      ToolTip.Tip="{Binding EnableCalibrationTextTooltip}"
                       Foreground="White"
                       IsChecked="{Binding EnableCalibration}"/>
@@ -78,16 +74,17 @@
 					   Foreground="White"/>
 			<StackPanel Orientation="Horizontal" Spacing="10">
 				<CheckBox Content="{Binding VerticalFlipText}" 
-						  x:Name="VerticalFlipText" 
+						  x:Name="VerticalFlip" 
 						  IsChecked="{Binding IsVerticalFlip}"
 						  ToolTip.Tip="{Binding VerticalFlipTextTooltip}"
 						  Foreground="White"/>
 				<CheckBox Content="{Binding HorizontalFlipText}" 
-						  x:Name="HorizontalFlipText" 
+						  x:Name="HorizontalFlip" 
 						  IsChecked="{Binding IsHorizontalFlip}"
 						  ToolTip.Tip="{Binding HorizontalFlipTextTooltip}"
 						  Foreground="White"/>
 			</StackPanel>
 		</StackPanel>
 	</Border>
+	</ScrollViewer>
 </UserControl>

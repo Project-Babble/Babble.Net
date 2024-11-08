@@ -4,12 +4,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
-
-	<UserControl.Resources>
-		
-	</UserControl.Resources>
-
-	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+	<ScrollViewer VerticalScrollBarVisibility="Auto">
+		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5">
 			<TextBlock Text="{Binding ModelSettingsText}"
 					 x:Name="ModelSettingsText"
@@ -18,21 +14,22 @@
 
 			<TextBlock Text="{Binding ModelFileText}" x:Name="ModelFileText" Foreground="White"/>
 			<TextBox Text="{Binding ModelFileEntryText}"
-					x:Name="ModelFileEntryText"
+					x:Name="ModelFileEntry"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
-			<Grid ColumnDefinitions="*,*,Auto">
-				<StackPanel Grid.Column="0" Spacing="5">
+			<Grid ColumnDefinitions="*,*,Auto" >
+				<StackPanel Grid.Column="0" Spacing="5" Margin="0,0,0,0">
 					<TextBlock Text="{Binding InferenceThreadsText}"
-							 x:Name="InferenceThreadsText"/>
+							 Foreground="White"
+							 x:Name="InferenceThreads"/>
 					<TextBox Text="{Binding InferenceThreadsEntryText}"
-							x:Name="InferenceThreadsEntryText"
+							x:Name="InferenceThreadsEntry"
 							Background="#2D2D2D"
 							Foreground="White"/>
 				</StackPanel>
 
-				<StackPanel Grid.Column="1" Spacing="5">
+				<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
 					<TextBlock Text="{Binding RuntimeText}" x:Name="RuntimeText" Foreground="White"/>
 					<ComboBox SelectedIndex="0"
 							Background="#2D2D2D"
@@ -45,7 +42,7 @@
 			<StackPanel Grid.Column="0" Spacing="5">
 				<CheckBox Grid.Column="2"
 					 Content="{Binding UseGPUText}"
-					 x:Name="UseGPUText"
+					 x:Name="UseGpu"
 					 IsChecked="{Binding UseGPU}"
 					 Foreground="White"
 					 VerticalAlignment="Bottom"/>
@@ -54,7 +51,7 @@
 					 x:Name="GPUIndexText"
 					 Foreground="White"/>
 				<TextBox Text="{Binding GpuIndexEntryText}"
-					 x:Name="GpuIndexEntryText"
+					 x:Name="GpuIndexEntry"
 					 Background="#2D2D2D"
 					 Foreground="White"/>
 			</StackPanel>
@@ -63,7 +60,7 @@
 					 x:Name="ModelOutputMultiplierText"
 					 Foreground="White"/>
 			<TextBox Text="{Binding ModelOutputMultiplierEntryText}"
-					x:Name="ModelOutputMultiplierEntryText"
+					x:Name="ModelOutputMultiplierEntry"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
@@ -71,7 +68,7 @@
 					 x:Name="CalibrationDeadzoneText"
 					 Foreground="White"/>
 			<TextBox Text="{Binding CalibrationDeadzoneEntryText}"
-					x:Name="CalibrationDeadzoneEntryText"
+					x:Name="CalibrationDeadzoneEntry"
 					Background="#2D2D2D"
 					Foreground="White"/>
 
@@ -82,26 +79,27 @@
 					 Margin="0,10,0,0"/>
 
 			<Grid ColumnDefinitions="*,*">
-				<StackPanel Grid.Column="0" Spacing="5">
+				<StackPanel Grid.Column="0" Spacing="5" Margin="00,0,0,0">
 					<TextBlock Text="{Binding MinFrequencyCutoffText}"
 							 x:Name="MinFrequencyCutoffText"
 							 Foreground="White"/>
 					<TextBox Text="{Binding MinFrequencyCutoffEntryText}"
-							x:Name="MinFrequencyCutoffEntryText"
+							x:Name="MinFrequencyCutoffEntry"
 							Background="#2D2D2D"
 							Foreground="White"/>
 				</StackPanel>
 
-				<StackPanel Grid.Column="1" Spacing="5">
+				<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
 					<TextBlock Text="{Binding SpeedCoefficientText}"
 							 x:Name="SpeedCoefficientText"
 							 Foreground="White"/>
 					<TextBox Text="{Binding SpeedCoefficientEntryText}"
-							x:Name="SpeedCoefficientEntryText"
+							x:Name="SpeedCoefficientEntry"
 							Background="#2D2D2D"
 							Foreground="White"/>
 				</StackPanel>
 			</Grid>
 		</StackPanel>
 	</Border>
+	</ScrollViewer>
 </UserControl>

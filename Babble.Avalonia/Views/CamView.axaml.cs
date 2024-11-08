@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -8,7 +9,6 @@ using Babble.Avalonia.ReactiveObjects;
 using Babble.Avalonia.Scripts.Enums;
 using Babble.Core;
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace Babble.Avalonia;
@@ -25,11 +25,16 @@ public partial class CamView : UserControl
 
         _viewModel = new CamViewModel();
         DataContext = _viewModel;
-        _viewModel.PropertyChanged += OnPropertyChanged;
 
         Loaded += CamView_OnLoaded;
         Unloaded += CamView_Unloaded;
-        
+
+        this.FindControl<Slider>("RotationSlider")!.ValueChanged += RotationEntry_ValueChanged;
+        this.FindControl<CheckBox>("EnableCalibration")!.IsCheckedChanged += EnableCalibration_Changed;
+        this.FindControl<CheckBox>("VerticalFlip")!.IsCheckedChanged += VerticalFlip_Changed;
+        this.FindControl<CheckBox>("HorizontalFlip")!.IsCheckedChanged += HorizontalFlip_Changed;
+        this.FindControl<TextBox>("CameraAddressEntry")!.LostFocus += CameraAddress_LostFocus;
+
         StartImageUpdates();
     }
 
@@ -43,28 +48,63 @@ public partial class CamView : UserControl
         ShouldDraw = false;
     }
 
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void RotationEntry_ValueChanged(object? sender, RangeBaseValueChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(_viewModel.MouthBitmap)) return;
-
-        var settings = BabbleCore.Instance.Settings;
-        switch (e.PropertyName)
+        if (_viewModel.Rotation < 1)
         {
-            case nameof(_viewModel.Rotation):
-                settings.UpdateSetting<double>(nameof(settings.Cam.RotationAngle), _viewModel.Rotation.ToString());
-                break;
-            case nameof(_viewModel.EnableCalibration):
-                settings.UpdateSetting<bool>(nameof(settings.GeneralSettings.UseCalibration), _viewModel.EnableCalibration.ToString());
-                break;
-            case nameof(_viewModel.IsVerticalFlip):
-                settings.UpdateSetting<bool>(nameof(settings.Cam.GuiVerticalFlip), _viewModel.IsVerticalFlip.ToString());
-                break;
-            case nameof(_viewModel.IsHorizontalFlip):
-                settings.UpdateSetting<bool>(nameof(settings.Cam.GuiHorizontalFlip), _viewModel.IsHorizontalFlip.ToString());
-                break;
+            BabbleCore.Instance.Settings.UpdateSetting<double>(
+                nameof(BabbleCore.Instance.Settings.Cam.RotationAngle),
+                "0");
         }
-        
-        settings.Save();
+        else
+        {
+            BabbleCore.Instance.Settings.UpdateSetting<double>(
+                nameof(BabbleCore.Instance.Settings.Cam.RotationAngle),
+                _viewModel.Rotation.ToString());
+        }
+
+        BabbleCore.Instance.Settings.Save();
+    }
+
+    private void EnableCalibration_Changed(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox checkBox)
+            return;
+
+        BabbleCore.Instance.Settings.UpdateSetting<bool>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.UseCalibration),
+            checkBox.IsChecked.ToString()!);
+        BabbleCore.Instance.Settings.Save();
+    }
+
+    private void VerticalFlip_Changed(object? sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox checkBox)
+        {
+            BabbleCore.Instance.Settings.UpdateSetting<bool>(
+                nameof(BabbleCore.Instance.Settings.Cam.GuiVerticalFlip),
+                checkBox.IsChecked.ToString()!);
+            BabbleCore.Instance.Settings.Save();
+        }
+    }
+
+    private void HorizontalFlip_Changed(object? sender, RoutedEventArgs e)
+    {
+        if (sender is CheckBox checkBox)
+        {
+            BabbleCore.Instance.Settings.UpdateSetting<bool>(
+                nameof(BabbleCore.Instance.Settings.Cam.GuiHorizontalFlip),
+                checkBox.IsChecked.ToString()!);
+            BabbleCore.Instance.Settings.Save();
+        }
+    }
+
+    private void CameraAddress_LostFocus(object? sender, RoutedEventArgs e)
+    {
+        BabbleCore.Instance.Settings.UpdateSetting<string>(
+            nameof(BabbleCore.Instance.Settings.Cam.CaptureSource),
+            _viewModel.CameraAddressEntryText);
+        BabbleCore.Instance.Settings.Save();
     }
 
     private void StartImageUpdates()
@@ -110,8 +150,6 @@ public partial class CamView : UserControl
                 _viewModel.MouthBitmap.PixelSize.Width != dims.width ||
                 _viewModel.MouthBitmap.PixelSize.Height != dims.height)
             {
-                // On other versions of Avalonia there is support for Gray8 PixelFormats
-                // But for the time being we'll roll our own converter
                 _viewModel.MouthBitmap = new WriteableBitmap(
                     new PixelSize(dims.width, dims.height),
                     new Vector(96, 96),
@@ -119,8 +157,6 @@ public partial class CamView : UserControl
                     AlphaFormat.Opaque);
             }
 
-            // BitmapConverter.WriteGrayscaleToWriteableBitmap(image, _viewModel.MouthBitmap, dims.width, dims.height);
-            // https://github.com/AvaloniaUI/Avalonia/issues/9092
             using var frameBuffer = _viewModel.MouthBitmap.Lock();
             {
                 Marshal.Copy(image, 0, frameBuffer.Address, image.Length);
@@ -142,13 +178,6 @@ public partial class CamView : UserControl
         }
     }
 
-    public void OnSaveAndRestartClicked(object sender, RoutedEventArgs args)
-    {
-        var settings = BabbleCore.Instance.Settings;
-        settings.UpdateSetting<string>(nameof(settings.Cam.CaptureSource), _viewModel.CameraAddressEntryText);
-        settings.Save();
-    }
-
     public void OnTrackingModeClicked(object sender, RoutedEventArgs args)
     {
         camViewMode = CamViewMode.Tracking;
@@ -161,11 +190,11 @@ public partial class CamView : UserControl
 
     public void StartCalibrationClicked(object sender, RoutedEventArgs args)
     {
-        
+
     }
 
     public void StopCalibrationClicked(object sender, RoutedEventArgs args)
     {
-        
+
     }
 }

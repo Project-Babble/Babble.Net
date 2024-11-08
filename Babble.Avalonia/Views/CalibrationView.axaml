@@ -4,9 +4,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
-	<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
-		<StackPanel Spacing="5">
-			<Grid ColumnDefinitions="Auto,*">
+	<ScrollViewer VerticalScrollBarVisibility="Auto">
+		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+		<StackPanel Spacing="5" Margin="0,0,0,0">
+			<Grid ColumnDefinitions="Auto,*" Margin="0,0,0,0">
 				<TextBlock Text="Calibration Mode:"
 						 x:Name="CalibrationModeText"
 						 Grid.Column="0"
@@ -53,4 +54,5 @@
 			</StackPanel>
 		</StackPanel>
 	</Border>
+	</ScrollViewer>
 </UserControl>
