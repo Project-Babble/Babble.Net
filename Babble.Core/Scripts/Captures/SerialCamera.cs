@@ -47,7 +47,7 @@ public class SerialCamera : Capture, IDisposable
         }
         catch (Exception ex)
         {
-            BabbleCore.Instance.Logger.LogError($"Failed to open serial port {Url}: {ex.Message}"); // xlinka 11/8/24: Improved logging to include specific error message
+            BabbleCore.Instance.Logger.LogError($"Failed to open serial port {Url}: {ex.Message}"); // xlinka 11/8/24: Improved logging.
             IsReady = false;
             return false;
         }
@@ -63,7 +63,7 @@ public class SerialCamera : Capture, IDisposable
         }
         catch (Exception ex)
         {
-            BabbleCore.Instance.Logger.LogError($"Failed to close serial port {Url}: {ex.Message}"); // xlinka 11/8/24: Improved logging to include specific error message
+            BabbleCore.Instance.Logger.LogError($"Failed to close serial port {Url}: {ex.Message}"); // xlinka 11/8/24: Improved logging.
             return false;
         }
     }
@@ -114,7 +114,7 @@ public class SerialCamera : Capture, IDisposable
         {
             // xlinka 11/8/24: Read data into buffer, respecting current buffer position to avoid overwriting data
             int bytesRead = _serialPort.Read(_buffer, _bufferPosition, Math.Min(2048, _buffer.Length - _bufferPosition));
-
+            
             if (bytesRead == 0)
             {
                 return (-1, -1);
@@ -137,6 +137,7 @@ public class SerialCamera : Capture, IDisposable
         int jpegSize = BitConverter.ToUInt16(_buffer, headerPos + 4); // xlinka 11/8/24: Read size directly after header
 
         // Ensure buffer has enough space for JPEG data
+        // Adjusted buffer resizing logic in GetNextPacketBounds to dynamically expand the buffer if the JPEG data size exceeds its current capacity. This ensures sufficient buffer space without truncating data.
         if (_buffer.Length < headerPos + ETVR_HEADER_LEN + jpegSize)
         {
             Array.Resize(ref _buffer, headerPos + ETVR_HEADER_LEN + jpegSize); // xlinka 11/8/24: Resize buffer if necessary
