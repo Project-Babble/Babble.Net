@@ -81,9 +81,6 @@ public partial class AlgoView : UserControl
 
     private void CalibrationDeadzoneEntry_LostFocus(object? sender, RoutedEventArgs e)
     {
-        if (!Validation.IsGreaterThanZero(_viewModel.CalibrationDeadzoneEntryText))
-            return;
-
         BabbleCore.Instance.Settings.UpdateSetting<double>(
             nameof(BabbleCore.Instance.Settings.GeneralSettings.CalibDeadzone),
             _viewModel.CalibrationDeadzoneEntryText.ToString());
