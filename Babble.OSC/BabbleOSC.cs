@@ -66,7 +66,7 @@ public partial class BabbleOSC
                 {
                     case OscSocketState.Connected:
                         foreach (var exp in Expressions.InnerKeys)
-                            _sender.Send(new OscMessage($"{prefix}{exp}", Expressions.GetByKey2(exp) * mul));
+                            _sender.Send(new OscMessage($"/{prefix}{exp}", Expressions.GetByKey2(exp) * mul));
                         break;
                     case OscSocketState.Closed:
                         _sender.Close();
@@ -75,12 +75,11 @@ public partial class BabbleOSC
                         break;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // Ignore network exceptions
             }
 
-            End:
             Thread.Sleep(10);
         }
     }

@@ -5,10 +5,22 @@
     <LangVersion>latest</LangVersion>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+    <AssemblyName></AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Title>Babble App</Title>
+    <Company>Paradigm Enhancement Reality Labs</Company>
+    <PackageProjectUrl>https://github.com/Project-Babble</PackageProjectUrl>
+    <PackageIcon>Icon.png</PackageIcon>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,8 +43,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\About.axaml.cs">
-      <DependentUpon>About.axaml</DependentUpon>
+    <Compile Update="Views\AboutView.axaml.cs">
+      <DependentUpon>AboutView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\CalibrationView.axaml.cs">
       <DependentUpon>CalibrationView.axaml</DependentUpon>
@@ -52,5 +64,12 @@
     <Compile Update="Views\CamView.axaml.cs">
       <DependentUpon>CamView.axaml</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\Icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>

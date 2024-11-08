@@ -31,10 +31,6 @@ public class DesktopConnector : PlatformConnector
         {
             Capture = new ImageCapture(Url);
         }
-        else if (IPConnections.Any(prefix => Url.EndsWith(prefix, StringComparison.OrdinalIgnoreCase)))
-        {
-            Capture = new IPCameraCapture(Url);
-        }
         else
         {
             // TODO: Fix the IP Camera thingy in this lmao

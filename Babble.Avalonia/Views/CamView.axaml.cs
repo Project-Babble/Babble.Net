@@ -6,51 +6,50 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using Babble.Avalonia.ReactiveObjects;
+using Babble.Avalonia.Scripts;
 using Babble.Avalonia.Scripts.Enums;
 using Babble.Core;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Babble.Avalonia;
 
-public partial class CamView : UserControl
+public partial class CamView : UserControl, IIsVisible
 {
+    public bool Visible { get; set; }
+
     private readonly CamViewModel _viewModel;
     private CamViewMode camViewMode = CamViewMode.Tracking;
-    private bool ShouldDraw;
 
     public CamView()
     {
         InitializeComponent();
+        Loaded += CamView_OnLoaded;
+        Unloaded += CamView_Unloaded;
 
         _viewModel = new CamViewModel();
         DataContext = _viewModel;
-
-        Loaded += CamView_OnLoaded;
-        Unloaded += CamView_Unloaded;
 
         this.FindControl<Slider>("RotationSlider")!.ValueChanged += RotationEntry_ValueChanged;
         this.FindControl<CheckBox>("EnableCalibration")!.IsCheckedChanged += EnableCalibration_Changed;
         this.FindControl<CheckBox>("VerticalFlip")!.IsCheckedChanged += VerticalFlip_Changed;
         this.FindControl<CheckBox>("HorizontalFlip")!.IsCheckedChanged += HorizontalFlip_Changed;
-        this.FindControl<TextBox>("CameraAddressEntry")!.LostFocus += CameraAddress_LostFocus;
 
         StartImageUpdates();
     }
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
     {
-        ShouldDraw = true;
+        Visible = true;
     }
 
     private void CamView_Unloaded(object? sender, RoutedEventArgs e)
     {
-        ShouldDraw = false;
+        Visible = false;
     }
 
     private void RotationEntry_ValueChanged(object? sender, RangeBaseValueChangedEventArgs e)
     {
-        if (_viewModel.Rotation < 1)
+        if (_viewModel.Rotation < 12)
         {
             BabbleCore.Instance.Settings.UpdateSetting<double>(
                 nameof(BabbleCore.Instance.Settings.Cam.RotationAngle),
@@ -99,14 +98,6 @@ public partial class CamView : UserControl
         }
     }
 
-    private void CameraAddress_LostFocus(object? sender, RoutedEventArgs e)
-    {
-        BabbleCore.Instance.Settings.UpdateSetting<string>(
-            nameof(BabbleCore.Instance.Settings.Cam.CaptureSource),
-            _viewModel.CameraAddressEntryText);
-        BabbleCore.Instance.Settings.Save();
-    }
-
     private void StartImageUpdates()
     {
         // Start a timer to draw our face image
@@ -136,7 +127,7 @@ public partial class CamView : UserControl
                 return;
         }
 
-        if (valid && ShouldDraw)
+        if (valid && Visible)
         {
             if (dims.width == 0 || dims.height == 0)
             {
@@ -176,6 +167,14 @@ public partial class CamView : UserControl
             MouthWindow.Height = 0;
             Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
         }
+    }
+
+    public void CameraAddressClicked(object? sender, RoutedEventArgs e)
+    {
+        BabbleCore.Instance.Settings.UpdateSetting<string>(
+            nameof(BabbleCore.Instance.Settings.Cam.CaptureSource),
+            _viewModel.CameraAddressEntryText);
+        BabbleCore.Instance.Settings.Save();
     }
 
     public void OnTrackingModeClicked(object sender, RoutedEventArgs args)

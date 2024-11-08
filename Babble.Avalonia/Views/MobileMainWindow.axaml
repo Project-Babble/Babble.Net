@@ -19,7 +19,7 @@
 			<TabItem Header="Algo Settings" x:Name="AlgoHeaderText" Foreground="White">
 				<views:AlgoView/>
 			</TabItem>
-			<TabItem Header="Setting" x:Name="SettingsHeaderText" Foreground="White">
+			<TabItem Header="Settings" x:Name="SettingsHeaderText" Foreground="White">
 				<views:SettingsView/>
 			</TabItem>
 		</TabControl>

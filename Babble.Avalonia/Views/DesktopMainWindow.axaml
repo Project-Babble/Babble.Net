@@ -5,7 +5,7 @@
         xmlns:views="clr-namespace:Babble.Avalonia"
         mc:Ignorable="d"
         x:Class="Babble.Avalonia.Views.DesktopMainWindow"
-        Title="Babble v2.0.6"
+        Title="Babble App v2.0.6"
         Width="700" Height="700"
         Background="#2D2D2D">
     <Grid Margin="10">
@@ -14,13 +14,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TabControl Grid.Row="1" Margin="0,10,0,0">
-            <TabItem Header="Cam" x:Name="CameraHeaderText">
+            <TabItem Header="Cam" x:Name="CameraHeaderText" Foreground="White" FontSize="20">
                 <views:CamView/>
             </TabItem>
-            <TabItem Header="Algo Settings" x:Name="AlgoHeaderText">
+            <TabItem Header="Algo Settings" x:Name="AlgoHeaderText" Foreground="White" FontSize="20">
                 <views:AlgoView/>
             </TabItem>
-            <TabItem Header="Setting" x:Name="SettingsHeaderText">
+            <TabItem Header="Settings" x:Name="SettingsHeaderText" Foreground="White" FontSize="20">
                 <views:SettingsView/>
             </TabItem>
         </TabControl>

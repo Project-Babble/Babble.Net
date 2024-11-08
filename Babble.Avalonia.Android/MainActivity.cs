@@ -7,7 +7,7 @@ using Avalonia.Android;
 namespace Babble.Avalonia.Android;
 
 [Activity(
-    Label = "Babble.Avalonia.Android",
+    Label = "Babble App",
     Theme = "@style/MyTheme.NoActionBar",
     Icon = "@drawable/icon",
     MainLauncher = true,

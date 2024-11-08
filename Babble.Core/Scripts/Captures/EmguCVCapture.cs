@@ -11,25 +11,36 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class EmguCVCapture : Capture
 {
+    private static readonly object lockObject = new object();
+
     public override Mat RawFrame
     {
         get
         {
-            if (_videoCapture is not null && _videoCapture.IsOpened)
+            lock (lockObject)
             {
-                // Call QueryFrame with a 100ms timeout
-                var frameTask = Task.Run(() => _videoCapture.QueryFrame());
-                if (frameTask.Wait(TimeSpan.FromMilliseconds(100)))
+                if (_videoCapture is not null && _videoCapture.IsOpened)
                 {
-                    var frame = frameTask.Result;
+                    // Call QueryFrame with a 100ms timeout
+                    var frame = _videoCapture.QueryFrame();
                     if (frame is not null)
                     {
                         return frame;
                     }
-                }
-            }
 
-            return EmptyMat;
+                    //var frameTask = Task.Run(() => _videoCapture.QueryFrame());
+                    //if (frameTask.Wait(TimeSpan.FromMilliseconds(100)))
+                    //{
+                    //    var frame = frameTask.Result;
+                    //    if (frame is not null)
+                    //    {
+                    //        return frame;
+                    //    }
+                    //}
+                }
+
+                return EmptyMat;
+            }
         }
         set => throw new NotImplementedException();
     }
@@ -38,21 +49,29 @@ public class EmguCVCapture : Capture
     {
         get
         {
-            if (_videoCapture is not null && _videoCapture.IsOpened)
+            lock (lockObject)
             {
-                // Call QueryFrame with a 100ms timeout
-                var frameTask = Task.Run(() => _videoCapture.QueryFrame());
-                if (frameTask.Wait(TimeSpan.FromMilliseconds(100)))
+                if (_videoCapture is not null && _videoCapture.IsOpened)
                 {
-                    var frame = frameTask.Result;
+                    var frame = _videoCapture.QueryFrame();
                     if (frame is not null)
                     {
                         return (frame.Width, frame.Height);
                     }
-                }
-            }
 
-            return DefaultFrameDimensions;
+                    //var frameTask = Task.Run(() => _videoCapture.QueryFrame());
+                    //if (frameTask.Wait(TimeSpan.FromMilliseconds(100)))
+                    //{
+                    //    var frame = frameTask.Result;
+                    //    if (frame is not null)
+                    //    {
+                    //        return (frame.Width, frame.Height);
+                    //    }
+                    //}
+                }
+
+                return DefaultFrameDimensions;
+            }
         }
     }
 
@@ -62,7 +81,6 @@ public class EmguCVCapture : Capture
     public override string Url { get; set; }
 
     private VideoCapture _videoCapture;
-    private Thread _thread;
 
     public EmguCVCapture(string Url) : base(Url)
     {
@@ -70,7 +88,24 @@ public class EmguCVCapture : Capture
 
     public override bool StartCapture()
     {
-        _videoCapture = new VideoCapture(Url);
+        using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
+        {
+            try
+            {
+                // Attempt to create VideoCapture with timeout
+                _videoCapture = Task.Run(() =>
+                {
+                    return new VideoCapture(Url);
+                }, cts.Token).Result;
+            }
+            catch (AggregateException)
+            {
+                // If timeout occurs or any other exception, fall back to default camera
+                var url = "0";
+                _videoCapture = new VideoCapture(url);
+                BabbleCore.Instance.Settings.UpdateSetting<string>("capture_source", url);
+            }
+        }
 
         var x = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_x");
         var y = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_y");
@@ -98,10 +133,6 @@ public class EmguCVCapture : Capture
     public override bool StopCapture()
     {
         IsReady = false;
-        if (_thread is not null)
-        {
-            _thread.Join();
-        }
 
         if (_videoCapture is null)
         {

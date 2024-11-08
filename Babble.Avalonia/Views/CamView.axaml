@@ -22,11 +22,12 @@
 			<TextBox Text="{Binding CameraAddressEntryText}" 
 					 ToolTip.Tip="{Binding CameraAddressTextTooltip}"
 					 x:Name="CameraAddressEntry" 
-					 Background="#2D2D2D" 
+					 Background="#2D2D2D"
 					 Foreground="White"/>
 			<Button Content="{Binding SaveAndRestartTrackingText}"
 					ToolTip.Tip="{Binding SaveAndRestartTrackingText}"
 					x:Name="SaveAndRestartTrackingText"
+					Click="CameraAddressClicked"
                     Background="#4CAF50"
                     Foreground="White"/>
 			<Image x:Name="MouthWindow"
@@ -38,11 +39,13 @@
 				<Button Content="{Binding TrackingModeText}"
 						x:Name="TrackingModeText"
 						ToolTip.Tip="{Binding TrackingModeTextTooltip}"
+						Click="OnTrackingModeClicked"
                         Background="#4CAF50"
                         Foreground="White"/>
 				<Button Content="{Binding CroppingModeText}"
 						x:Name="CroppingModeText"
 						ToolTip.Tip="{Binding CroppingModeTextTooltip}"
+						Click="OnCroppingModeClicked"
                         Background="#4CAF50"
                         Foreground="White"/>
 			</StackPanel>

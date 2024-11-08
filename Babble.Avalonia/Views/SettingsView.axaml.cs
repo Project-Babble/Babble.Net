@@ -7,14 +7,18 @@ using Babble.Locale;
 
 namespace Babble.Avalonia;
 
-public partial class SettingsView : UserControl
+public partial class SettingsView : UserControl, IIsVisible
 {
+    public bool Visible { get; set; }
+
     private readonly SettingsViewModel _viewModel;
     private readonly ComboBox comboBox;
 
     public SettingsView()
     {
         InitializeComponent();
+        Loaded += CamView_OnLoaded;
+        Unloaded += CamView_Unloaded;
 
         _viewModel = new SettingsViewModel();
         DataContext = _viewModel;
@@ -36,6 +40,16 @@ public partial class SettingsView : UserControl
             comboBox.Items.Add(item);
         comboBox.SelectedIndex = 0;
         comboBox.SelectionChanged += ComboBox_SelectionChanged;
+    }
+
+    private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
+    {
+        Visible = true;
+    }
+
+    private void CamView_Unloaded(object? sender, RoutedEventArgs e)
+    {
+        Visible = false;
     }
 
     private void CheckForUpdates_Changed(object? sender, RoutedEventArgs e)

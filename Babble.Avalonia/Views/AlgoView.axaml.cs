@@ -6,13 +6,17 @@ using Babble.Core;
 
 namespace Babble.Avalonia;
 
-public partial class AlgoView : UserControl
+public partial class AlgoView : UserControl, IIsVisible
 {
     private readonly AlgoSettingsViewModel _viewModel;
+
+    public bool Visible { get; set; }
 
     public AlgoView()
     {
         InitializeComponent();
+        Loaded += CamView_OnLoaded;
+        Unloaded += CamView_Unloaded;
 
         _viewModel = new AlgoSettingsViewModel();
         DataContext = _viewModel;
@@ -25,6 +29,16 @@ public partial class AlgoView : UserControl
         this.FindControl<TextBox>("CalibrationDeadzoneEntry")!.LostFocus += CalibrationDeadzoneEntry_LostFocus;
         this.FindControl<TextBox>("MinFrequencyCutoffEntry")!.LostFocus += MinFrequencyCutoffEntry_LostFocus;
         this.FindControl<TextBox>("SpeedCoefficientEntry")!.LostFocus += SpeedCoefficientEntry_LostFocus;
+    }
+
+    private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
+    {
+        Visible = true;
+    }
+
+    private void CamView_Unloaded(object? sender, RoutedEventArgs e)
+    {
+        Visible = false;
     }
 
     private void ModelFileEntry_LostFocus(object? sender, RoutedEventArgs e)

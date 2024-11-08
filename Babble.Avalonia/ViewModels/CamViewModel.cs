@@ -59,6 +59,15 @@ public partial class CamViewModel : ObservableObject, ILocalizable
 
         Localize();
         LocaleManager.OnLocaleChanged += Localize;
+        BabbleCore.Instance.Settings.OnUpdate += Settings_OnUpdate;
+    }
+
+    // Handle a very niche edge case where the user starts up the application
+    // With a previously correct URL, but it's not ready just yet
+    private void Settings_OnUpdate(string obj)
+    {
+        var settings = BabbleCore.Instance.Settings;
+        cameraAddressEntryText = settings.Cam.CaptureSource;
     }
 
     public void Localize()
@@ -70,7 +79,7 @@ public partial class CamViewModel : ObservableObject, ILocalizable
         TrackingModeText = LocaleManager.Instance["camera.trackingMode"];
         TrackingModeTextTooltip = LocaleManager.Instance["camera.trackingModeTooltip"];
         CroppingModeText = LocaleManager.Instance["camera.croppingMode"];
-        CroppingModeTextTooltip = LocaleManager.Instance["camera.croppingModeTooltip"];
+        // CroppingModeTextTooltip = LocaleManager.Instance["camera.croppingModeTooltip"];
         RotationText = LocaleManager.Instance["camera.rotation"];
         RotationTextTooltip = LocaleManager.Instance["camera.rotationTooltip"];
         StartCalibrationText = LocaleManager.Instance["camera.startCalibration"];
