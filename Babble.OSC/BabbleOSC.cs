@@ -7,10 +7,10 @@ namespace Babble.OSC;
 public partial class BabbleOSC
 {
     private OscSender _sender;
+    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly Task _sendTask;
 
-    private bool _loop = true;
 
-    private readonly Thread _thread;
 
     private readonly int _resolvedLocalPort;
 
@@ -35,9 +35,8 @@ public partial class BabbleOSC
 
         ConfigureReceiver();
 
-        _loop = true;
-        _thread = new Thread(new ThreadStart(SendLoop));
-        _thread.Start();
+        _cancellationTokenSource  = new CancellationTokenSource();
+        _sendTask = Task.Run(() => SendLoopAsync(_cancellationTokenSource.Token));
     }
 
 
@@ -51,11 +50,12 @@ public partial class BabbleOSC
         _sender.Connect();
     }
 
-    private void SendLoop()
+    //refactored to a async task for non blocking execution.
+    private async Task SendLoopAsync(CancellationToken cancellationToken)
     {
         var settings = BabbleCore.Instance.Settings;
 
-        while (_loop)
+        while (!cancellationToken.IsCancellationRequested)
         {
             var prefix = settings.GetSetting<string>("gui_osc_location");
             var mul = settings.GetSetting<double>("gui_multiply");
@@ -77,18 +77,21 @@ public partial class BabbleOSC
             }
             catch (Exception e)
             {
-                // Ignore network exceptions
+                // Ignore network exceptions 
             }
 
-            Thread.Sleep(10);
+            await Task.Delay(10, cancellationToken);
+
         }
     }
 
+
+    //Cancels the token waits for _sendTask to finish and then disposes of all resources allocated.
     public void Teardown()
     {
-        _loop = false;
+        _cancellationTokenSource.Cancel();
         _sender.Close();
         _sender.Dispose();
-        _thread.Join();
+        _cancellationTokenSource.Dispose();
     }
 }
