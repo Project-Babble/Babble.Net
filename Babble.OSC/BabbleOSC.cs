@@ -7,11 +7,12 @@ namespace Babble.OSC;
 public partial class BabbleOSC
 {
     private OscSender _sender;
+    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly Task _sendTask;
 
-    private bool _loop = true;
-
-    private readonly Thread _thread;
-
+    private const int maxretries = 5;
+    private int _connectionattemtps;
+    private const int SEND_INTERVAL_MS = 10;
     private readonly int _resolvedLocalPort;
 
     private readonly int _resolvedRemotePort;
@@ -25,7 +26,7 @@ public partial class BabbleOSC
     public const int DEFAULT_REMOTE_PORT = 8888;
 
     private const int TIMEOUT_MS = 10000;
-
+    public event EventHandler? OnConnectionLost;
 
     public BabbleOSC(string? host = null, int? remotePort = null, int ? localPort = null)
     {
@@ -35,9 +36,8 @@ public partial class BabbleOSC
 
         ConfigureReceiver();
 
-        _loop = true;
-        _thread = new Thread(new ThreadStart(SendLoop));
-        _thread.Start();
+        _cancellationTokenSource  = new CancellationTokenSource();
+        _sendTask = Task.Run(() => SendLoopAsync(_cancellationTokenSource.Token));
     }
 
 
@@ -51,44 +51,72 @@ public partial class BabbleOSC
         _sender.Connect();
     }
 
-    private void SendLoop()
+    //refactored to a async task for non blocking execution.
+    private async Task SendLoopAsync(CancellationToken cancellationToken)
     {
         var settings = BabbleCore.Instance.Settings;
 
-        while (_loop)
+        while (!cancellationToken.IsCancellationRequested)
         {
             var prefix = settings.GetSetting<string>("gui_osc_location");
             var mul = settings.GetSetting<double>("gui_multiply");
-            
+
             try
             {
                 switch (_sender.State)
                 {
                     case OscSocketState.Connected:
+                        _connectionattemtps = 0; // Reset retry counter on successful connection
+
                         foreach (var exp in Expressions.InnerKeys)
-                            _sender.Send(new OscMessage($"/{prefix}{exp}", Expressions.GetByKey2(exp) * mul));
+                        {
+                            var message = new OscMessage($"/{prefix}{exp}", Expressions.GetByKey2(exp) * mul);
+                            _sender.Send(message);  // Using OscSender.Send directly
+                        }
                         break;
+
                     case OscSocketState.Closed:
-                        _sender.Close();
-                        _sender.Dispose();
-                        ConfigureReceiver();
+                        if (_connectionattemtps < maxretries)
+                        {
+                            _connectionattemtps++;
+
+                            // Close and dispose the current sender
+                            _sender.Close();
+                            _sender.Dispose();
+
+                            // Delay before attempting to reconnect
+                            await Task.Delay(1000, cancellationToken);
+
+                            // Attempt to reconfigure the receiver and reconnect
+                            ConfigureReceiver();
+                        }
+                        else
+                        {
+                            // Trigger the connection lost event after max retries reached
+                            OnConnectionLost?.Invoke(this, EventArgs.Empty);
+                            return; // Exit the loop
+                        }
                         break;
                 }
             }
             catch (Exception e)
             {
-                // Ignore network exceptions
+                //IGNORE THIS
             }
 
-            Thread.Sleep(10);
+            // Delay between each loop iteration to avoid high CPU usage
+            await Task.Delay(SEND_INTERVAL_MS, cancellationToken);
         }
     }
 
+
+
+    //Cancels the token waits for _sendTask to finish and then disposes of all resources allocated.
     public void Teardown()
     {
-        _loop = false;
+        _cancellationTokenSource.Cancel();
         _sender.Close();
         _sender.Dispose();
-        _thread.Join();
+        _cancellationTokenSource.Dispose();
     }
 }
