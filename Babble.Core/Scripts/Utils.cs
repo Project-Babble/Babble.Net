@@ -146,21 +146,21 @@ public static class Utils
         return Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
     }
 
-    public static void ExtractEmbeddedResource(Assembly assembly, string pathName, string fileName, bool overwrite = false)
+    public static void ExtractEmbeddedResource(Assembly assembly, string resourceName, string file, bool overwrite = false)
     {
         // Extract the embedded model if it isn't already present
-        if (!File.Exists(pathName) || overwrite)
+        if (!File.Exists(file) || overwrite)
         {
             using var stm = assembly
-                .GetManifestResourceStream(fileName);
+                .GetManifestResourceStream(resourceName);
 
-            using Stream outFile = File.Create(pathName);
+            using Stream outFile = File.Create(file);
 
             const int sz = 4096;
             var buf = new byte[sz];
             while (true)
             {
-                if (stm == null) throw new FileNotFoundException(fileName);
+                if (stm == null) throw new FileNotFoundException(file);
                 var nRead = stm.Read(buf, 0, sz);
                 if (nRead < 1)
                     break;

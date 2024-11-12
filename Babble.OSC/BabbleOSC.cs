@@ -56,8 +56,8 @@ public class BabbleOSC
         var resources = Assembly.GetExecutingAssembly().GetManifestResourceNames();
         foreach (var resource in resources)
         {
-            var pathName = Path.Combine(AppContext.BaseDirectory, resource);
-            Utils.ExtractEmbeddedResource(Assembly.GetExecutingAssembly(), pathName, resource, overwrite: true);
+            var extractedResource = Path.Combine(AppContext.BaseDirectory, resource);
+            Utils.ExtractEmbeddedResource(Assembly.GetExecutingAssembly(), resource, extractedResource, overwrite: true);
         }
 
         LoadMappingsFromFile(Path.Combine(AppContext.BaseDirectory, "Babble.OSC.LipExpressionsManifest.txt"));
@@ -228,7 +228,7 @@ public class BabbleOSC
             expressionName.StartsWith("Mouth") ||
             expressionName.StartsWith("Lip"))
         {
-            return ExpressionPriority.High;
+            return ExpressionPriority.Low;
         }
 
         // Low priority for less noticeable expressions
@@ -239,7 +239,7 @@ public class BabbleOSC
         }
 
         // Medium priority for everything else
-        return ExpressionPriority.Medium;
+        return ExpressionPriority.Low;
     }
 
     private List<ExpressionMapping> CreateMappingsFromAddress(string address)
@@ -439,7 +439,7 @@ public class BabbleOSC
                     // Convert bool to float (0f or 1f)
                     return bits[Array.IndexOf(Float8Converter.BinaryPowers, power)] ? 1f : 0f;
                 },
-                ExpressionPriority.Low  // Binary parameters are low priority
+                ExpressionPriority.Medium  // Binary parameters are low priority
             );
 
             binaryMappings.Add(binaryMapping);

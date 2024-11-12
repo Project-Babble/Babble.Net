@@ -117,6 +117,6 @@ public sealed class GeneralSettings
         GuiCamFramerate = 0;
 
         // Language
-        GuiLanguage = "English";
+        GuiLanguage = "en-us";
     }
 }

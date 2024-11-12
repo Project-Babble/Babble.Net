@@ -89,7 +89,9 @@ namespace Avalonia.Localizer.Core.Localization
         /// <exception cref="CultureNotFoundException"> Missing a localization package for this language code </exception>
         public bool SwitchLanguage(string languageCode)
         {
-            var uri = new Uri($"{LocalizationPath}/{languageCode.ToLower()}.json");
+            languageCode = languageCode.ToLower();
+
+            var uri = new Uri($"{LocalizationPath}/{languageCode}.json");
 
             if (!AssetLoader.Exists(uri))
             {

@@ -15,7 +15,7 @@
 
 	<ScrollViewer VerticalScrollBarVisibility="Auto">
 		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
-		<StackPanel Spacing="5">
+		<StackPanel Spacing="5" Margin="0,0,0,0">
 			<TextBlock Text="{localization:Localize camera.cameraAddress}" 
 					   ToolTip.Tip="{localization:Localize camera.cameraAddressTooltip}"
 					   x:Name="CameraAddressText" 
@@ -36,7 +36,7 @@
                    Grid.Column="0"
                    Grid.Row="0"
                    Stretch="None"/>
-			<StackPanel Orientation="Horizontal" Spacing="5">
+			<StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,0">
 				<Button Content="{localization:Localize camera.trackingMode}"
 						x:Name="TrackingModeText"
 						ToolTip.Tip="{localization:Localize camera.trackingModeTooltip}"
@@ -49,12 +49,19 @@
                         Background="#4CAF50"
                         Foreground="White"/>
 			</StackPanel>
-			<TextBlock Text="{localization:Localize RotationText}" x:Name="RotationText" Foreground="White"/>
-			<Slider x:Name="RotationSlider" 
-					Minimum="0" 
-					Maximum="360" 
-					Value="{Binding Rotation}" />
-			<StackPanel Orientation="Horizontal" Spacing="5">
+
+			<StackPanel Spacing="5"  Margin="0,5,0,0">
+				<TextBlock Text="{localization:Localize camera.rotation}"
+						   ToolTip.Tip="{localization:Localize camera.rotationTooltip}" 
+						   x:Name="RotationText" 
+						   Foreground="White"/>
+				<Slider x:Name="RotationSlider" 
+						Minimum="0" 
+						Maximum="360" 
+						Value="{Binding Rotation}" />
+			</StackPanel>
+			
+			<StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,0">
 				<Button Content="{localization:Localize camera.startCalibration}"
 						x:Name="StartCalibrationText"
 						ToolTip.Tip="{localization:Localize camera.startCalibrationTooltip}"

@@ -60,6 +60,7 @@ public partial class SettingsViewModel : ObservableObject
         Port = settings.GeneralSettings.GuiOscPort;
         ReceiverPort = settings.GeneralSettings.GuiOscReceiverPort;
         RecalibrateAddress = settings.GeneralSettings.GuiOscRecalibrateAddress;
+        ForceRelevancy = settings.GeneralSettings.GuiForceRelevancy;
         UseRedChannel = settings.GeneralSettings.GuiUseRedChannel;
         ForceRelevancy = settings.GeneralSettings.GuiForceRelevancy;
         XResolution = settings.GeneralSettings.GuiCamResolutionX;

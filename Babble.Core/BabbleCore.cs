@@ -92,7 +92,11 @@ public class BabbleCore
         // Model manifest on Github?
         const string modelName = "model.onnx";
         string modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
-        Utils.ExtractEmbeddedResource(Assembly.GetExecutingAssembly(), modelPath, modelName);
+        Utils.ExtractEmbeddedResource(
+            Assembly.GetExecutingAssembly(), 
+            Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(x => x.Contains("model.onnx")).First(), // Babble model
+            modelPath, 
+            overwrite: true);
 
         SessionOptions sessionOptions = SetupSessionOptions();
 

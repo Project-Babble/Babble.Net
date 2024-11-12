@@ -4,6 +4,7 @@ using Avalonia.Localizer.Core;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;
 using Babble.Core;
+using Meadow;
 
 namespace Babble.Avalonia;
 
@@ -38,9 +39,16 @@ public partial class SettingsView : UserControl, IIsVisible
 
         comboBox = this.Find<ComboBox>("LanguageCombo")!;
         comboBox!.Items.Clear();
+        int i = 0;
         foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
+        {
             comboBox.Items.Add(item);
-        comboBox.SelectedIndex = 0;
+            if (item == LocalizerCore.Localizer.Language)
+            {
+                comboBox.SelectedIndex =  i;
+            }
+            i++;
+        }
         comboBox.SelectionChanged += ComboBox_SelectionChanged;
     }
 
@@ -119,7 +127,7 @@ public partial class SettingsView : UserControl, IIsVisible
 
     private void ReceiverPort_LostFocus(object? sender, RoutedEventArgs e)
     {
-        if (!Validation.IsPortValid(_viewModel.Port))
+        if (!Validation.IsPortValid(_viewModel.ReceiverPort))
             return;
 
         BabbleCore.Instance.Settings.UpdateSetting<int>(

@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="LipExpressionsManifest.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 

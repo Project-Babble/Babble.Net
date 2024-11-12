@@ -8,13 +8,13 @@ namespace Avalonia.Localizer.Core.Interfaces
     internal interface ILocalizer
     {
         /// <summary>
-        /// Gets current language code in format: 'en-US'
+        /// Gets current language code in format: 'en-us'
         /// </summary>
         /// <value> Current language code </value>
         string Language { get; }
 
         /// <summary>
-        /// Gets list of languages with available localization packages in format: 'en-US'
+        /// Gets list of languages with available localization packages in format: 'en-us'
         /// </summary>
         /// <value> List of available languages </value>
         List<string> AvailableLanguages { get; }
@@ -32,7 +32,7 @@ namespace Avalonia.Localizer.Core.Interfaces
         /// <summary>
         /// Switch current language
         /// </summary>
-        /// <param name="languageCode"> Language code in format: 'en-US' </param>
+        /// <param name="languageCode"> Language code in format: 'en-us' </param>
         /// <returns> True, if switched </returns>
         bool SwitchLanguage(string languageCode);
     }
