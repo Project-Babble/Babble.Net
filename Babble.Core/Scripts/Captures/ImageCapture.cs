@@ -43,7 +43,7 @@ public class ImageCapture : Capture
         }
     }
 
-    public override bool IsReady { get; set; }
+    public override bool IsReady { get; protected set; }
     public override string Url { get; set; }
 
     public override bool StartCapture()

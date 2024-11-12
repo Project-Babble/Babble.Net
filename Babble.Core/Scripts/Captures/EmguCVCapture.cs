@@ -46,7 +46,7 @@ public class EmguCVCapture : Capture
     /// <summary>
     /// Indicates if the camera is ready for capturing frames.
     /// </summary>
-    public override bool IsReady { get; set; }
+    public override bool IsReady { get; protected set; }
 
     /// <summary>
     /// Camera URL or source identifier.

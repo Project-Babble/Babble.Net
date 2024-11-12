@@ -7,14 +7,14 @@ namespace Babble.Core.Scripts.Decoders;
 
 /// <summary>
 /// Serial Camera capture class intended for use on Desktop platforms
-/// Babble-board specific implementation, assumes a fixed camera size of 256x256
+/// Babble-board specific implementation, assumes a fixed camera size of 240x240
 /// </summary>
-public class SerialCamera : Capture, IDisposable
+public class SerialCameraCapture : Capture, IDisposable
 {
     private const int BAUD_RATE = 3000000;
-    private static readonly byte[] ETVR_HEADER = { 0xff, 0xa0 }; // xlinka 11/8/24: Changed to use array initializer
+    private static readonly byte[] ETVR_HEADER = { 0xff, 0xa0 };       // xlinka 11/8/24: Changed to use array initializer
     private static readonly byte[] ETVR_HEADER_FRAME = { 0xff, 0xa1 }; // xlinka 11/8/24: Changed to use array initializer
-    private const int ETVR_HEADER_LEN = 6;  // 2 bytes header + 2 bytes frame type + 2 bytes size
+    private const int ETVR_HEADER_LEN = 6;                             // 2 bytes header + 2 bytes frame type + 2 bytes size
 
     private readonly SerialPort _serialPort;
     private byte[] _buffer = new byte[2048];
@@ -22,11 +22,13 @@ public class SerialCamera : Capture, IDisposable
     private bool _isDisposed;
 
     public override string Url { get; set; }
-    public override Mat RawFrame { get; }
+    public override Mat RawFrame { get; } = new Mat();
     public override (int width, int height) Dimensions => (240, 240);
-    public override bool IsReady { get; set; }
+    public override bool IsReady { get; protected set; }
 
-    public SerialCamera(string portName) : base(portName)
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    public SerialCameraCapture(string portName) : base(portName)
     {
         _serialPort = new SerialPort
         {
@@ -42,6 +44,7 @@ public class SerialCamera : Capture, IDisposable
         try
         {
             _serialPort.Open();
+            Task.Run(GetNextFrame, _cancellationTokenSource.Token);
             IsReady = true;
             return true;
         }
@@ -57,6 +60,7 @@ public class SerialCamera : Capture, IDisposable
     {
         try
         {
+            _cancellationTokenSource.Cancel();
             _serialPort.Close();
             IsReady = false;
             return true;
@@ -68,40 +72,45 @@ public class SerialCamera : Capture, IDisposable
         }
     }
 
-    private Mat GetNextFrame()
+    private Task GetNextFrame()
     {
-        if (!IsReady || !_serialPort.IsOpen) return EmptyMat;
-
-        try
+        while (!_cancellationTokenSource.IsCancellationRequested)
         {
-            if (_serialPort.BytesToRead > 0)
+            if (!IsReady || !_serialPort.IsOpen) continue;
+
+            try
             {
-                var (start, jpegSize) = GetNextPacketBounds();
-                if (start == -1 || jpegSize == -1) return EmptyMat;
-
-                byte[] jpegData = new byte[jpegSize];
-                Array.Copy(_buffer, start + ETVR_HEADER_LEN, jpegData, 0, jpegSize);
-
-                if (jpegData.Length >= 2 && jpegData[0] == 0xFF && jpegData[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
+                if (_serialPort.BytesToRead > 0)
                 {
+                    var (start, jpegSize) = GetNextPacketBounds();
+                    if (start == -1 || jpegSize == -1) continue;
+
+                    byte[] jpegData = new byte[jpegSize];
+                    Array.Copy(_buffer, start + ETVR_HEADER_LEN, jpegData, 0, jpegSize);
+
+                    if (jpegData.Length >= 2 && jpegData[0] == 0xFF && jpegData[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
+                    {
+                        _bufferPosition = 0;
+                        CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawFrame);
+                        continue;
+                    }
+
+                    // xlinka 11/8/24: Clear buffer after processing each frame to prevent leftover data
+                    Array.Clear(_buffer, 0, _buffer.Length);
                     _bufferPosition = 0;
-                    CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawFrame);
-                    return RawFrame;
                 }
-
-                // xlinka 11/8/24: Clear buffer after processing each frame to prevent leftover data
-                Array.Clear(_buffer, 0, _buffer.Length);
-                _bufferPosition = 0;
             }
-        }
-        catch (Exception ex)
-        {
-            IsReady = false;
-            _serialPort.Close();
-            BabbleCore.Instance.Logger.LogError($"Error reading frame on port {Url} at buffer position {_bufferPosition}: {ex.Message}"); // xlinka 11/8/24: Added detailed logging for frame reading errors
+            catch (Exception ex)
+            {
+                IsReady = false;
+                _serialPort.Close();
+                BabbleCore.Instance.Logger.LogError($"Error reading frame on port {Url} at buffer position {_bufferPosition}: {ex.Message}"); // xlinka 11/8/24: Added detailed logging for frame reading errors
+            }
+
+            Task.Delay(100);
         }
 
-        return EmptyMat;
+        return Task.CompletedTask;
     }
 
     private (int start, int size) GetNextPacketBounds()
@@ -183,7 +192,7 @@ public class SerialCamera : Capture, IDisposable
         GC.SuppressFinalize(this); // xlinka 11/8/24: Suppress finalization as resources are now disposed
     }
 
-    ~SerialCamera()
+    ~SerialCameraCapture()
     {
         Dispose(false);
     }

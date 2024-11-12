@@ -16,7 +16,7 @@ public class DummyCapture : Capture
 
     public override (int width, int height) Dimensions => DefaultFrameDimensions;
 
-    public override bool IsReady { get; set; }
+    public override bool IsReady { get; protected set; }
 
     public DummyCapture(string Url) : base(Url)
     {

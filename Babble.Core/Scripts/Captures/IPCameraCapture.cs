@@ -16,7 +16,7 @@ public class IPCameraCapture : Capture
 {
     public override Mat RawFrame { get; } = new Mat();
     public override (int width, int height) Dimensions => (240, 240);
-    public override bool IsReady { get; set; }
+    public override bool IsReady { get; protected set; }
     public override string Url { get; set; }
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();

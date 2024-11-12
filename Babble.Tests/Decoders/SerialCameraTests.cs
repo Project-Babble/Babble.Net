@@ -11,11 +11,11 @@ namespace Babble.Tests.Decoders;
 public class SerialCameraTests : IDisposable
 {
     private const string TEST_PORT = "COM5";
-    private SerialCamera _camera;
+    private SerialCameraCapture _camera;
 
     public SerialCameraTests()
     {
-        _camera = new SerialCamera(TEST_PORT);
+        _camera = new SerialCameraCapture(TEST_PORT);
     }
 
     public void Dispose()
@@ -27,7 +27,7 @@ public class SerialCameraTests : IDisposable
     public void Constructor_ShouldInitializeWithCorrectDefaults()
     {
         // Act
-        var camera = new SerialCamera(TEST_PORT);
+        var camera = new SerialCameraCapture(TEST_PORT);
 
         // Assert
         camera.Url.Should().Be(TEST_PORT);
@@ -106,7 +106,7 @@ public class SerialCameraTests : IDisposable
     public void Dispose_ShouldStopCaptureAndCleanup()
     {
         // Arrange
-        var camera = new SerialCamera(TEST_PORT);
+        var camera = new SerialCameraCapture(TEST_PORT);
         try
         {
             camera.StartCapture();
@@ -130,7 +130,7 @@ public class SerialCameraTests : IDisposable
     public void Constructor_WithInvalidPort_ShouldNotThrow(string invalidPort)
     {
         // Act
-        Action act = () => new SerialCamera(invalidPort);
+        Action act = () => new SerialCameraCapture(invalidPort);
 
         // Assert
         act.Should().Throw<Exception>();

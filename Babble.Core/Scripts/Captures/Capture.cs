@@ -36,7 +36,7 @@ public abstract class Capture
     /// <summary>
     /// Is this Capture source ready to produce data?
     /// </summary>
-    public abstract bool IsReady { get; set; }
+    public abstract bool IsReady { get; protected set; }
 
     /// <summary>
     /// Start Capture on this source
