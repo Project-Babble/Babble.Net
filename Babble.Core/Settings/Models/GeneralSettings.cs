@@ -52,6 +52,9 @@ public sealed class GeneralSettings
     [JsonProperty("gui_use_red_channel")]
     public bool GuiUseRedChannel { get; set; }
 
+    [JsonProperty("gui_force_relevancy")]
+    public bool GuiForceRelevancy { get; set; }
+
     [JsonProperty("calib_deadzone")]
     public double CalibDeadzone { get; set; }
 

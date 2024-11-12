@@ -7,7 +7,8 @@ namespace Babble.Avalonia;
 
 public partial class CalibrationView : UserControl, IIsVisible
 {
-    public bool Visible { get; set; }
+    public bool Visible { get => _isVisible; }
+    private bool _isVisible;
 
     private readonly CalibrationViewModel _viewModel;
 
@@ -23,11 +24,11 @@ public partial class CalibrationView : UserControl, IIsVisible
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
     {
-        Visible = true;
+        _isVisible = true;
     }
 
     private void CamView_Unloaded(object? sender, RoutedEventArgs e)
     {
-        Visible = false;
+        _isVisible = false;
     }
 }

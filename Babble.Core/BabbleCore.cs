@@ -19,13 +19,14 @@ public class BabbleCore
     public static BabbleCore Instance { get; private set; }
 
     public BabbleSettings Settings { get; private set; }
+    
+    public bool IsRunning { get; private set; }
 
     internal ILogger Logger { get; private set; }
     
     private PlatformConnector _platformConnector;
     private InferenceSession _session;
     private string _inputName;
-    private bool _isRunning;
 
     static BabbleCore()
     {
@@ -75,7 +76,7 @@ public class BabbleCore
     /// <exception cref="InvalidOperationException"></exception>
     public void Start(BabbleSettings settings)
     {
-        if (_isRunning)
+        if (IsRunning)
         {
             Logger.LogInformation("Babble.Core was already running. Restarting...");
             Stop();
@@ -100,7 +101,7 @@ public class BabbleCore
 
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
-        _isRunning = true;
+        IsRunning = true;
 
         Logger.LogInformation("Babble.Core started.");
     }
@@ -115,7 +116,7 @@ public class BabbleCore
         // Cache/Clear dictionary on start?
         UnifiedExpressions = new();
 
-        if (!_isRunning || Instance is null)
+        if (!IsRunning || Instance is null)
         {
             Logger.LogError("Tried to to poll Babble.Core, but it wasn't running!");
             return false;
@@ -134,7 +135,7 @@ public class BabbleCore
             return false;
         }
 
-        var inputTensor = Utils.PreprocessFrame(data);
+        var inputTensor = TensorUtils.PreprocessFrame(data);
 
         var inputs = new List<NamedOnnxValue>
         {
@@ -233,13 +234,13 @@ public class BabbleCore
     /// </summary>
     public void Stop()
     {
-        if (!_isRunning)
+        if (!IsRunning)
         {
             Logger.LogWarning("Tried to to stop Babble.Core, but it wasn't running!");
             return;
         }
 
-        _isRunning = false;
+        IsRunning = false;
         _session.Dispose();
         _platformConnector.Terminate();
         Logger.LogInformation("Babble.Core stopped");

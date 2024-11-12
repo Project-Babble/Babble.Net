@@ -24,7 +24,6 @@ public class ImageCapture : Capture
 
             throw new FileNotFoundException();
         }
-        set => throw new NotImplementedException();
     }
 
     public override (int width, int height) Dimensions

@@ -32,6 +32,9 @@ public partial class SettingsViewModel : ObservableObject, ILocalizable
     public string recalibrateAddress;
 
     [ObservableProperty]
+    public bool forceRelevancy;
+
+    [ObservableProperty]
     public bool useRedChannel;
 
     [ObservableProperty]
@@ -92,6 +95,7 @@ public partial class SettingsViewModel : ObservableObject, ILocalizable
         ReceiverPort = settings.GeneralSettings.GuiOscReceiverPort;
         RecalibrateAddress = settings.GeneralSettings.GuiOscRecalibrateAddress;
         UseRedChannel = settings.GeneralSettings.GuiUseRedChannel;
+        ForceRelevancy = settings.GeneralSettings.GuiForceRelevancy;
         XResolution = settings.GeneralSettings.GuiCamResolutionX;
         YResolution = settings.GeneralSettings.GuiCamResolutionY;
         Framerate = settings.GeneralSettings.GuiCamFramerate;

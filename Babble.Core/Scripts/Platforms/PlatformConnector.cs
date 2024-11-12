@@ -40,7 +40,7 @@ public abstract class PlatformConnector
     /// <exception cref="InvalidOperationException"></exception>
     public float[] ExtractFrameData()
     {
-        // Fail *fast*
+
         if (Capture is null)
         {
             return Array.Empty<float>();
@@ -57,6 +57,7 @@ public abstract class PlatformConnector
         {
             return Array.Empty<float>();
         }
+
 
         using Mat resultMat = TransformRawImage();
 

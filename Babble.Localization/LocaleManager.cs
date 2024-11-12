@@ -66,7 +66,7 @@ public class LocaleManager
             var simpleName = locale.Replace("Babble.Localization.Locale.", string.Empty);
             simpleName = simpleName.Replace(".locale.json", string.Empty);
             var localePath = Directory.CreateDirectory(Path.Combine(localeDirectory, simpleName)).FullName;
-            Utils.ExtractEmbeddedResource(Assembly.GetExecutingAssembly(), Path.Combine(localePath, "locale.json"), locale, string.Empty, true);
+            Utils.ExtractEmbeddedResource(Assembly.GetExecutingAssembly(), Path.Combine(localePath, "locale.json"), locale, true);
         }
         //if (!Directory.Exists(localeDirectory))
         //{

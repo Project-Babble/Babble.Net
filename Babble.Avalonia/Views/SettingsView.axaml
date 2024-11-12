@@ -69,6 +69,11 @@
 							Foreground="White"/>
 				</Grid>
 
+				<CheckBox Content="Force relevancy"
+						 x:Name="ForceRelevancy"
+						 Foreground="White"
+						 IsChecked="{Binding ForceRelevancy}"
+						 Margin="0,10,0,0"/>
 				<CheckBox Content="{Binding ReceiveFunctionsText}" 
 						  ToolTip.Tip="{Binding ReceiveFunctionsTextTooltip}"
 						  x:Name="ReceiveFunctionsText" 

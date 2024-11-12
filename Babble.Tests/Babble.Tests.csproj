@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Babble.Core\Babble.Core.csproj" />
+    <ProjectReference Include="..\Babble.Localization\Babble.Localization.csproj" />
+    <ProjectReference Include="..\Babble.OSC\Babble.OSC.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -32,7 +32,7 @@ public class SerialCameraTests : IDisposable
         // Assert
         camera.Url.Should().Be(TEST_PORT);
         camera.IsReady.Should().BeFalse();
-        camera.Frame.Should().BeNull();
+        camera.RawFrame.Should().BeNull();
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class SerialCameraTests : IDisposable
             // Act
             _camera.StartCapture();
             await Task.Delay(1000); // Wait for potential frame capture
-            var updatedFrame = _camera.Frame;
+            var updatedFrame = _camera.RawFrame;
 
             // Assert
             // In real testing with actual hardware or mocks,

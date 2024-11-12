@@ -9,7 +9,8 @@ namespace Babble.Avalonia;
 
 public partial class SettingsView : UserControl, IIsVisible
 {
-    public bool Visible { get; set; }
+    public bool Visible { get => _isVisible; }
+    private bool _isVisible;
 
     private readonly SettingsViewModel _viewModel;
     private readonly ComboBox comboBox;
@@ -25,6 +26,7 @@ public partial class SettingsView : UserControl, IIsVisible
         
         this.FindControl<CheckBox>("CheckForUpdates")!.IsCheckedChanged += CheckForUpdates_Changed;
         this.FindControl<CheckBox>("UseRedChannel")!.IsCheckedChanged += UseRedChannel_Changed;
+        this.FindControl<CheckBox>("ForceRelevancy")!.IsCheckedChanged += ForceRelevancy_Changed;
         this.FindControl<TextBox>("LocationPrefixEntry")!.LostFocus += LocationPrefix_LostFocus;
         this.FindControl<TextBox>("IpAddressEntry")!.LostFocus += IpAddress_LostFocus;
         this.FindControl<TextBox>("PortEntry")!.LostFocus += Port_LostFocus;
@@ -44,12 +46,23 @@ public partial class SettingsView : UserControl, IIsVisible
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
     {
-        Visible = true;
+        _isVisible = true;
     }
 
     private void CamView_Unloaded(object? sender, RoutedEventArgs e)
     {
-        Visible = false;
+        _isVisible = false;
+    }
+
+    private void ForceRelevancy_Changed(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox checkBox)
+            return;
+
+        BabbleCore.Instance.Settings.UpdateSetting<bool>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy),
+            checkBox.IsChecked.ToString()!);
+        BabbleCore.Instance.Settings.Save();
     }
 
     private void CheckForUpdates_Changed(object? sender, RoutedEventArgs e)

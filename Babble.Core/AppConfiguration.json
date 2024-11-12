@@ -28,6 +28,7 @@
 		"gui_gpu_index": 0,
 		"gui_inference_threads": 4,
 		"gui_use_red_channel": false,
+		"gui_force_relevancy": false,
 		"calib_deadzone": -0.1,
 		"calib_array": "[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]",
 		"gui_cam_resolution_x": 0,
