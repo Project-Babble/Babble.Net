@@ -6,7 +6,7 @@
 		"roi_window_y": 0,
 		"roi_window_w": 480,
 		"roi_window_h": 640,
-		"capture_source": "http://babbletracker.local/",
+		"capture_source": "COM5",
 		"gui_vertical_flip": false,
 		"gui_horizontal_flip": false,
 		"use_ffmpeg": false

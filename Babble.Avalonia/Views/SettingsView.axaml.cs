@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Localizer.Core;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;
 using Babble.Core;
-using Babble.Locale;
 
 namespace Babble.Avalonia;
 
@@ -38,7 +38,7 @@ public partial class SettingsView : UserControl, IIsVisible
 
         comboBox = this.Find<ComboBox>("LanguageCombo")!;
         comboBox!.Items.Clear();
-        foreach (var item in LocaleManager.Instance.GetLanguages())
+        foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
             comboBox.Items.Add(item);
         comboBox.SelectedIndex = 0;
         comboBox.SelectionChanged += ComboBox_SelectionChanged;
@@ -171,8 +171,10 @@ public partial class SettingsView : UserControl, IIsVisible
 
     private void ComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        var lang = LocaleManager.Instance.GetLanguages()[comboBox.SelectedIndex];
-        LocaleManager.Instance.ChangeLanguage(lang);
+        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[comboBox.SelectedIndex]);
+        BabbleCore.Instance.Settings.UpdateSetting<string>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage),
+            LocalizerCore.Localizer.Language);
         BabbleCore.Instance.Settings.Save();
     }
 }

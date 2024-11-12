@@ -20,6 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Localization\en-owo.json" />
+    <None Remove="Assets\Localization\en-pirate.json" />
+    <None Remove="Assets\Localization\en-US.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Assets\Icon.ico" />
   </ItemGroup>
 
@@ -38,7 +44,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Babble.Core\Babble.Core.csproj" />
-    <ProjectReference Include="..\Babble.Localization\Babble.Localization.csproj" />
     <ProjectReference Include="..\Babble.OSC\Babble.OSC.csproj" />
   </ItemGroup>
 

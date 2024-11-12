@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
+using Avalonia.Localizer.Core;
 using Avalonia.Markup.Xaml;
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
@@ -80,6 +81,9 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         }
 
         base.OnFrameworkInitializationCompleted();
+
+        var lang = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
+        LocalizerCore.Localizer.SwitchLanguage(lang);
     }
 
     private void NeedRestartOSC(string name)
