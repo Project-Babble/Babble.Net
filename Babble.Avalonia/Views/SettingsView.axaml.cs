@@ -1,15 +1,17 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Localizer.Core;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;
 using Babble.Core;
-using Babble.Locale;
+using Meadow;
 
 namespace Babble.Avalonia;
 
 public partial class SettingsView : UserControl, IIsVisible
 {
-    public bool Visible { get; set; }
+    public bool Visible { get => _isVisible; }
+    private bool _isVisible;
 
     private readonly SettingsViewModel _viewModel;
     private readonly ComboBox comboBox;
@@ -25,6 +27,7 @@ public partial class SettingsView : UserControl, IIsVisible
         
         this.FindControl<CheckBox>("CheckForUpdates")!.IsCheckedChanged += CheckForUpdates_Changed;
         this.FindControl<CheckBox>("UseRedChannel")!.IsCheckedChanged += UseRedChannel_Changed;
+        this.FindControl<CheckBox>("ForceRelevancy")!.IsCheckedChanged += ForceRelevancy_Changed;
         this.FindControl<TextBox>("LocationPrefixEntry")!.LostFocus += LocationPrefix_LostFocus;
         this.FindControl<TextBox>("IpAddressEntry")!.LostFocus += IpAddress_LostFocus;
         this.FindControl<TextBox>("PortEntry")!.LostFocus += Port_LostFocus;
@@ -36,20 +39,38 @@ public partial class SettingsView : UserControl, IIsVisible
 
         comboBox = this.Find<ComboBox>("LanguageCombo")!;
         comboBox!.Items.Clear();
-        foreach (var item in LocaleManager.Instance.GetLanguages())
+        int i = 0;
+        foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
+        {
             comboBox.Items.Add(item);
-        comboBox.SelectedIndex = 0;
+            if (item == LocalizerCore.Localizer.Language)
+            {
+                comboBox.SelectedIndex =  i;
+            }
+            i++;
+        }
         comboBox.SelectionChanged += ComboBox_SelectionChanged;
     }
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
     {
-        Visible = true;
+        _isVisible = true;
     }
 
     private void CamView_Unloaded(object? sender, RoutedEventArgs e)
     {
-        Visible = false;
+        _isVisible = false;
+    }
+
+    private void ForceRelevancy_Changed(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox checkBox)
+            return;
+
+        BabbleCore.Instance.Settings.UpdateSetting<bool>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy),
+            checkBox.IsChecked.ToString()!);
+        BabbleCore.Instance.Settings.Save();
     }
 
     private void CheckForUpdates_Changed(object? sender, RoutedEventArgs e)
@@ -106,7 +127,7 @@ public partial class SettingsView : UserControl, IIsVisible
 
     private void ReceiverPort_LostFocus(object? sender, RoutedEventArgs e)
     {
-        if (!Validation.IsPortValid(_viewModel.Port))
+        if (!Validation.IsPortValid(_viewModel.ReceiverPort))
             return;
 
         BabbleCore.Instance.Settings.UpdateSetting<int>(
@@ -158,8 +179,10 @@ public partial class SettingsView : UserControl, IIsVisible
 
     private void ComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        var lang = LocaleManager.Instance.GetLanguages()[comboBox.SelectedIndex];
-        LocaleManager.Instance.ChangeLanguage(lang);
+        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[comboBox.SelectedIndex]);
+        BabbleCore.Instance.Settings.UpdateSetting<string>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage),
+            LocalizerCore.Localizer.Language);
         BabbleCore.Instance.Settings.Save();
     }
 }

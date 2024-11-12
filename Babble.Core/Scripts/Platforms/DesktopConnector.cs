@@ -25,7 +25,7 @@ public class DesktopConnector : PlatformConnector
         // Determine if this is an IP Camera, Serial Camera, or something else
         if (SerialConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
         {
-            Capture = new SerialCamera(Url);
+            Capture = new SerialCameraCapture(Url);
         }
         else if (ImageConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
         {

@@ -1,5 +1,4 @@
 ﻿using Babble.Core.Enums;
-using Microsoft.ML.OnnxRuntime.Tensors;
 using System.Reflection;
 
 namespace Babble.Core.Scripts;
@@ -9,12 +8,6 @@ namespace Babble.Core.Scripts;
 /// </summary>
 public static class Utils
 {
-    /// <summary>
-    /// Represents the expected size of the input image,
-    /// grayscale at 256x256px, 1 float per pixel, normalized to 0f-1f.
-    /// </summary>
-    private const int EXPECTED_SIZE = 256 * 256;
-
     internal static readonly Dictionary<ARKitExpression, List<UnifiedExpression>> ExpressionMapping = new()
     {
         { ARKitExpression.CheekPuffLeft, new List<UnifiedExpression>() { UnifiedExpression.CheekPuffLeft } },
@@ -153,47 +146,21 @@ public static class Utils
         return Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
     }
 
-    /// <summary>
-    /// Converts a float[256 * 256] array to a (dense) Tensor.
-    /// An exception is raised if the array is the incorrect size.
-    /// </summary>
-    /// <param name="frame"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidDataException"></exception>
-    internal static Tensor<float> PreprocessFrame(float[] frame)
-    {
-        if (frame.Length != EXPECTED_SIZE)
-            throw new InvalidDataException();
-
-        var input = new DenseTensor<float>([1, 1, 256, 256]);
-
-        for (int y = 0; y < 256; y++)
-        {
-            for (int x = 0; x < 256; x++)
-            {
-                // Bit shift this 8 instead??
-                input[0, 0, y, x] = frame[y * 256 + x];
-            }
-        }
-
-        return input;
-    }
-
-    public static void ExtractEmbeddedResource(Assembly assembly, string pathName, string fileName, string @namespace = "Babble.Core.", bool overwrite = false)
+    public static void ExtractEmbeddedResource(Assembly assembly, string resourceName, string file, bool overwrite = false)
     {
         // Extract the embedded model if it isn't already present
-        if (!File.Exists(pathName) || overwrite)
+        if (!File.Exists(file) || overwrite)
         {
             using var stm = assembly
-                .GetManifestResourceStream($"{@namespace}{fileName}");
+                .GetManifestResourceStream(resourceName);
 
-            using Stream outFile = File.Create(pathName);
+            using Stream outFile = File.Create(file);
 
             const int sz = 4096;
             var buf = new byte[sz];
             while (true)
             {
-                if (stm == null) throw new FileNotFoundException();
+                if (stm == null) throw new FileNotFoundException(file);
                 var nRead = stm.Read(buf, 0, sz);
                 if (nRead < 1)
                     break;

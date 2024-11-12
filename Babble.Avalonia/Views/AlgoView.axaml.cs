@@ -10,7 +10,8 @@ public partial class AlgoView : UserControl, IIsVisible
 {
     private readonly AlgoSettingsViewModel _viewModel;
 
-    public bool Visible { get; set; }
+    public bool Visible { get => _isVisible; }
+    private bool _isVisible;
 
     public AlgoView()
     {
@@ -33,12 +34,12 @@ public partial class AlgoView : UserControl, IIsVisible
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
     {
-        Visible = true;
+        _isVisible = true;
     }
 
     private void CamView_Unloaded(object? sender, RoutedEventArgs e)
     {
-        Visible = false;
+        _isVisible = false;
     }
 
     private void ModelFileEntry_LostFocus(object? sender, RoutedEventArgs e)

@@ -25,7 +25,7 @@ public abstract class Capture
     /// Represents the incoming frame data for this capture source. 
     /// Can be any dimension, BGR color space
     /// </summary>
-    public abstract Mat RawFrame { get; set;  }
+    public abstract Mat RawFrame { get;  }
 
     /// <summary>
     /// Dimensions for this frame. Needs to be explicitly defined when dealing with 
@@ -36,7 +36,7 @@ public abstract class Capture
     /// <summary>
     /// Is this Capture source ready to produce data?
     /// </summary>
-    public abstract bool IsReady { get; set; }
+    public abstract bool IsReady { get; protected set; }
 
     /// <summary>
     /// Start Capture on this source

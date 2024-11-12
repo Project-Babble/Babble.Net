@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="LipExpressionsManifest.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="LipExpressionsManifest.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Rug.Osc" Version="1.2.5" />
   </ItemGroup>
 

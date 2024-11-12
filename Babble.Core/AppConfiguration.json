@@ -6,7 +6,7 @@
 		"roi_window_y": 0,
 		"roi_window_w": 480,
 		"roi_window_h": 640,
-		"capture_source": "http://babbletracker.local/",
+		"capture_source": "COM5",
 		"gui_vertical_flip": false,
 		"gui_horizontal_flip": false,
 		"use_ffmpeg": false
@@ -28,6 +28,7 @@
 		"gui_gpu_index": 0,
 		"gui_inference_threads": 4,
 		"gui_use_red_channel": false,
+		"gui_force_relevancy": false,
 		"calib_deadzone": -0.1,
 		"calib_array": "[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]",
 		"gui_cam_resolution_x": 0,
@@ -35,7 +36,7 @@
 		"gui_cam_framerate": 0,
 		"use_calibration": true,
 		"calibration_mode": "Neutral",
-		"gui_language": "English"
+		"gui_language": "en-us"
 	},
 	"cam_display_id": 0
 }

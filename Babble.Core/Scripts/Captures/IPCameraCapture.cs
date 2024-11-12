@@ -14,9 +14,9 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class IPCameraCapture : Capture
 {
-    public override Mat RawFrame { get; set; }
+    public override Mat RawFrame { get; } = new Mat();
     public override (int width, int height) Dimensions => (240, 240);
-    public override bool IsReady { get; set; }
+    public override bool IsReady { get; protected set; }
     public override string Url { get; set; }
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -35,7 +35,6 @@ public class IPCameraCapture : Capture
 
     public override bool StartCapture()
     {
-        RawFrame = new Mat();
         Task.Run(() => StartStreaming(Url, null, null, _cancellationTokenSource.Token, 1024, Dimensions.width * Dimensions.height));
         IsReady = true;
         return true;
@@ -152,7 +151,6 @@ public class IPCameraCapture : Capture
 
     public override bool StopCapture()
     {
-        RawFrame = null;
         _cancellationTokenSource.Cancel();
         IsReady = false;
         return true;

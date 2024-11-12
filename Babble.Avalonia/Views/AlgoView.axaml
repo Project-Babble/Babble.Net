@@ -3,103 +3,108 @@
              x:Class="Babble.Avalonia.AlgoView"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:localization="clr-namespace:Avalonia.Localizer.Core.Localization"
              mc:Ignorable="d">
 	<ScrollViewer VerticalScrollBarVisibility="Auto">
 		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
-		<StackPanel Spacing="5">
-			<TextBlock Text="{Binding ModelSettingsText}"
-					 x:Name="ModelSettingsText"
-					 Foreground="White"
-					 FontWeight="Bold"/>
+			<StackPanel Spacing="5">
+				<TextBlock Text="{localization:Localize algorithm.header}"
+						 x:Name="ModelSettingsText"
+						 Foreground="White"
+						 FontWeight="Bold"/>
 
-			<TextBlock Text="{Binding ModelFileText}" x:Name="ModelFileText" Foreground="White"/>
-			<TextBox Text="{Binding ModelFileEntryText}"
-					x:Name="ModelFileEntry"
-					Background="#2D2D2D"
-					Foreground="White"/>
+				<TextBlock Text="{localization:Localize algorithm.modelFile}"
+						 x:Name="ModelFileText"
+						 Foreground="White"/>
+				<TextBox Text="{Binding ModelFileEntryText}"
+						x:Name="ModelFileEntry"
+						Background="#2D2D2D"
+						Foreground="White"/>
 
-			<Grid ColumnDefinitions="*,*,Auto" >
-				<StackPanel Grid.Column="0" Spacing="5" Margin="0,0,0,0">
-					<TextBlock Text="{Binding InferenceThreadsText}"
-							 Foreground="White"
-							 x:Name="InferenceThreads"/>
-					<TextBox Text="{Binding InferenceThreadsEntryText}"
-							x:Name="InferenceThreadsEntry"
-							Background="#2D2D2D"
-							Foreground="White"/>
+				<Grid ColumnDefinitions="*,*,Auto" >
+					<StackPanel Grid.Column="0" Spacing="5" Margin="0,0,0,0">
+						<TextBlock Text="{localization:Localize algorithm.inferenceThreads}"
+								 Foreground="White"
+								 x:Name="InferenceThreads"/>
+						<TextBox Text="{Binding InferenceThreadsEntryText}"
+								x:Name="InferenceThreadsEntry"
+								Background="#2D2D2D"
+								Foreground="White"/>
+					</StackPanel>
+
+					<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
+						<TextBlock Text="{localization:Localize algorithm.runtime}"
+								 x:Name="RuntimeText"
+								 Foreground="White"/>
+						<ComboBox SelectedIndex="0"
+								Background="#2D2D2D"
+								Foreground="White">
+							<ComboBoxItem>ONNX</ComboBoxItem>
+						</ComboBox>
+					</StackPanel>
+				</Grid>
+
+				<StackPanel Grid.Column="0" Spacing="5">
+					<CheckBox Grid.Column="2"
+						 Content="{localization:Localize algorithm.useGPU}"
+						 x:Name="UseGpu"
+						 IsChecked="{Binding UseGPU}"
+						 Foreground="White"
+						 VerticalAlignment="Bottom"/>
+
+					<TextBlock Text="{localization:Localize algorithm.GPUIndex}"
+						 x:Name="GPUIndexText"
+						 Foreground="White"/>
+					<TextBox Text="{Binding GpuIndexEntryText}"
+						 x:Name="GpuIndexEntry"
+						 Background="#2D2D2D"
+						 Foreground="White"/>
 				</StackPanel>
 
-				<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
-					<TextBlock Text="{Binding RuntimeText}" x:Name="RuntimeText" Foreground="White"/>
-					<ComboBox SelectedIndex="0"
-							Background="#2D2D2D"
-							Foreground="White">
-						<ComboBoxItem>ONNX</ComboBoxItem>
-					</ComboBox>
-				</StackPanel>
-			</Grid>
+				<TextBlock Text="{localization:Localize algorithm.modelOutputMultiplier}"
+						 x:Name="ModelOutputMultiplierText"
+						 Foreground="White"/>
+				<TextBox Text="{Binding ModelOutputMultiplierEntryText}"
+						x:Name="ModelOutputMultiplierEntry"
+						Background="#2D2D2D"
+						Foreground="White"/>
 
-			<StackPanel Grid.Column="0" Spacing="5">
-				<CheckBox Grid.Column="2"
-					 Content="{Binding UseGPUText}"
-					 x:Name="UseGpu"
-					 IsChecked="{Binding UseGPU}"
-					 Foreground="White"
-					 VerticalAlignment="Bottom"/>
+				<TextBlock Text="{localization:Localize algorithm.calibrationDeadzone}"
+						 x:Name="CalibrationDeadzoneText"
+						 Foreground="White"/>
+				<TextBox Text="{Binding CalibrationDeadzoneEntryText}"
+						x:Name="CalibrationDeadzoneEntry"
+						Background="#2D2D2D"
+						Foreground="White"/>
 
-				<TextBlock Text="{Binding GPUIndexText}"
-					 x:Name="GPUIndexText"
-					 Foreground="White"/>
-				<TextBox Text="{Binding GpuIndexEntryText}"
-					 x:Name="GpuIndexEntry"
-					 Background="#2D2D2D"
-					 Foreground="White"/>
+				<TextBlock Text="{localization:Localize algorithm.oneEuroFilterParameters}"
+						 x:Name="OneEuroFilterText"
+						 Foreground="White"
+						 FontWeight="Bold"
+						 Margin="0,10,0,0"/>
+
+				<Grid ColumnDefinitions="*,*">
+					<StackPanel Grid.Column="0" Spacing="5" Margin="00,0,0,0">
+						<TextBlock Text="{localization:Localize algorithm.minFrequencyCutoff}"
+								 x:Name="MinFrequencyCutoffText"
+								 Foreground="White"/>
+						<TextBox Text="{Binding MinFrequencyCutoffEntryText}"
+								x:Name="MinFrequencyCutoffEntry"
+								Background="#2D2D2D"
+								Foreground="White"/>
+					</StackPanel>
+
+					<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
+						<TextBlock Text="{localization:Localize algorithm.speedCoefficient}"
+								 x:Name="SpeedCoefficientText"
+								 Foreground="White"/>
+						<TextBox Text="{Binding SpeedCoefficientEntryText}"
+								x:Name="SpeedCoefficientEntry"
+								Background="#2D2D2D"
+								Foreground="White"/>
+					</StackPanel>
+				</Grid>
 			</StackPanel>
-
-			<TextBlock Text="{Binding ModelOutputMultiplierText}"
-					 x:Name="ModelOutputMultiplierText"
-					 Foreground="White"/>
-			<TextBox Text="{Binding ModelOutputMultiplierEntryText}"
-					x:Name="ModelOutputMultiplierEntry"
-					Background="#2D2D2D"
-					Foreground="White"/>
-
-			<TextBlock Text="{Binding CalibrationDeadzoneText}"
-					 x:Name="CalibrationDeadzoneText"
-					 Foreground="White"/>
-			<TextBox Text="{Binding CalibrationDeadzoneEntryText}"
-					x:Name="CalibrationDeadzoneEntry"
-					Background="#2D2D2D"
-					Foreground="White"/>
-
-			<TextBlock Text="{Binding OneEuroFilterText}"
-					 x:Name="OneEuroFilterText"
-					 Foreground="White"
-					 FontWeight="Bold"
-					 Margin="0,10,0,0"/>
-
-			<Grid ColumnDefinitions="*,*">
-				<StackPanel Grid.Column="0" Spacing="5" Margin="00,0,0,0">
-					<TextBlock Text="{Binding MinFrequencyCutoffText}"
-							 x:Name="MinFrequencyCutoffText"
-							 Foreground="White"/>
-					<TextBox Text="{Binding MinFrequencyCutoffEntryText}"
-							x:Name="MinFrequencyCutoffEntry"
-							Background="#2D2D2D"
-							Foreground="White"/>
-				</StackPanel>
-
-				<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
-					<TextBlock Text="{Binding SpeedCoefficientText}"
-							 x:Name="SpeedCoefficientText"
-							 Foreground="White"/>
-					<TextBox Text="{Binding SpeedCoefficientEntryText}"
-							x:Name="SpeedCoefficientEntry"
-							Background="#2D2D2D"
-							Foreground="White"/>
-				</StackPanel>
-			</Grid>
-		</StackPanel>
-	</Border>
+		</Border>
 	</ScrollViewer>
 </UserControl>

@@ -1,14 +1,14 @@
 ﻿using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
+using Avalonia.Localizer.Core;
 using Avalonia.Markup.Xaml;
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
 using Babble.OSC;
+using Babble.OSC.Expressions;
 using Meadow;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Babble.Avalonia;
 
@@ -20,6 +20,7 @@ public partial class App : AvaloniaMeadowApplication<Linux>
     private Task _task;
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private CancellationToken _cancellationToken;
+    internal ILogger Logger { get; private set; }
 
     public override void Initialize()
     {
@@ -29,6 +30,9 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         BabbleCore.Instance.Start();
         var settings = BabbleCore.Instance.Settings;
         settings.OnUpdate += NeedRestartOSC;
+
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        Logger = factory.CreateLogger("Avalonia");
 
         var ip = settings.GeneralSettings.GuiOscAddress;
         var remotePort = settings.GeneralSettings.GuiOscPort;
@@ -77,6 +81,9 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         }
 
         base.OnFrameworkInitializationCompleted();
+
+        var lang = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
+        LocalizerCore.Localizer.SwitchLanguage(lang);
     }
 
     private void NeedRestartOSC(string name)
@@ -94,18 +101,19 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         }
     }
 
-    private void OSCLoop()
+    private async Task OSCLoop()
     {
-        while (true)
+        while (!_cancellationToken.IsCancellationRequested)
         {
-            if (!BabbleCore.Instance.GetExpressionData(out var expressions))
-                goto End;
+            if (BabbleCore.Instance.GetExpressionData(out var expressions))
+            {
+                foreach (var exp in expressions)
+                {
+                    UnifiedExpressionToFloatMapping.Expressions[exp.Key] = exp.Value;
+                }
+            }
 
-            foreach (var exp in expressions)
-                BabbleOSC.Expressions.SetByKey1(exp.Key, exp.Value);
-
-            End:
-            Thread.Sleep(50);
+            await Task.Delay(200);
         }
     }
 }
