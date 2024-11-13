@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Babble.Core\Babble.Core.csproj" />
-    <ProjectReference Include="..\VRCFaceTracking\VRCFaceTracking.Core\VRCFaceTracking.Core.csproj" />
-    <ProjectReference Include="..\VRCFaceTracking\VRCFaceTracking.SDK\VRCFaceTracking.SDK.csproj" />
   </ItemGroup>
 
 </Project>
