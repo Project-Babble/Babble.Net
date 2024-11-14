@@ -58,7 +58,6 @@ public abstract class PlatformConnector
             return Array.Empty<float>();
         }
 
-
         using Mat resultMat = TransformRawImage();
 
         using var finalMat = new Mat();
@@ -103,12 +102,13 @@ public abstract class PlatformConnector
 
         using var processingChain = new MatProcessingChain();
         var settings = BabbleCore.Instance.Settings;
-        var roiX = settings.GetSetting<int>("roi_window_x");
-        var roiY = settings.GetSetting<int>("roi_window_y");
-        var roiWidth = settings.GetSetting<int>("roi_window_w");
-        var roiHeight = settings.GetSetting<int>("roi_window_h");
-        var rotationAngle = settings.GetSetting<double>("rotation_angle");
-        var useRedChannel = settings.GetSetting<bool>("gui_use_red_channel");
+        var camSettings = settings.Cam;
+        var roiX = camSettings.RoiWindowX;
+        var roiY = camSettings.RoiWindowY;
+        var roiWidth = camSettings.RoiWindowW;
+        var roiHeight = camSettings.RoiWindowH;
+        var rotationAngle = camSettings.RotationAngle;
+        var useRedChannel = settings.GeneralSettings.GuiUseRedChannel;
 
         // Process the image through our chain of operations
         using Mat resultMat = processingChain
@@ -117,8 +117,8 @@ public abstract class PlatformConnector
             .Rotate(rotationAngle)
             // .Crop(roiX, roiY, roiWidth, roiHeight)
             .Resize(new System.Drawing.Size(256, 256))
-            .ApplyFlip("gui_vertical_flip", FlipType.Vertical)
-            .ApplyFlip("gui_horizontal_flip", FlipType.Horizontal)
+            .ApplyFlip(camSettings.GuiVerticalFlip, FlipType.Vertical)
+            .ApplyFlip(camSettings.GuiHorizontalFlip, FlipType.Horizontal)
             .Result;
 
         // Verify That the matrix is in continuous memory layout - xlinka

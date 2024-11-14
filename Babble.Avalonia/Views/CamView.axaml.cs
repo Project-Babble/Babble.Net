@@ -101,8 +101,6 @@ public partial class CamView : UserControl, IIsVisible
 
     private void StartImageUpdates()
     {
-        // Start a timer to draw our face image
-        // Note: In Debug mode this is slow af to update. Release isn't!
         DispatcherTimer drawTimer = new()
         {
             Interval = TimeSpan.FromMilliseconds(10)
@@ -113,9 +111,11 @@ public partial class CamView : UserControl, IIsVisible
 
     private void UpdateImage()
     {
+        if (!BabbleCore.Instance.IsRunning) return;
+
+        bool valid;
         byte[] image;
         (int width, int height) dims;
-        bool valid;
         switch (camViewMode)
         {
             case CamViewMode.Tracking:

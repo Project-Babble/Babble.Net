@@ -58,22 +58,6 @@ public class BabbleSettings
         }
     }
 
-    // Method to get property value by name
-    public T GetSetting<T>(string propertyName)
-    {
-        propertyName = propertyName.Replace("_", string.Empty);
-        foreach (var p in prefixes)
-        {
-            var fullPropertyName = p + propertyName;
-            if (_propertyCache.TryGetValue(fullPropertyName, out var propertyInfo))
-            {
-                var target = GetPropertyTarget(fullPropertyName);
-                return (T)propertyInfo.GetValue(target);
-            }
-        }
-        throw new ArgumentException($"Property '{propertyName}' does not exist.");
-    }
-
     // Method to set property value by name
     public void UpdateSetting<T>(string propertyName, string value)
     {

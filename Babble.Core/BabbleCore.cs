@@ -45,7 +45,8 @@ public class BabbleCore
             var normalizedSetting = setting.Replace("_", string.Empty).ToLower();
             if (normalizedSetting == "capturesource")
             {
-                _platformConnector!.Terminate();
+                if (_platformConnector is not null)
+                    _platformConnector!.Terminate();
                 ConfigurePlatformConnector();
             }
         };
@@ -94,7 +95,7 @@ public class BabbleCore
         string modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
         Utils.ExtractEmbeddedResource(
             Assembly.GetExecutingAssembly(), 
-            Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(x => x.Contains("model.onnx")).First(), // Babble model
+            Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(x => x.Contains(modelName)).First(), // Babble model
             modelPath, 
             overwrite: true);
 
@@ -117,7 +118,7 @@ public class BabbleCore
     /// <returns></returns>
     public bool GetExpressionData(out Dictionary<UnifiedExpression, float> UnifiedExpressions)
     {
-        // Cache/Clear dictionary on start?
+        // Cache dictionary on start?
         UnifiedExpressions = new();
 
         if (!IsRunning || Instance is null)
@@ -130,26 +131,17 @@ public class BabbleCore
 
         // Camera not ready, or connecting to new source
         var data = _platformConnector.ExtractFrameData();
-        if (data is null)
-        {
-            return false;
-        }
-        if (data.Length == 0)
-        {
-            return false;
-        }
+        if (data is null) return false;
+        if (data.Length == 0) return false;
 
         var inputTensor = TensorUtils.PreprocessFrame(data);
-
         var inputs = new List<NamedOnnxValue>
         {
             NamedOnnxValue.CreateFromTensor(_inputName, inputTensor)
         };
 
         using var results = _session.Run(inputs);
-
         var output = results[0].AsEnumerable<float>().ToArray();
-
         for (int i = 0; i < output.Length; i++)
         {
             arKitExpressions[(ARKitExpression)i] = Math.Clamp(output[i], 0f, 1f);
@@ -214,21 +206,12 @@ public class BabbleCore
         dimensions = (0, 0);
         image = Array.Empty<byte>();
         using var transformedImageCandidate = _platformConnector.TransformRawImage();
-        if (transformedImageCandidate is null)
-        {
-            return false;
-        }
+        if (transformedImageCandidate is null) return false;
 
         dimensions = (256, 256);
         image = transformedImageCandidate.GetRawData();
-        if (image is null)
-        {
-            return false;
-        }
-        if (image.Length == 0)
-        {
-            return false;
-        }
+        if (image is null) return false;
+        if (image.Length == 0) return false;
         
         return true;
     }
@@ -264,7 +247,7 @@ public class BabbleCore
         // Setup inference backend
         var sessionOptions = new SessionOptions();
         sessionOptions.InterOpNumThreads = 1;
-        sessionOptions.IntraOpNumThreads = Settings.GetSetting<int>($"gui_inference_threads");
+        sessionOptions.IntraOpNumThreads = Settings.GeneralSettings.GuiInferenceThreads;
         sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
         // ~3% savings worth ~6ms avg latency. Not noticeable at 60fps?
         sessionOptions.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");  
@@ -300,7 +283,7 @@ public class BabbleCore
     /// <param name="sessionOptions"></param>
     private void ConfigurePlatformSpecificGPU(SessionOptions sessionOptions)
     {
-        if (Settings.GetSetting<bool>("gui_use_gpu"))
+        if (Settings.GeneralSettings.GuiUseGpu)
         {
             if (OperatingSystem.IsAndroid())
             {
@@ -320,7 +303,7 @@ public class BabbleCore
             {
                 // The EmguCV CUDA runtime BLOWS UP how much ram we use?!
                 // Like 150mb to 1.2GB!!
-                var gpuIndex = Settings.GetSetting<int>("gui_gpu_index");
+                var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
                 sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
             }
         }

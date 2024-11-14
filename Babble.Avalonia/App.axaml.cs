@@ -6,40 +6,58 @@ using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
 using Babble.OSC;
-using Babble.OSC.Expressions;
+using Hypernex.ExtendedTracking;
 using Meadow;
 using Microsoft.Extensions.Logging;
+using VRCFaceTracking;
+using VRCFaceTracking.Core.Library;
+using VRCFaceTracking.Core.Params.Data;
+using VRCFaceTracking.Core.Services;
 
 namespace Babble.Avalonia;
 
 public partial class App : AvaloniaMeadowApplication<Linux>
 {
-    private static readonly HashSet<string> Whitelist = ["guiosclocation", "guioscaddress", "guioscport", "guioscreceiverport"];
-    private BabbleOSC _sender;
+    internal static ILogger Logger { get; private set; }
 
     private Task _task;
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private CancellationToken _cancellationToken;
-    internal ILogger Logger { get; private set; }
+    private MainIntegrated _mainIntegrated;
+    private BabbleOSC _babbleOSC;
 
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
         LoadMeadowOS();
 
+        // Start BabbleCore early so we can load settings.
+        // In the VRCFT module, we skip init if we're already started
         BabbleCore.Instance.Start();
-        var settings = BabbleCore.Instance.Settings;
-        settings.OnUpdate += NeedRestartOSC;
+        var lang = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
+        LocalizerCore.Localizer.SwitchLanguage(lang);
 
+        // Setup logging
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        Logger = factory.CreateLogger("Avalonia");
+        Logger = factory.CreateLogger("Babble App");
 
-        var ip = settings.GeneralSettings.GuiOscAddress;
-        var remotePort = settings.GeneralSettings.GuiOscPort;
-        _sender = new BabbleOSC(ip, remotePort);
-        _cancellationTokenSource = new CancellationTokenSource();
-        _cancellationToken = _cancellationTokenSource.Token;
-        _task = Task.Run(OSCLoop, _cancellationToken);
+        // Setup VRCFT
+        var settings = new FaceTrackingServices.FTSettings();
+        var loggerFactory = new FaceTrackingServices.FTLoggerFactory();
+        var dispatcher = new FaceTrackingServices.FTDispatcher();
+        var moduleDataServiceLogger = loggerFactory.CreateLogger<ModuleDataService>();
+        var mutatorLogger = loggerFactory.CreateLogger<UnifiedTrackingMutator>();
+        var moduleDataService = new ModuleDataService(new FaceTrackingServices.BabbleIdentity(), moduleDataServiceLogger);
+        var libManager = new UnifiedLibManager(loggerFactory, dispatcher, moduleDataService);
+        var mutator = new UnifiedTrackingMutator(mutatorLogger, settings);
+        _mainIntegrated = new MainIntegrated(loggerFactory, libManager, mutator);
+        Task.Run(async () => await _mainIntegrated.InitializeAsync());
+        ParameterSenderService.AllParametersRelevant = true;
+
+        // Setup custom OSC handler
+        var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
+        var port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
+        _babbleOSC = new BabbleOSC(ip, port);
     }
 
     public override Task InitializeMeadow()
@@ -71,6 +89,7 @@ public partial class App : AvaloniaMeadowApplication<Linux>
             {
                 DataContext = new MainWindowViewModel()
             };
+            desktop.Exit += Desktop_Exit;
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
@@ -78,42 +97,15 @@ public partial class App : AvaloniaMeadowApplication<Linux>
             {
                 DataContext = new MainWindowViewModel()
             };
+            // We don't need to worry about teardown on mobile
         }
 
         base.OnFrameworkInitializationCompleted();
-
-        var lang = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
-        LocalizerCore.Localizer.SwitchLanguage(lang);
     }
 
-    private void NeedRestartOSC(string name)
+    private void Desktop_Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
-        var normalizedSetting = name.ToLower().Replace("_", string.Empty);
-        if (Whitelist.Contains(normalizedSetting))
-        {
-            _sender.Teardown();
-            var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
-            var remotePort = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
-            _sender = new BabbleOSC(ip, remotePort);
-            _cancellationTokenSource = new CancellationTokenSource();
-            _cancellationToken = _cancellationTokenSource.Token;
-            _task = Task.Run(OSCLoop, _cancellationToken);
-        }
-    }
-
-    private async Task OSCLoop()
-    {
-        while (!_cancellationToken.IsCancellationRequested)
-        {
-            if (BabbleCore.Instance.GetExpressionData(out var expressions))
-            {
-                foreach (var exp in expressions)
-                {
-                    UnifiedExpressionToFloatMapping.Expressions[exp.Key] = exp.Value;
-                }
-            }
-
-            await Task.Delay(200);
-        }
+        _mainIntegrated.Teardown();
+        _babbleOSC.Teardown();
     }
 }

@@ -20,9 +20,9 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" Version="11.2.0" />
-    <PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.5" />
-    <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.4.5" />
-    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.12" />
+    <PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.5.1" />
+    <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.4.5.1" />
+    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.13" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,10 +30,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.93" />
+    <PackageReference Update="Microsoft.Maui.Controls" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.93" />
+    <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="9.0.0" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionBabbleAvaloniaAndroidHideInfoBar="True" /></VisualStudio></ProjectExtensions>
 </Project>

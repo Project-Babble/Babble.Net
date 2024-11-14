@@ -1,3 +1,6 @@
 [submodule "SimpleRustOSC"]
 	path = SimpleRustOSC
 	url = https://github.com/benaclejames/SimpleRustOSC
+[submodule "VRCFaceTracking"]
+	path = VRCFaceTracking
+	url = https://github.com/TigersUniverse/VRCFaceTracking

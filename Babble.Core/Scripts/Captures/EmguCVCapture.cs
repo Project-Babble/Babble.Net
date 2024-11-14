@@ -87,9 +87,10 @@ public class EmguCVCapture : Capture
         }
 
         // Retrieve resolution and framerate settings from BabbleCore and apply
-        var x = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_x");
-        var y = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_resolution_y");
-        var fr = BabbleCore.Instance.Settings.GetSetting<int>("gui_cam_framerate");
+        var generalSettings = BabbleCore.Instance.Settings.GeneralSettings;
+        var x = generalSettings.GuiCamResolutionX;
+        var y = generalSettings.GuiCamResolutionY;
+        var fr = generalSettings.GuiCamFramerate;
 
         if (x > 0) _videoCapture.Set(CapProp.FrameWidth, x);
         if (y > 0) _videoCapture.Set(CapProp.FrameHeight, y);
@@ -132,6 +133,7 @@ public class EmguCVCapture : Capture
 
         _videoCapture.ImageGrabbed -= VideoCapture_ImageGrabbed;
 
+        // Don't call _videoCapture.Dispose or Release here, it will crash us
         IsReady = false;
         _videoCapture.Stop();
         _videoCapture = null;

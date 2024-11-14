@@ -36,7 +36,7 @@ public sealed class CameraSettings
         // Default to no rotation
         RotationAngle = 0;
 
-        // Default ROI window to 256x256 (No crop)
+        // Default ROI window to 256x256 (with no crop)
         RoiWindowX = 0;
         RoiWindowY = 0;
         RoiWindowW = 256;

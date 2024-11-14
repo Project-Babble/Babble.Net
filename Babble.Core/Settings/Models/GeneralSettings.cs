@@ -87,7 +87,7 @@ public sealed class GeneralSettings
 
         // OSC communication settings
         GuiOscAddress = "127.0.0.1";
-        GuiOscPort = 9000;
+        GuiOscPort = 8888;
         GuiOscReceiverPort = 9001;
         GuiOscRecalibrateAddress = "/avatar/parameters/babble_recalibrate";
         GuiOscLocation = "";

@@ -39,16 +39,11 @@ public partial class SettingsView : UserControl, IIsVisible
 
         comboBox = this.Find<ComboBox>("LanguageCombo")!;
         comboBox!.Items.Clear();
-        int i = 0;
         foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
         {
             comboBox.Items.Add(item);
-            if (item == LocalizerCore.Localizer.Language)
-            {
-                comboBox.SelectedIndex =  i;
-            }
-            i++;
         }
+        comboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
         comboBox.SelectionChanged += ComboBox_SelectionChanged;
     }
 

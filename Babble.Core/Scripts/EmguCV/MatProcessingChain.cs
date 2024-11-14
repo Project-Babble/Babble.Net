@@ -142,10 +142,10 @@ public class MatProcessingChain : IDisposable
         return this;
     }
     
-    public MatProcessingChain ApplyFlip(string settingName, FlipType flipType)
+    public MatProcessingChain ApplyFlip(bool flip, FlipType flipType)
     {
         EnsureCurrentMat();
-        if (BabbleCore.Instance.Settings.GetSetting<bool>(settingName))
+        if (flip)
         {
             var newMat = new Mat();
             _matsToDispose.Add(newMat);
