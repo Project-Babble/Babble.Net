@@ -77,7 +77,6 @@ public class BabbleOSC
                 continue;
             }
 
-            var mul = (float)generalSettings.GuiMultiply;
             var forceRelevancy = generalSettings.GuiForceRelevancy;
             var prefix = generalSettings.GuiOscLocation;
 
@@ -88,18 +87,35 @@ public class BabbleOSC
                     _connectionAttempts = 0;
                     foreach (var param in allParams)
                     {
-                        var value = param.GetWeight(UnifiedTracking.Data) * mul;
-                        _sender.Send(new OscMessage($"{prefix}{param.Name}".TrimEnd('/'), value));
+                        var value = param.GetWeight(UnifiedTracking.Data);
+                        if (value == 0) 
+                            continue;
+
+                        var trimmed = param.Name.TrimEnd('/');
+                        _sender.Send(new OscMessage($"{prefix}{trimmed}", value));
+
+                        // TODO Binary params!
+                        //IEnumerable<(bool bit, int power)> bitsWithPowers = Float8Converter.
+                        //    GetBits(param.GetWeight(UnifiedTracking.Data)).
+                        //    Zip(Float8Converter.BinaryPowers);
+                        //foreach (var bitWithPower in bitsWithPowers)
+                        //{
+                        //    _sender.Send(new OscMessage($"{prefix}{trimmed}{bitWithPower.power}", bitWithPower.bit));
+                        //}
                     }
                 }
                 else if (_sender.State == OscSocketState.Connected)
                 {
                     _connectionAttempts = 0;
+                    var mul = (float)generalSettings.GuiMultiply;
                     foreach (var exp in BabbleMapping.Mapping)
                     {
                         var address = BabbleAddresses.Addresses[exp.Key];
-                        var value = UnifiedTracking.Data.Shapes[(int) exp.Value].Weight * mul;
-                        _sender.Send(new OscMessage($"{prefix}{address}".TrimEnd('/'), value));
+                        var value = UnifiedTracking.Data.Shapes[(int) exp.Value].Weight;
+                        if (value == 0)
+                            continue;
+
+                        _sender.Send(new OscMessage($"{prefix}{address}".TrimEnd('/'), value * mul));
                     }
                 }
                 else if (_sender.State == OscSocketState.Closed)
