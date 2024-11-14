@@ -11,7 +11,7 @@ internal static class Float8Converter
     // Powers of 2 for binary parameters (1,2,4,8)
     internal static readonly int[] BinaryPowers = { 1, 2, 4, 8 };
 
-    private const float MinFloat8 = 0f;
+    private const float MinFloat8 = -1f;
     private const float MaxFloat8 = 1f;
     private const int BitsFloat8 = 8;
 
