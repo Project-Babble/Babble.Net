@@ -299,13 +299,12 @@ public class BabbleCore
             {
                 sessionOptions.AppendExecutionProvider_CoreML();
             }
-            else if (RuntimeDetector.IsRuntimeSupported(Runtime.CUDA))
-            {
-                // The EmguCV CUDA runtime BLOWS UP how much ram we use?!
-                // Like 150mb to 1.2GB!!
-                var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
-                sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
-            }
+            // Crashes rn
+            //else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            //{
+            //    var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
+            //    sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+            //}
         }
         else
         {

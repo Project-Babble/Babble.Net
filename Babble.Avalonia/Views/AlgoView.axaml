@@ -48,7 +48,7 @@
 					<CheckBox Grid.Column="2"
 						 Content="{localization:Localize algorithm.useGPU}"
 						 x:Name="UseGpu"
-						 IsChecked="{Binding UseGPU}"
+						 IsChecked="{Binding UseGpu}"
 						 Foreground="White"
 						 VerticalAlignment="Bottom"/>
 

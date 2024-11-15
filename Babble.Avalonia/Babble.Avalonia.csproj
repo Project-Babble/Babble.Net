@@ -23,6 +23,7 @@
     <None Remove="Assets\Localization\en-owo.json" />
     <None Remove="Assets\Localization\en-pirate.json" />
     <None Remove="Assets\Localization\en-US.json" />
+    <None Remove="Assets\Localization\es-es.json" />
   </ItemGroup>
 
   <ItemGroup>

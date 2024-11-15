@@ -30,11 +30,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Maui.Controls" Version="9.0.0" />
+    <PackageReference Update="Microsoft.Maui.Controls" Version="9.0.10" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="9.0.0" />
+    <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="9.0.10" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionBabbleAvaloniaAndroidHideInfoBar="True" /></VisualStudio></ProjectExtensions>
