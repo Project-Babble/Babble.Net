@@ -20,29 +20,39 @@
 						x:Name="ModelFileEntry"
 						Background="#2D2D2D"
 						Foreground="White"/>
+				<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,0">
+					<Button Content="Browse"
+							x:Name="BrowseModel"
+							ToolTip.Tip="Browse for a model"
+							Background="#4CAF50"
+							Foreground="White"/>
+					<TextBlock Text="(Changing the model requires a restart.)"
+							TextAlignment="Left"
+							Foreground="White"
+						    Margin="0,6,6,0"
+							x:Name="BrowseModelText"/>
+				</StackPanel>
+				
+				<StackPanel Grid.Column="0" Spacing="5" Margin="0,0,0,0">
+					<TextBlock Text="{localization:Localize algorithm.inferenceThreads}"
+								Foreground="White"
+								x:Name="InferenceThreads"/>
+					<TextBox Text="{Binding InferenceThreadsEntryText}"
+							x:Name="InferenceThreadsEntry"
+							Background="#2D2D2D"
+							Foreground="White"/>
+				</StackPanel>
 
-				<Grid ColumnDefinitions="*,*,Auto" >
-					<StackPanel Grid.Column="0" Spacing="5" Margin="0,0,0,0">
-						<TextBlock Text="{localization:Localize algorithm.inferenceThreads}"
-								 Foreground="White"
-								 x:Name="InferenceThreads"/>
-						<TextBox Text="{Binding InferenceThreadsEntryText}"
-								x:Name="InferenceThreadsEntry"
-								Background="#2D2D2D"
+				<StackPanel Grid.Column="1" Spacing="5" Margin="0,0,0,0">
+					<TextBlock Text="{localization:Localize algorithm.runtime}"
+								x:Name="RuntimeText"
 								Foreground="White"/>
-					</StackPanel>
-
-					<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
-						<TextBlock Text="{localization:Localize algorithm.runtime}"
-								 x:Name="RuntimeText"
-								 Foreground="White"/>
-						<ComboBox SelectedIndex="0"
-								Background="#2D2D2D"
-								Foreground="White">
-							<ComboBoxItem>ONNX</ComboBoxItem>
-						</ComboBox>
-					</StackPanel>
-				</Grid>
+					<ComboBox SelectedIndex="0"
+							Background="#2D2D2D"
+							Foreground="White">
+						<ComboBoxItem>ONNX</ComboBoxItem>
+					</ComboBox>
+				</StackPanel>			
 
 				<StackPanel Grid.Column="0" Spacing="5">
 					<CheckBox Grid.Column="2"
@@ -82,28 +92,27 @@
 						 Foreground="White"
 						 FontWeight="Bold"
 						 Margin="0,10,0,0"/>
-
-				<Grid ColumnDefinitions="*,*">
-					<StackPanel Grid.Column="0" Spacing="5" Margin="00,0,0,0">
-						<TextBlock Text="{localization:Localize algorithm.minFrequencyCutoff}"
-								 x:Name="MinFrequencyCutoffText"
-								 Foreground="White"/>
-						<TextBox Text="{Binding MinFrequencyCutoffEntryText}"
-								x:Name="MinFrequencyCutoffEntry"
-								Background="#2D2D2D"
+				
+				<StackPanel Grid.Column="0" Spacing="5" Margin="00,0,0,0">
+					<TextBlock Text="{localization:Localize algorithm.minFrequencyCutoff}"
+								x:Name="MinFrequencyCutoffText"
 								Foreground="White"/>
-					</StackPanel>
+					<TextBox Text="{Binding MinFrequencyCutoffEntryText}"
+							x:Name="MinFrequencyCutoffEntry"
+							Background="#2D2D2D"
+							Foreground="White"/>
+				</StackPanel>
 
-					<StackPanel Grid.Column="1" Spacing="5" Margin="10,0,0,0">
-						<TextBlock Text="{localization:Localize algorithm.speedCoefficient}"
-								 x:Name="SpeedCoefficientText"
-								 Foreground="White"/>
-						<TextBox Text="{Binding SpeedCoefficientEntryText}"
-								x:Name="SpeedCoefficientEntry"
-								Background="#2D2D2D"
+				<StackPanel Grid.Column="1" Spacing="5" Margin="0,0,0,0">
+					<TextBlock Text="{localization:Localize algorithm.speedCoefficient}"
+								x:Name="SpeedCoefficientText"
 								Foreground="White"/>
-					</StackPanel>
-				</Grid>
+					<TextBox Text="{Binding SpeedCoefficientEntryText}"
+							x:Name="SpeedCoefficientEntry"
+							Background="#2D2D2D"
+							Foreground="White"/>
+				</StackPanel>
+				
 			</StackPanel>
 		</Border>
 	</ScrollViewer>

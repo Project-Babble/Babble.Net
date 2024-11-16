@@ -8,4 +8,18 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+
+	<TrayIcon.Icons>
+		<TrayIcons>
+			<TrayIcon Icon="/Assets/IconOpaque_32x32.ico"
+					  ToolTipText="Right click to see Babble App options">
+				<TrayIcon.Menu>
+					<NativeMenu>
+						<NativeMenuItem Header="Exit" Click="OnShutdownClicked"></NativeMenuItem>
+					</NativeMenu>
+				</TrayIcon.Menu>
+			</TrayIcon>
+		</TrayIcons>
+	</TrayIcon.Icons>
+
 </Application>

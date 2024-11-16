@@ -3,6 +3,7 @@ using Emgu.CV.CvEnum;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Text;
+using Babble.Core;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -14,8 +15,27 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class IPCameraCapture : Capture
 {
+    public override (int width, int height) Dimensions 
+    {
+        get
+        {
+            var x = BabbleCore.Instance.Settings.GeneralSettings.GuiCamResolutionX;
+            var y = BabbleCore.Instance.Settings.GeneralSettings.GuiCamResolutionY;
+            if (x > 0 && y > 0)
+            {
+                // Support custom IP camera resolutions
+                return (x, y);
+            }
+            else
+            {
+                // Babble Cam res (240x240)
+                return DefaultFrameDimensions;
+            }
+        }
+        
+    }
+
     public override Mat RawFrame { get; } = new Mat();
-    public override (int width, int height) Dimensions => (240, 240);
     public override bool IsReady { get; protected set; }
     public override string Url { get; set; }
 

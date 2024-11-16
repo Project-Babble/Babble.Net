@@ -108,4 +108,12 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         _mainIntegrated.Teardown();
         _babbleOSC.Teardown();
     }
+
+    private void OnShutdownClicked(object? sender, EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
 }

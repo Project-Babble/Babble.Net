@@ -12,7 +12,7 @@ public abstract class Capture
     /// Represents the size of a "default" Babble frame 
     /// Pulled from the Babble Board ESP32 cam
     /// </summary>
-    public virtual (int width, int height) DefaultFrameDimensions => (240, 240);
+    public virtual (int width, int height) DefaultFrameDimensions { get; } = (240, 240);
 
     /// <summary>
     /// Empty frame, used when data is bad and we need to return something

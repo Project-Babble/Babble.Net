@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;
 using Babble.Core;
@@ -30,7 +31,33 @@ public partial class AlgoView : UserControl, IIsVisible
         this.FindControl<TextBox>("CalibrationDeadzoneEntry")!.LostFocus += CalibrationDeadzoneEntry_LostFocus;
         this.FindControl<TextBox>("MinFrequencyCutoffEntry")!.LostFocus += MinFrequencyCutoffEntry_LostFocus;
         this.FindControl<TextBox>("SpeedCoefficientEntry")!.LostFocus += SpeedCoefficientEntry_LostFocus;
+        this.Get<Button>("BrowseModel").Click += async delegate
+        {
+            var topLevel = TopLevel.GetTopLevel(this)!;
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Select a .onnx model.",
+                AllowMultiple = false,
+                FileTypeFilter = [ONNX]
+            });
+
+            if (files.Count == 1)
+            {
+                var model = files[0].Path.AbsolutePath;
+                BabbleCore.Instance.Settings.UpdateSetting<string>(
+                    nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiModelFile),
+                    model);
+                BabbleCore.Instance.Settings.Save();
+                _viewModel.ModelFileEntryText = model;
+            }
+        };
     }
+
+    private static FilePickerFileType ONNX { get; } = new("ONNX Models")
+    {
+        Patterns = [ "*.onnx" ]
+    };
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
     {
@@ -122,5 +149,10 @@ public partial class AlgoView : UserControl, IIsVisible
             nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiSpeedCoefficient),
             _viewModel.SpeedCoefficientEntryText.ToString());
         BabbleCore.Instance.Settings.Save();
+    }
+
+    public void StartCalibrationClicked(object sender, RoutedEventArgs args)
+    {
+
     }
 }

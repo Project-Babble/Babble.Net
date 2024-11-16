@@ -5,13 +5,13 @@
     <LangVersion>latest</LangVersion>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Icon_32x32.ico</ApplicationIcon>
     <AssemblyName></AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Title>Babble App</Title>
     <Company>Paradigm Enhancement Reality Labs</Company>
     <PackageProjectUrl>https://github.com/Project-Babble</PackageProjectUrl>
-    <PackageIcon>Icon.png</PackageIcon>
+    <PackageIcon>Icon_512x512.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
@@ -24,10 +24,6 @@
     <None Remove="Assets\Localization\en-pirate.json" />
     <None Remove="Assets\Localization\en-US.json" />
     <None Remove="Assets\Localization\es-es.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Assets\Icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -76,9 +72,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\Icon.png">
+    <None Update="Assets\Icon_512x512.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Remove="Assets\Icon.ico" />
   </ItemGroup>
 </Project>

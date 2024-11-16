@@ -27,6 +27,9 @@ internal static class TensorUtils
         if (frame.Length != EXPECTED_SIZE)
             throw new InvalidDataException();
 
+        // var input = new DenseTensor<float>([1, 1, 256, 256]);
+        // frame.AsSpan().CopyTo(input.Buffer.Span);
+
         var input = new DenseTensor<float>([1, 1, 256, 256]);
 
         for (int y = 0; y < 256; y++)

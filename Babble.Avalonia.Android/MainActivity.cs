@@ -1,9 +1,10 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Avalonia;
 using Avalonia.Android;
-using System;
+using Babble.Avalonia.Android.Services;
 
 namespace Babble.Avalonia.Android;
 
@@ -15,105 +16,55 @@ namespace Babble.Avalonia.Android;
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>
 {
+    private bool _isServiceRunning;
+    private Intent _backgroundServiceIntent;
+
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
         return base.CustomizeAppBuilder(builder)
             .WithInterFont();
     }
 
-    private PowerManager.WakeLock _wakeLock;
-
     protected override void OnCreate(Bundle savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
-
-        // Initialize our (partial) wake lock
-        InitializeWakeLock();
+        _backgroundServiceIntent = new Intent(this, typeof(BackgroundService));
     }
 
-    private void InitializeWakeLock()
-    {
-        try
-        {
-            var powerManager = (PowerManager)GetSystemService(PowerService)!;
-            _wakeLock = powerManager.NewWakeLock(
-                WakeLockFlags.Partial,
-                $"{PackageName}:WakeLock")!;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error initializing wake lock: {ex}");
-        }
-    }
 
-    public void AcquireWakeLock()
+    public void StartBackgroundService()
     {
-        try
+        if (!_isServiceRunning)
         {
-            if (_wakeLock != null && !_wakeLock.IsHeld)
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
             {
-                _wakeLock.Acquire();
+                StartForegroundService(_backgroundServiceIntent);
             }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error acquiring wake lock: {ex}");
-        }
-    }
-
-    public void ReleaseWakeLock()
-    {
-        try
-        {
-            if (_wakeLock != null && _wakeLock.IsHeld)
+            else
             {
-                _wakeLock.Release();
+                StartService(_backgroundServiceIntent);
             }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error releasing wake lock: {ex}");
+            _isServiceRunning = true;
         }
     }
 
-    protected override void OnResume()
+    public void StopBackgroundService()
     {
-        base.OnResume();
-        // If we need to reacquire wake lock
-        AcquireWakeLock();
-    }
-
-    protected override void OnPause()
-    {
-        if (!IsFinishing)
+        if (_isServiceRunning)
         {
-            // App is just paused, might want to keep wake lock
+            StopService(_backgroundServiceIntent);
+            _isServiceRunning = false;
         }
-        else
-        {
-            ReleaseWakeLock();
-        }
-
-        base.OnPause();
     }
 
     protected override void OnDestroy()
     {
-        CleanupResources();
+        // Only stop the service if the app is actually being destroyed,
+        // not just configured
+        if (IsFinishing)
+        {
+            StopBackgroundService();
+        }
         base.OnDestroy();
-    }
-
-    private void CleanupResources()
-    {
-        try
-        {
-            ReleaseWakeLock();
-            _wakeLock?.Dispose();
-            _wakeLock = null;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error cleaning up resources: {ex}");
-        }
     }
 }

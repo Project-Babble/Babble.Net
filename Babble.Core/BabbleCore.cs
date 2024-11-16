@@ -299,7 +299,7 @@ public class BabbleCore
             {
                 sessionOptions.AppendExecutionProvider_CoreML();
             }
-            // Crashes rn
+            //// Crashes rn
             //else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
             //{
             //    var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;

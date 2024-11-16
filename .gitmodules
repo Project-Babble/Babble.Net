@@ -4,3 +4,6 @@
 [submodule "VRCFaceTracking"]
 	path = VRCFaceTracking
 	url = https://github.com/TigersUniverse/VRCFaceTracking
+[submodule "DesktopNotifications"]
+	path = DesktopNotifications
+	url = https://github.com/pr8x/DesktopNotifications.git
