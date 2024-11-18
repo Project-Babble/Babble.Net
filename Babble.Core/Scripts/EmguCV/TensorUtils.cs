@@ -27,19 +27,18 @@ internal static class TensorUtils
         if (frame.Length != EXPECTED_SIZE)
             throw new InvalidDataException();
 
-        // var input = new DenseTensor<float>([1, 1, 256, 256]);
-        // frame.AsSpan().CopyTo(input.Buffer.Span);
-
         var input = new DenseTensor<float>([1, 1, 256, 256]);
+        frame.AsSpan().CopyTo(input.Buffer.Span);
 
-        for (int y = 0; y < 256; y++)
-        {
-            for (int x = 0; x < 256; x++)
-            {
-                // Bit shift this 8 instead??
-                input[0, 0, y, x] = frame[y * 256 + x];
-            }
-        }
+        // Works in case the above breaks
+        //for (int y = 0; y < 256; y++)
+        //{
+        //    for (int x = 0; x < 256; x++)
+        //    {
+        //        // Bit shift this 8 instead??
+        //        input[0, 0, y, x] = frame[y * 256 + x];
+        //    }
+        //}
 
         return input;
     }

@@ -5,6 +5,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:localization="clr-namespace:Avalonia.Localizer.Core.Localization"
              mc:Ignorable="d">
+	
+	<UserControl.Styles>
+		<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+			<Setter Property="Background" Value="#2D2D2D"/>
+			<Setter Property="BorderBrush" Value="#4CAF50"/>
+			<!-- Optional: gives a nice green highlight when focused -->
+			<Setter Property="BorderThickness" Value="1"/>
+		</Style>
+	</UserControl.Styles>
+
 	<ScrollViewer VerticalScrollBarVisibility="Auto">
 		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5" Margin="0,0,0,0">

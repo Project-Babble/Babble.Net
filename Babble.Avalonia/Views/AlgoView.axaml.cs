@@ -31,7 +31,7 @@ public partial class AlgoView : UserControl, IIsVisible
         this.FindControl<TextBox>("CalibrationDeadzoneEntry")!.LostFocus += CalibrationDeadzoneEntry_LostFocus;
         this.FindControl<TextBox>("MinFrequencyCutoffEntry")!.LostFocus += MinFrequencyCutoffEntry_LostFocus;
         this.FindControl<TextBox>("SpeedCoefficientEntry")!.LostFocus += SpeedCoefficientEntry_LostFocus;
-        this.Get<Button>("BrowseModel").Click += async delegate
+        this.Get<Button>("BrowseModel")!.Click += async delegate
         {
             var topLevel = TopLevel.GetTopLevel(this)!;
 

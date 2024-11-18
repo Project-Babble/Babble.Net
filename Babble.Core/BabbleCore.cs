@@ -283,6 +283,7 @@ public class BabbleCore
     /// <param name="sessionOptions"></param>
     private void ConfigurePlatformSpecificGPU(SessionOptions sessionOptions)
     {
+        sessionOptions.AppendExecutionProvider_CPU();
         if (Settings.GeneralSettings.GuiUseGpu)
         {
             if (OperatingSystem.IsAndroid())
@@ -299,16 +300,11 @@ public class BabbleCore
             {
                 sessionOptions.AppendExecutionProvider_CoreML();
             }
-            //// Crashes rn
-            //else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
-            //{
-            //    var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
-            //    sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
-            //}
-        }
-        else
-        {
-            sessionOptions.AppendExecutionProvider_CPU();
+            else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            {
+                var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
+                sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+            }
         }
     }
 }
