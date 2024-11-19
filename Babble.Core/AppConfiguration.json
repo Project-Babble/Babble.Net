@@ -12,8 +12,8 @@
 		"use_ffmpeg": false
 	},
 	"settings": {
-		"gui_min_cutoff": "0.9",
-		"gui_speed_coefficient": "0.9",
+		"gui_min_cutoff": 0.9,
+		"gui_speed_coefficient": 0.9,
 		"gui_osc_address": "127.0.0.7",
 		"gui_osc_port": 8888,
 		"gui_osc_receiver_port": 9001,

@@ -2,6 +2,7 @@
 using Babble.Core.Scripts;
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Scripts.EmguCV;
+using Babble.Core.Scripts.Filters;
 using Babble.Core.Settings;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -17,12 +18,12 @@ namespace Babble.Core;
 public class BabbleCore
 {
     public static BabbleCore Instance { get; private set; }
-
     public BabbleSettings Settings { get; private set; }
-    
+    internal ILogger Logger { get; private set; }
     public bool IsRunning { get; private set; }
 
-    internal ILogger Logger { get; private set; }
+    private ExpressionFilter _expressionFilter { get; set; }
+
     
     private PlatformConnector _platformConnector;
     private InferenceSession _session;
@@ -77,6 +78,7 @@ public class BabbleCore
     /// <exception cref="InvalidOperationException"></exception>
     public void Start(BabbleSettings settings)
     {
+        // Fail fast
         if (IsRunning)
         {
             Logger.LogInformation("Babble.Core was already running. Restarting...");
@@ -84,29 +86,38 @@ public class BabbleCore
         }
 
         Settings = settings;
-
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
         Logger = factory.CreateLogger(nameof(BabbleCore));
 
-        // TODO Support a multi-model system
-        // For the time being one model is enough
         // Model manifest on Github?
-        const string modelName = "model.onnx";
-        string modelPath = Path.Combine(AppContext.BaseDirectory, modelName);
+        const string defaultModelName = "model.onnx";
+        string modelPath = Path.Combine(AppContext.BaseDirectory, defaultModelName);
         Utils.ExtractEmbeddedResource(
             Assembly.GetExecutingAssembly(), 
-            Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(x => x.Contains(modelName)).First(), // Babble model
+            Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(x => x.Contains(defaultModelName)).First(), // Babble model
             modelPath, 
-            overwrite: true);
+            overwrite: false);
+
+        if (File.Exists(Instance.Settings.GeneralSettings.GuiModelFile))
+        {
+            modelPath = Instance.Settings.GeneralSettings.GuiModelFile;
+        }
 
         SessionOptions sessionOptions = SetupSessionOptions();
 
         ConfigurePlatformSpecificGPU(sessionOptions);
         ConfigurePlatformConnector();
 
+        _expressionFilter = new ExpressionFilter(
+            minCutoff: Instance.Settings.GeneralSettings.GuiMinCutoff,                 // Lower values create more smoothing
+            speedCoefficient: Instance.Settings.GeneralSettings.GuiSpeedCoefficient,   // Increase to reduce lag during fast movements
+            dCutoff: 1.0f                                                              // Cutoff frequency for derivative
+        );
+
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
         IsRunning = true;
+
 
         Logger.LogInformation("Babble.Core started.");
     }
@@ -126,33 +137,41 @@ public class BabbleCore
             Logger.LogError("Tried to to poll Babble.Core, but it wasn't running!");
             return false;
         }
-
-        var arKitExpressions = Utils.ARKitExpressions;
-
-        // Camera not ready, or connecting to new source
+        
+        // Test if the camera is not ready or connecting to new source
         var data = _platformConnector.ExtractFrameData();
         if (data is null) return false;
         if (data.Length == 0) return false;
 
+        // Camera ready, prepare Mat as DenseTensor
         var inputTensor = TensorUtils.PreprocessFrame(data);
         var inputs = new List<NamedOnnxValue>
         {
             NamedOnnxValue.CreateFromTensor(_inputName, inputTensor)
         };
 
+        // Run inference!
         using var results = _session.Run(inputs);
         var output = results[0].AsEnumerable<float>().ToArray();
+
+        // Clamp and give meaning to the floats
+        var arKitExpressions = Utils.ARKitExpressions;
         for (int i = 0; i < output.Length; i++)
         {
             arKitExpressions[(ARKitExpression)i] = Math.Clamp(output[i], 0f, 1f);
         }
 
-        // Map Babble's ARKit to UnifiedExpression
+        // Prepare one-euro filter
+        double currentTimestamp = DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond;
+
+        // Map unfiltered ARKit expressions to filtered Unified Expressions
         foreach (var exp in Utils.ExpressionMapping)
         {
+            float filteredValue = arKitExpressions[exp.Key];
             foreach (var ue in exp.Value)
             {
-                UnifiedExpressions.Add(ue, arKitExpressions[exp.Key]);
+                filteredValue = _expressionFilter.FilterExpression(ue, filteredValue, currentTimestamp);
+                UnifiedExpressions.Add(ue, filteredValue);
             }
         }
 

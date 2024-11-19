@@ -5,10 +5,10 @@ namespace Babble.Core.Settings.Models;
 public sealed class GeneralSettings
 {
     [JsonProperty("gui_min_cutoff")]
-    public string GuiMinCutoff { get; set; }
+    public float GuiMinCutoff { get; set; }
 
     [JsonProperty("gui_speed_coefficient")]
-    public string GuiSpeedCoefficient { get; set; }
+    public float GuiSpeedCoefficient { get; set; }
 
     [JsonProperty("gui_osc_address")]
     public string GuiOscAddress { get; set; }
@@ -82,8 +82,8 @@ public sealed class GeneralSettings
     public GeneralSettings()
     {
         // Filter settings
-        GuiMinCutoff = "1.0";
-        GuiSpeedCoefficient = "1.0";
+        GuiMinCutoff = 1.0f;
+        GuiSpeedCoefficient = 1.0f;
 
         // OSC communication settings
         GuiOscAddress = "127.0.0.1";

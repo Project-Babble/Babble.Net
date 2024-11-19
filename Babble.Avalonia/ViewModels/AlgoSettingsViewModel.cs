@@ -42,7 +42,7 @@ public partial class AlgoSettingsViewModel : ObservableObject
         gpuIndexEntryText = settings.GeneralSettings.GuiGpuIndex;
         modelOutputMultiplierEntryText = settings.GeneralSettings.GuiMultiply;
         calibrationDeadzoneEntryText = settings.GeneralSettings.CalibDeadzone;
-        minFrequencyCutoffEntryText = double.Parse(settings.GeneralSettings.GuiMinCutoff);
-        speedCoefficientEntryText = double.Parse(settings.GeneralSettings.GuiSpeedCoefficient);
+        minFrequencyCutoffEntryText = settings.GeneralSettings.GuiMinCutoff;
+        speedCoefficientEntryText = settings.GeneralSettings.GuiSpeedCoefficient;
     }
 }
