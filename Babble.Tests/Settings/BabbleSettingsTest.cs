@@ -1,5 +1,4 @@
 ﻿using Babble.Core.Settings;
-using Babble.Core.Settings.Models;
 using System.Text.Json;
 
 namespace Babble.Tests.Settings;
@@ -32,21 +31,10 @@ public class SettingsTests : IDisposable
         const int expectedVersion = 1;
 
         // Act
-        var version = _settings.GetSetting<int>("Version");
+        var version = _settings.Version;
 
         // Assert
         Assert.Equal(expectedVersion, version);
-    }
-
-    [Fact]
-    public void GetSetting_ThrowsArgumentException_ForNonExistentProperty()
-    {
-        var _settings = CreateTestConfiguration();
-        _settings.Load();
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() =>
-            _settings.GetSetting<BabbleSettings>("NonExistentProperty"));
     }
 
     [Fact]
@@ -60,7 +48,7 @@ public class SettingsTests : IDisposable
 
         // Act
         _settings.UpdateSetting<int>("Version", newVersion.ToString());
-        var updatedVersion = _settings.GetSetting<int>("Version");
+        var updatedVersion = _settings.Version;
 
         // Assert
         Assert.Equal(newVersion, updatedVersion);
@@ -95,7 +83,7 @@ public class SettingsTests : IDisposable
         _settings.UpdateSetting<int>("Cam.roi_window_x", "101");
 
         // Act
-        var value = _settings.GetSetting<int>("Cam.roi_window_x");
+        var value = _settings.Cam.RoiWindowX;
 
         // Assert
         Assert.Equal(testValue, value);
@@ -112,7 +100,7 @@ public class SettingsTests : IDisposable
 
         // Act
         _settings.UpdateSetting<int>("Cam.roi_window_x", newValue.ToString());
-        var updatedValue = _settings.GetSetting<int>("Cam.roi_window_x");
+        var updatedValue = _settings.Cam.RoiWindowX;
 
         // Assert
         Assert.Equal(newValue, updatedValue);
