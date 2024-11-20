@@ -8,7 +8,21 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <UserSecretsId>d6f3104e-07a3-4ef6-9374-7cbdd8874cbc</UserSecretsId>
+    <PackageIcon>Icon_512x512.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/Project-Babble/ProjectBabble</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Project-Babble/ProjectBabble</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <ApplicationIcon>IconOpaque_32x32.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="IconOpaque_32x32.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Babble.Avalonia\Assets\Icon_512x512.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="11.2.1" />

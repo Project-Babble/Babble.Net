@@ -319,11 +319,13 @@ public class BabbleCore
             {
                 sessionOptions.AppendExecutionProvider_CoreML();
             }
-            else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
-            {
-                var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
-                sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
-            }
+            // Replace Microsoft.ML.OnnxRuntime with Microsoft.ML.OnnxRuntime.Gpu for Desktop builds.
+            // TODO: Add this to .csproj?
+            //else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            //{
+            //    var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
+            //    sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+            //}
         }
     }
 }

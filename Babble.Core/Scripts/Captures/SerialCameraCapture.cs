@@ -12,11 +12,11 @@ namespace Babble.Core.Scripts.Decoders;
 public class SerialCameraCapture : Capture, IDisposable
 {
     private const int BAUD_RATE = 3000000;
-    private static readonly byte[] ETVR_HEADER = { 0xff, 0xa0 };       // xlinka 11/8/24: Changed to use array initializer
-    private static readonly byte[] ETVR_HEADER_FRAME = { 0xff, 0xa1 }; // xlinka 11/8/24: Changed to use array initializer
+    private static readonly byte[] ETVR_HEADER = { 0xff, 0xa0, 0xff, 0xa1 };       // xlinka 11/8/24: Changed to use array initializer
     private const int ETVR_HEADER_LEN = 6;                             // 2 bytes header + 2 bytes frame type + 2 bytes size
 
     private readonly SerialPort _serialPort;
+    private byte[] _reuseableJpegBuffer = Array.Empty<byte>();
     private byte[] _buffer = new byte[2048];
     private int _bufferPosition;
     private bool _isDisposed;
@@ -85,13 +85,17 @@ public class SerialCameraCapture : Capture, IDisposable
                     var (start, jpegSize) = GetNextPacketBounds();
                     if (start == -1 || jpegSize == -1) continue;
 
-                    byte[] jpegData = new byte[jpegSize];
-                    Array.Copy(_buffer, start + ETVR_HEADER_LEN, jpegData, 0, jpegSize);
+                    if (_reuseableJpegBuffer.Length != jpegSize)
+                    {
+                        Array.Resize(ref _reuseableJpegBuffer, jpegSize);
+                    }
 
-                    if (jpegData.Length >= 2 && jpegData[0] == 0xFF && jpegData[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
+                    Array.Copy(_buffer, start + ETVR_HEADER_LEN, _reuseableJpegBuffer, 0, jpegSize);
+
+                    if (_reuseableJpegBuffer.Length >= 2 && _reuseableJpegBuffer[0] == 0xFF && _reuseableJpegBuffer[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
                     {
                         _bufferPosition = 0;
-                        CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawFrame);
+                        CvInvoke.Imdecode(_reuseableJpegBuffer, ImreadModes.Color, RawFrame);
                         continue;
                     }
 
@@ -116,7 +120,6 @@ public class SerialCameraCapture : Capture, IDisposable
     private (int start, int size) GetNextPacketBounds()
     {
         int headerPos = -1;
-        byte[] header = ETVR_HEADER.Concat(ETVR_HEADER_FRAME).ToArray(); // xlinka 11/8/24: Combine headers for matching
 
         // Keep reading until we find a valid header
         while (headerPos == -1)
@@ -132,9 +135,9 @@ public class SerialCameraCapture : Capture, IDisposable
             _bufferPosition += bytesRead;
 
             // Search for the protocol header
-            for (int i = 0; i <= _bufferPosition - header.Length; i++)
+            for (int i = 0; i <= _bufferPosition - ETVR_HEADER.Length; i++)
             {
-                if (CompareBytes(_buffer, i, header))
+                if (CompareBytes(_buffer, i, ETVR_HEADER))
                 {
                     headerPos = i;
                     break;

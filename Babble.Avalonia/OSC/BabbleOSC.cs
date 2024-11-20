@@ -1,4 +1,5 @@
-﻿using Babble.Avalonia.OSC;
+﻿using Babble.Avalonia.Scripts;
+using Babble.Avalonia.OSC;
 using Babble.Core;
 using Hypernex.ExtendedTracking;
 using Microsoft.Extensions.Logging;
@@ -32,7 +33,9 @@ public class BabbleOSC
 
     private const int TIMEOUT_MS = 10000;
 
-    private const int SEND_INTERVAL_MS = 150;
+    // VRC has a 100ms limit when sending a "cluster" of OSC messages, or 10 messages per second
+    // So we'll send 8 (clusters of) messages per second!
+    private const int SEND_INTERVAL_MS_FLOOR = 125; 
 
     private const int MAX_RETRIES = 5;
 
@@ -66,14 +69,14 @@ public class BabbleOSC
     private async Task SendLoopAsync(CancellationToken cancellationToken)
     {
         var generalSettings = BabbleCore.Instance.Settings.GeneralSettings;
-
         var allParams = VRCFTParameters.GetParameters();
+        int[] binaryPowers = [1, 2, 4, 8];
 
         while (!cancellationToken.IsCancellationRequested)
         {  
             if (!BabbleCore.Instance.IsRunning)
             {
-                await Task.Delay(SEND_INTERVAL_MS, cancellationToken);
+                await Task.Delay(SEND_INTERVAL_MS_FLOOR, cancellationToken);
                 continue;
             }
 
@@ -93,16 +96,20 @@ public class BabbleOSC
 
                         var trimmed = param.Name.TrimEnd('/');
                         _sender.Send(new OscMessage($"{prefix}{trimmed}", value));
+                        _sender.Send(new OscMessage($"{prefix}v2/{trimmed}", value));
+                        // _sender.Send(new OscMessage($"{prefix}{trimmed}Negative", -value));
+                        // _sender.Send(new OscMessage($"{prefix}v2/{trimmed}Negative", -value));
 
-                        // TODO Binary params!
-                        //IEnumerable<(bool bit, int power)> bitsWithPowers = Float8Converter.
-                        //    GetBits(param.GetWeight(UnifiedTracking.Data)).
-                        //    Zip(Float8Converter.BinaryPowers);
-                        //foreach (var bitWithPower in bitsWithPowers)
-                        //{
-                        //    _sender.Send(new OscMessage($"{prefix}{trimmed}{bitWithPower.power}", bitWithPower.bit));
-                        //}
+                        var bitsWithPowers = Float8Converter.GetBits(param.GetWeight(UnifiedTracking.Data));
+                        for (int i = 0; i < binaryPowers.Length; i++)
+                        {
+                            _sender.Send(new OscMessage($"{prefix}{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
+                            _sender.Send(new OscMessage($"{prefix}v2/{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
+                        }
                     }
+
+                    // If sending directly to VRChat, make sure we don't spam the queue
+                    await Task.Delay(SEND_INTERVAL_MS_FLOOR, cancellationToken);
                 }
                 else if (_sender.State == OscSocketState.Connected)
                 {
@@ -115,7 +122,7 @@ public class BabbleOSC
                         if (value == 0)
                             continue;
 
-                        _sender.Send(new OscMessage($"{prefix}{address}".TrimEnd('/'), value * mul));
+                        _sender.Send(new OscMessage($"{prefix}{address}", value * mul));
                     }
                 }
                 else if (_sender.State == OscSocketState.Closed)
@@ -142,13 +149,15 @@ public class BabbleOSC
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                continue;
+                // If there's an error here, don't freeze the UI thread
+                await Task.Delay(SEND_INTERVAL_MS_FLOOR, cancellationToken);
             }
             finally
             {
-                await Task.Delay(SEND_INTERVAL_MS, cancellationToken);
+                // Don't max out CPU
+                await Task.Delay(10, cancellationToken);
             }
         }
     }

@@ -20,9 +20,6 @@ public partial class App : AvaloniaMeadowApplication<Linux>
 {
     internal static ILogger Logger { get; private set; }
 
-    private Task _task;
-    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-    private CancellationToken _cancellationToken;
     private MainIntegrated _mainIntegrated;
     private BabbleOSC _babbleOSC;
 
