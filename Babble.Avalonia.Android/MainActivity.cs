@@ -5,6 +5,7 @@ using Android.OS;
 using Avalonia;
 using Avalonia.Android;
 using Babble.Avalonia.Android.Services;
+using Emgu.CV;
 
 namespace Babble.Avalonia.Android;
 
@@ -21,6 +22,7 @@ public class MainActivity : AvaloniaMainActivity<App>
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
+        CvInvokeAndroid.Init();
         return base.CustomizeAppBuilder(builder)
             .WithInterFont();
     }

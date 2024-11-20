@@ -91,7 +91,7 @@ public class BabbleOSC
                     foreach (var param in allParams)
                     {
                         var value = param.GetWeight(UnifiedTracking.Data);
-                        if (value == 0) 
+                        if (value == 0 || float.IsNaN(value)) 
                             continue;
 
                         var trimmed = param.Name.TrimEnd('/');
@@ -100,12 +100,13 @@ public class BabbleOSC
                         // _sender.Send(new OscMessage($"{prefix}{trimmed}Negative", -value));
                         // _sender.Send(new OscMessage($"{prefix}v2/{trimmed}Negative", -value));
 
-                        var bitsWithPowers = Float8Converter.GetBits(param.GetWeight(UnifiedTracking.Data));
-                        for (int i = 0; i < binaryPowers.Length; i++)
-                        {
-                            _sender.Send(new OscMessage($"{prefix}{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
-                            _sender.Send(new OscMessage($"{prefix}v2/{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
-                        }
+
+                        //var bitsWithPowers = Float8Converter.GetBits(param.GetWeight(UnifiedTracking.Data));
+                        //for (int i = 0; i < binaryPowers.Length; i++)
+                        //{
+                        //    _sender.Send(new OscMessage($"{prefix}{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
+                        //    _sender.Send(new OscMessage($"{prefix}v2/{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
+                        //}
                     }
 
                     // If sending directly to VRChat, make sure we don't spam the queue

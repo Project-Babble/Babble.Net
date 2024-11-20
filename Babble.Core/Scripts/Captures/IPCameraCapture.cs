@@ -3,13 +3,12 @@ using Emgu.CV.CvEnum;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Text;
-using Babble.Core;
 
 namespace Babble.Core.Scripts.Decoders;
 
 /// <summary>
 /// Captures and decodes an MJPEG stream, commonly used by IP Cameras
-/// Mobile-platform specific implementation, assumes a fixed camera size of 256x256
+/// Mobile-platform specific implementation
 /// https://github.com/Larry57/SimpleMJPEGStreamViewer
 /// https://stackoverflow.com/questions/3801275/how-to-convert-image-to-byte-array
 /// </summary>
@@ -31,8 +30,7 @@ public class IPCameraCapture : Capture
                 // Babble Cam res (240x240)
                 return DefaultFrameDimensions;
             }
-        }
-        
+        }       
     }
 
     public override Mat RawFrame { get; } = new Mat();

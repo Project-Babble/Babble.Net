@@ -20,10 +20,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\de-de.json" />
+    <None Remove="Assets\Localization\de-de.json" />
     <None Remove="Assets\Localization\en-owo.json" />
     <None Remove="Assets\Localization\en-pirate.json" />
     <None Remove="Assets\Localization\en-US.json" />
     <None Remove="Assets\Localization\es-es.json" />
+    <None Remove="Assets\Localization\fr-fr.json" />
+    <None Remove="Assets\Localization\ru-ru.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -80,5 +84,29 @@
 
   <ItemGroup>
     <AvaloniaResource Remove="Assets\Icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Update="Assets\Localization\de-de.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Localization\en-owo.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Localization\en-pirate.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Localization\en-us.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Localization\es-es.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Localization\fr-fr.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
+    <AvaloniaResource Update="Assets\Localization\ru-ru.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AvaloniaResource>
   </ItemGroup>
 </Project>

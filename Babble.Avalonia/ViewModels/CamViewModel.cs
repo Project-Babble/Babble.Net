@@ -40,6 +40,7 @@ public partial class CamViewModel : ObservableObject
     {
         // Handle a very niche edge case where the user starts up the application
         // With a previously correct URL, but it's not ready just yet
+        // Don't send an update event!
         var settings = BabbleCore.Instance.Settings;
         cameraAddressEntryText = settings.Cam.CaptureSource;
     }

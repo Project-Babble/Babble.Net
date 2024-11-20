@@ -27,6 +27,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="11.2.1" />
     <PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.2.1" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />
   </ItemGroup>
 
   <ItemGroup>

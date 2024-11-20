@@ -1,4 +1,6 @@
-﻿namespace Babble.Core.Scripts.Decoders;
+﻿using Emgu.CV;
+
+namespace Babble.Core.Scripts.Decoders;
 
 /// <summary>
 /// Special class for iOS, Android and UWP platforms where EmguCV VideoCapture is not fully implemented
