@@ -15,7 +15,7 @@ namespace Babble.Core;
 /// <summary>
 /// The singleton entrypoint for our library
 /// </summary>
-public class BabbleCore
+public partial class BabbleCore
 {
     public static BabbleCore Instance { get; private set; }
     public BabbleSettings Settings { get; private set; }
@@ -104,8 +104,8 @@ public class BabbleCore
         }
 
         SessionOptions sessionOptions = SetupSessionOptions();
-
         ConfigurePlatformSpecificGPU(sessionOptions);
+
         ConfigurePlatformConnector();
 
         _expressionFilter = new ExpressionFilter(
@@ -113,7 +113,7 @@ public class BabbleCore
             speedCoefficient: Instance.Settings.GeneralSettings.GuiSpeedCoefficient,   // Increase to reduce lag during fast movements
             dCutoff: 1.0f                                                              // Cutoff frequency for derivative
         );
-
+        
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
         IsRunning = true;
@@ -129,9 +129,7 @@ public class BabbleCore
     /// <returns></returns>
     public bool GetExpressionData(out Dictionary<UnifiedExpression, float> UnifiedExpressions)
     {
-        // Cache dictionary on start?
-        UnifiedExpressions = new();
-
+        UnifiedExpressions = null;
         if (!IsRunning || Instance is null)
         {
             Logger.LogError("Tried to to poll Babble.Core, but it wasn't running!");
@@ -171,10 +169,11 @@ public class BabbleCore
             foreach (var ue in exp.Value)
             {
                 filteredValue = _expressionFilter.FilterExpression(ue, filteredValue, currentTimestamp);
-                UnifiedExpressions.Add(ue, filteredValue);
+                CachedExpressionTable[ue] = filteredValue;
             }
         }
 
+        UnifiedExpressions = CachedExpressionTable;
         return true;
     }
 
@@ -321,11 +320,11 @@ public class BabbleCore
             }
             // Replace Microsoft.ML.OnnxRuntime with Microsoft.ML.OnnxRuntime.Gpu for Desktop builds.
             // TODO: Add this to .csproj?
-            //else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
-            //{
-            //    var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
-            //    sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
-            //}
+            else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            {
+                var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
+                sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+            }
         }
     }
 }

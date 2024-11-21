@@ -14,7 +14,7 @@
 		</Style>
 	</UserControl.Styles>
 	
-	<ScrollViewer VerticalScrollBarVisibility="Auto">
+	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
 	    <Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 	    </Border>
 	</ScrollViewer>

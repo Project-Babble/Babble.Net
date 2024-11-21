@@ -17,49 +17,58 @@ public class BabbleOSC
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly Task _sendTask;
 
-    private readonly int _resolvedLocalPort;
+    private const string DEFAULT_HOST = "127.0.0.1";
 
-    private readonly int _resolvedRemotePort;
+    private const int DEFAULT_LOCAL_PORT = 44444;
 
-    private readonly string _resolvedHost;
-
-    private int _connectionAttempts;
-
-    public const string DEFAULT_HOST = "127.0.0.1";
-
-    public const int DEFAULT_LOCAL_PORT = 44444;
-
-    public const int DEFAULT_REMOTE_PORT = 8888;
+    private const int DEFAULT_REMOTE_PORT = 8888;
 
     private const int TIMEOUT_MS = 10000;
-
-    // VRC has a 100ms limit when sending a "cluster" of OSC messages, or 10 messages per second
-    // So we'll send 8 (clusters of) messages per second!
+    
     private const int SEND_INTERVAL_MS_FLOOR = 125; 
 
     private const int MAX_RETRIES = 5;
+
+    private int _connectionAttempts;
 
     public event EventHandler? OnConnectionLost;
 
     public BabbleOSC(string? host = null, int? remotePort = null)
     {
-        _resolvedHost = host ?? DEFAULT_HOST;
-        _resolvedRemotePort = remotePort ?? DEFAULT_REMOTE_PORT;
-        _resolvedLocalPort = DEFAULT_LOCAL_PORT;
-
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
         _logger = factory.CreateLogger("BabbleOSC");
 
-        ConfigureReceiver();
+        var settings = BabbleCore.Instance.Settings;
+        settings.OnUpdate += async (setting) =>
+        {
+            // Hacky but it works
+            var normalizedSetting = setting.Replace("_", string.Empty).ToLower();
+            if (normalizedSetting == "guioscaddress" || normalizedSetting == "guioscport")
+            {
+                // Close and dispose the current sender
+                _sender.Close();
+                _sender.Dispose();
+
+                // Delay before attempting to reconnect
+                await Task.Delay(1000);
+
+                // Attempt to reconfigure the receiver and reconnect
+                ConfigureReceiver(
+                    IPAddress.Parse(settings.GeneralSettings.GuiOscAddress), 
+                    settings.GeneralSettings.GuiOscPort);
+            }
+        };
+
+        var ip = IPAddress.Parse(host ?? DEFAULT_HOST);
+        ConfigureReceiver(ip, remotePort ?? DEFAULT_REMOTE_PORT);
 
         _cancellationTokenSource  = new CancellationTokenSource();
         _sendTask = Task.Run(() => SendLoopAsync(_cancellationTokenSource.Token));
     }
 
-    private void ConfigureReceiver()
+    private void ConfigureReceiver(IPAddress host, int remotePort)
     {
-        IPAddress address = IPAddress.Parse(_resolvedHost);
-        _sender = new OscSender(address, _resolvedLocalPort, _resolvedRemotePort)
+        _sender = new OscSender(host, DEFAULT_LOCAL_PORT, remotePort)
         {
             DisconnectTimeout = TIMEOUT_MS
         };
@@ -140,7 +149,7 @@ public class BabbleOSC
                         await Task.Delay(1000, cancellationToken);
 
                         // Attempt to reconfigure the receiver and reconnect
-                        ConfigureReceiver();
+                        ConfigureReceiver(_sender.RemoteAddress, _sender.Port);
                     }
                     else
                     {

@@ -22,7 +22,7 @@
 		<vm:CamView />
 	</Design.DataContext>
 
-	<ScrollViewer VerticalScrollBarVisibility="Auto">
+	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
 		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
 		<StackPanel Spacing="5" Margin="0,0,0,0">
 			<TextBlock Text="{localization:Localize camera.cameraAddress}" 
@@ -91,18 +91,16 @@
 					   x:Name="ModeText" 
 					   ToolTip.Tip="{localization:Localize camera.modeTooltip}"
 					   Foreground="White"/>
-			<StackPanel Orientation="Horizontal" Spacing="10">
-				<CheckBox Content="{localization:Localize camera.verticalFlip}" 
-						  x:Name="VerticalFlip" 
-						  IsChecked="{Binding IsVerticalFlip}"
-						  ToolTip.Tip="{localization:Localize camera.verticalFlipTooltip}"
-						  Foreground="White"/>
-				<CheckBox Content="{localization:Localize camera.horizontalFlip}" 
-						  x:Name="HorizontalFlip" 
-						  IsChecked="{Binding IsHorizontalFlip}"
-						  ToolTip.Tip="{localization:Localize camera.horizontalFlipTooltip}"
-						  Foreground="White"/>
-			</StackPanel>
+			<CheckBox Content="{localization:Localize camera.verticalFlip}"
+					  x:Name="VerticalFlip"
+					  IsChecked="{Binding IsVerticalFlip}"
+					  ToolTip.Tip="{localization:Localize camera.verticalFlipTooltip}"
+					  Foreground="White"/>
+			<CheckBox Content="{localization:Localize camera.horizontalFlip}"
+					  x:Name="HorizontalFlip"
+					  IsChecked="{Binding IsHorizontalFlip}"
+					  ToolTip.Tip="{localization:Localize camera.horizontalFlipTooltip}"
+					  Foreground="White"/>
 		</StackPanel>
 	</Border>
 	</ScrollViewer>

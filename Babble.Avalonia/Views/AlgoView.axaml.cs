@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Localizer.Core;
 using Avalonia.Platform.Storage;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;
@@ -10,6 +11,7 @@ namespace Babble.Avalonia;
 public partial class AlgoView : UserControl, IIsVisible
 {
     private readonly AlgoSettingsViewModel _viewModel;
+    private readonly ComboBox comboBox;
 
     public bool Visible { get => _isVisible; }
     private bool _isVisible;
@@ -52,6 +54,16 @@ public partial class AlgoView : UserControl, IIsVisible
                 _viewModel.ModelFileEntryText = model;
             }
         };
+
+
+        comboBox = this.Find<ComboBox>("LanguageCombo")!;
+        comboBox!.Items.Clear();
+        foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
+        {
+            comboBox.Items.Add(item);
+        }
+        comboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
+        comboBox.SelectionChanged += ComboBox_SelectionChanged;
     }
 
     private static FilePickerFileType ONNX { get; } = new("ONNX Models")
@@ -154,5 +166,14 @@ public partial class AlgoView : UserControl, IIsVisible
     public void StartCalibrationClicked(object sender, RoutedEventArgs args)
     {
 
+    }
+
+    private void ComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[comboBox.SelectedIndex]);
+        BabbleCore.Instance.Settings.UpdateSetting<string>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage),
+            LocalizerCore.Localizer.Language);
+        BabbleCore.Instance.Settings.Save();
     }
 }

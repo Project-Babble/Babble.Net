@@ -16,7 +16,6 @@ public class SerialCameraCapture : Capture, IDisposable
     private const int ETVR_HEADER_LEN = 6;                             // 2 bytes header + 2 bytes frame type + 2 bytes size
 
     private readonly SerialPort _serialPort;
-    private byte[] _reuseableJpegBuffer = Array.Empty<byte>();
     private byte[] _buffer = new byte[2048];
     private int _bufferPosition;
     private bool _isDisposed;
@@ -85,17 +84,13 @@ public class SerialCameraCapture : Capture, IDisposable
                     var (start, jpegSize) = GetNextPacketBounds();
                     if (start == -1 || jpegSize == -1) continue;
 
-                    if (_reuseableJpegBuffer.Length != jpegSize)
-                    {
-                        Array.Resize(ref _reuseableJpegBuffer, jpegSize);
-                    }
+                    byte[] jpegData = new byte[jpegSize];
+                    Array.Copy(_buffer, start + ETVR_HEADER_LEN, jpegData, 0, jpegSize);
 
-                    Array.Copy(_buffer, start + ETVR_HEADER_LEN, _reuseableJpegBuffer, 0, jpegSize);
-
-                    if (_reuseableJpegBuffer.Length >= 2 && _reuseableJpegBuffer[0] == 0xFF && _reuseableJpegBuffer[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
+                    if (jpegData.Length >= 2 && jpegData[0] == 0xFF && jpegData[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
                     {
                         _bufferPosition = 0;
-                        CvInvoke.Imdecode(_reuseableJpegBuffer, ImreadModes.Color, RawFrame);
+                        CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawFrame);
                         continue;
                     }
 
