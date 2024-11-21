@@ -12,6 +12,8 @@ public class DummyCapture : Capture
 {
     public override string Url { get; set; }
 
+    public override uint FrameCount { get; protected set; }
+
     public override Mat RawFrame { get => EmptyMat; }
 
     public override (int width, int height) Dimensions => DefaultFrameDimensions;

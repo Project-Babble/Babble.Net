@@ -1,6 +1,7 @@
-﻿using Babble.Avalonia.Scripts;
-using Babble.Avalonia.OSC;
+﻿using Babble.Avalonia.OSC;
 using Babble.Core;
+using Babble.Core.Settings;
+using Babble.Core.Settings.Models;
 using Hypernex.ExtendedTracking;
 using Microsoft.Extensions.Logging;
 using Rug.Osc;
@@ -25,13 +26,11 @@ public class BabbleOSC
 
     private const int TIMEOUT_MS = 10000;
     
-    private const int SEND_INTERVAL_MS_FLOOR = 125; 
+    private const int SEND_INTERVAL_MS_MOBILE = 125;
+
+    private const int SEND_INTERVAL_MS_DESKTOP = 10;
 
     private const int MAX_RETRIES = 5;
-
-    private int _connectionAttempts;
-
-    public event EventHandler? OnConnectionLost;
 
     public BabbleOSC(string? host = null, int? remotePort = null)
     {
@@ -39,6 +38,18 @@ public class BabbleOSC
         _logger = factory.CreateLogger("BabbleOSC");
 
         var settings = BabbleCore.Instance.Settings;
+        OnBabbleSettingsChanged(settings);
+
+        ConfigureReceiver(
+            IPAddress.Parse(host ?? DEFAULT_HOST), 
+            remotePort ?? DEFAULT_REMOTE_PORT);
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        _sendTask = Task.Run(() => SendLoopAsync(_cancellationTokenSource.Token));
+    }
+
+    private void OnBabbleSettingsChanged(BabbleSettings settings)
+    {
         settings.OnUpdate += async (setting) =>
         {
             // Hacky but it works
@@ -54,16 +65,10 @@ public class BabbleOSC
 
                 // Attempt to reconfigure the receiver and reconnect
                 ConfigureReceiver(
-                    IPAddress.Parse(settings.GeneralSettings.GuiOscAddress), 
+                    IPAddress.Parse(settings.GeneralSettings.GuiOscAddress),
                     settings.GeneralSettings.GuiOscPort);
             }
         };
-
-        var ip = IPAddress.Parse(host ?? DEFAULT_HOST);
-        ConfigureReceiver(ip, remotePort ?? DEFAULT_REMOTE_PORT);
-
-        _cancellationTokenSource  = new CancellationTokenSource();
-        _sendTask = Task.Run(() => SendLoopAsync(_cancellationTokenSource.Token));
     }
 
     private void ConfigureReceiver(IPAddress host, int remotePort)
@@ -85,7 +90,7 @@ public class BabbleOSC
         {  
             if (!BabbleCore.Instance.IsRunning)
             {
-                await Task.Delay(SEND_INTERVAL_MS_FLOOR, cancellationToken);
+                await Task.Delay(SEND_INTERVAL_MS_MOBILE, cancellationToken);
                 continue;
             }
 
@@ -94,84 +99,89 @@ public class BabbleOSC
 
             try
             {
-                if (forceRelevancy && _sender.State == OscSocketState.Connected)
-                {
-                    _connectionAttempts = 0;
-                    foreach (var param in allParams)
-                    {
-                        var value = param.GetWeight(UnifiedTracking.Data);
-                        if (value == 0 || float.IsNaN(value)) 
-                            continue;
-
-                        var trimmed = param.Name.TrimEnd('/');
-                        _sender.Send(new OscMessage($"{prefix}{trimmed}", value));
-                        _sender.Send(new OscMessage($"{prefix}v2/{trimmed}", value));
-                        // _sender.Send(new OscMessage($"{prefix}{trimmed}Negative", -value));
-                        // _sender.Send(new OscMessage($"{prefix}v2/{trimmed}Negative", -value));
-
-
-                        //var bitsWithPowers = Float8Converter.GetBits(param.GetWeight(UnifiedTracking.Data));
-                        //for (int i = 0; i < binaryPowers.Length; i++)
-                        //{
-                        //    _sender.Send(new OscMessage($"{prefix}{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
-                        //    _sender.Send(new OscMessage($"{prefix}v2/{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
-                        //}
-                    }
-
-                    // If sending directly to VRChat, make sure we don't spam the queue
-                    await Task.Delay(SEND_INTERVAL_MS_FLOOR, cancellationToken);
-                }
-                else if (_sender.State == OscSocketState.Connected)
-                {
-                    _connectionAttempts = 0;
-                    var mul = (float)generalSettings.GuiMultiply;
-                    foreach (var exp in BabbleMapping.Mapping)
-                    {
-                        var address = BabbleAddresses.Addresses[exp.Key];
-                        var value = UnifiedTracking.Data.Shapes[(int) exp.Value].Weight;
-                        if (value == 0)
-                            continue;
-
-                        _sender.Send(new OscMessage($"{prefix}{address}", value * mul));
-                    }
-                }
-                else if (_sender.State == OscSocketState.Closed)
-                {
-                    if (_connectionAttempts < MAX_RETRIES)
-                    {
-                        _connectionAttempts++;
-
-                        // Close and dispose the current sender
-                        _sender.Close();
-                        _sender.Dispose();
-
-                        // Delay before attempting to reconnect
-                        await Task.Delay(1000, cancellationToken);
-
-                        // Attempt to reconfigure the receiver and reconnect
-                        ConfigureReceiver(_sender.RemoteAddress, _sender.Port);
-                    }
-                    else
-                    {
-                        // Trigger the connection lost event after max retries reached
-                        OnConnectionLost?.Invoke(this, EventArgs.Empty);
-                        return; // Exit the loop
-                    }
-                }
+                await SendMobileParameters(allParams, forceRelevancy, prefix, cancellationToken);
+                await SendDesktopParameters(generalSettings, prefix, cancellationToken);
+                await PollConnectionStatus(cancellationToken);
             }
             catch (Exception)
             {
                 // If there's an error here, don't freeze the UI thread
-                await Task.Delay(SEND_INTERVAL_MS_FLOOR, cancellationToken);
-            }
-            finally
-            {
-                // Don't max out CPU
-                await Task.Delay(10, cancellationToken);
+                await Task.Delay(SEND_INTERVAL_MS_MOBILE, cancellationToken);
             }
         }
     }
-    
+
+    private async Task SendMobileParameters(List<VRCFTParameters.VRCFTProgrammableExpression> allParams, bool forceRelevancy, string prefix, CancellationToken cancellationToken)
+    {
+        if (!forceRelevancy || _sender.State != OscSocketState.Connected)
+        {
+            return;
+        }
+
+        foreach (var param in allParams)
+        {
+            var value = param.GetWeight(UnifiedTracking.Data);
+            if (value == 0 || float.IsNaN(value))
+                continue;
+
+            var trimmed = param.Name.TrimEnd('/');
+            _sender.Send(new OscMessage($"{prefix}{trimmed}", value));
+
+            // To be replaced with OSCQuery
+            // _sender.Send(new OscMessage($"{prefix}v2/{trimmed}", value));
+            // _sender.Send(new OscMessage($"{prefix}{trimmed}Negative", -value));
+            // _sender.Send(new OscMessage($"{prefix}v2/{trimmed}Negative", -value));
+            //var bitsWithPowers = Float8Converter.GetBits(param.GetWeight(UnifiedTracking.Data));
+            //for (int i = 0; i < binaryPowers.Length; i++)
+            //{
+            //    _sender.Send(new OscMessage($"{prefix}{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
+            //    _sender.Send(new OscMessage($"{prefix}v2/{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
+            //}
+        }
+
+        // If sending directly to VRChat, make sure we don't spam the queue
+        await Task.Delay(SEND_INTERVAL_MS_MOBILE, cancellationToken);
+    }
+
+    private async Task SendDesktopParameters(GeneralSettings generalSettings, string prefix, CancellationToken cancellationToken)
+    {
+        if (_sender.State != OscSocketState.Connected)
+        {
+            return;
+        }
+
+        var mul = (float)generalSettings.GuiMultiply;
+        foreach (var exp in BabbleMapping.Mapping)
+        {
+            var address = BabbleAddresses.Addresses[exp.Key];
+            var value = UnifiedTracking.Data.Shapes[(int)exp.Value].Weight;
+            if (value == 0)
+                continue;
+
+            _sender.Send(new OscMessage($"{prefix}{address}", value * mul));
+        }
+
+        await Task.Delay(SEND_INTERVAL_MS_DESKTOP, cancellationToken);
+    }
+
+    private async Task PollConnectionStatus(CancellationToken cancellationToken)
+    {
+        if (_sender.State != OscSocketState.Closed)
+        {
+            return;
+        }
+
+        // Close and dispose the current sender
+        _sender.Close();
+        _sender.Dispose();
+
+        // Delay before attempting to reconnect
+        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+
+        // Attempt to reconfigure the receiver and reconnect
+        ConfigureReceiver(_sender.RemoteAddress, _sender.Port);
+    }
+
     public void Teardown()
     {
         _cancellationTokenSource.Cancel();

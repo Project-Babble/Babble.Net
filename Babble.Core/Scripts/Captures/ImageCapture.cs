@@ -5,6 +5,8 @@ namespace Babble.Core.Scripts.Decoders;
 
 public class ImageCapture : Capture
 {
+    public override uint FrameCount { get; protected set; }
+
     public ImageCapture(string Url) : base(Url)
     {
         
@@ -18,6 +20,7 @@ public class ImageCapture : Capture
             {
                 if (CvInvoke.HaveImageReader(Url))
                 {
+                    FrameCount++;
                     return CvInvoke.Imread(Url, ImreadModes.Color);
                 }
             }

@@ -21,6 +21,8 @@ public abstract class Capture
 
     public abstract string Url { get; set; }
 
+    public abstract uint FrameCount { get; protected set; }
+
     /// <summary>
     /// Represents the incoming frame data for this capture source. 
     /// Can be any dimension, BGR color space

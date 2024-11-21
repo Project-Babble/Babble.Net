@@ -29,6 +29,8 @@ public class EmguCVCapture : Capture
         get => _mat;
     }
 
+    public override uint FrameCount { get; protected set; }
+
     /// <summary>
     /// Retrieves the dimensions of the video frame with timeout.
     /// </summary>
@@ -109,6 +111,7 @@ public class EmguCVCapture : Capture
         {
             if (_videoCapture.Retrieve(_mat))
             {
+                FrameCount++;
                 _dimensions.width = _mat.Width;
                 _dimensions.height = _mat.Height;
             }

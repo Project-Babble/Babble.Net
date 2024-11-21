@@ -11,9 +11,11 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class SerialCameraCapture : Capture, IDisposable
 {
+    public override uint FrameCount { get; protected set; }
+
     private const int BAUD_RATE = 3000000;
     private static readonly byte[] ETVR_HEADER = { 0xff, 0xa0, 0xff, 0xa1 };       // xlinka 11/8/24: Changed to use array initializer
-    private const int ETVR_HEADER_LEN = 6;                             // 2 bytes header + 2 bytes frame type + 2 bytes size
+    private const int ETVR_HEADER_LEN = 6;                                         // 2 bytes header + 2 bytes frame type + 2 bytes size
 
     private readonly SerialPort _serialPort;
     private byte[] _buffer = new byte[2048];
@@ -91,6 +93,7 @@ public class SerialCameraCapture : Capture, IDisposable
                     {
                         _bufferPosition = 0;
                         CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawFrame);
+                        FrameCount++;
                         continue;
                     }
 

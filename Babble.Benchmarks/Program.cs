@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Columns;
+﻿using Babble.Benchmarks.Babble.Avalonia;
+using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
@@ -13,7 +14,8 @@ internal class Program
                     .WithOption(ConfigOptions.DisableOptimizationsValidator, true)
                     .WithSummaryStyle(SummaryStyle.Default.WithRatioStyle(RatioStyle.Trend));
 
-        var summary = BenchmarkRunner.Run<CoreBenchmark>(config);
+        // var summary = BenchmarkRunner.Run<CoreBenchmark>(config);
+        var summary = BenchmarkRunner.Run<AvaloniaBenchmarks>(config);
 
         // For specific benchmarks:
         // var summary = BenchmarkRunner.Run<BabbleBenchmarks>(config, 

@@ -20,6 +20,8 @@ public abstract class PlatformConnector
     /// </summary>
     public Capture Capture { get; set; }
 
+    private uint _lastFrameCount = 0;
+
     public PlatformConnector(string Url)
     {
         this.Url = Url;
@@ -40,7 +42,6 @@ public abstract class PlatformConnector
     /// <exception cref="InvalidOperationException"></exception>
     public float[] ExtractFrameData()
     {
-
         if (Capture is null)
         {
             return Array.Empty<float>();
@@ -53,10 +54,16 @@ public abstract class PlatformConnector
         {
             return Array.Empty<float>();
         }
-        if (Capture.RawFrame.GetRawData() is null)
+        if (Capture.RawFrame.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
         {
             return Array.Empty<float>();
         }
+        if (Capture.FrameCount == _lastFrameCount)
+        {
+            return Array.Empty<float>();
+        }
+
+        _lastFrameCount = Capture.FrameCount;
 
         using Mat resultMat = TransformRawImage();
 
@@ -95,7 +102,7 @@ public abstract class PlatformConnector
         {
             return emptyMat;
         }
-        if (Capture.RawFrame.GetRawData() is null)
+        if (Capture.RawFrame.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
         {
             return emptyMat;
         }

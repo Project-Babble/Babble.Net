@@ -2,7 +2,6 @@
 using Babble.Core.Scripts;
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Scripts.EmguCV;
-using Babble.Core.Scripts.Filters;
 using Babble.Core.Settings;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -21,13 +20,12 @@ public partial class BabbleCore
     public BabbleSettings Settings { get; private set; }
     internal ILogger Logger { get; private set; }
     public bool IsRunning { get; private set; }
-
-    private ExpressionFilter _expressionFilter { get; set; }
-
     
     private PlatformConnector _platformConnector;
     private InferenceSession _session;
     private string _inputName;
+
+    private OneEuroFilter floatFilter;
 
     static BabbleCore()
     {
@@ -106,14 +104,12 @@ public partial class BabbleCore
         SessionOptions sessionOptions = SetupSessionOptions();
         ConfigurePlatformSpecificGPU(sessionOptions);
 
+        var fps = settings.GeneralSettings.GuiCamFramerate > 0 ? settings.GeneralSettings.GuiCamFramerate : 30;
+        var mc = settings.GeneralSettings.GuiMinCutoff > 0 ? settings.GeneralSettings.GuiMinCutoff : 1;
+        var sc = settings.GeneralSettings.GuiSpeedCoefficient > 0 ? settings.GeneralSettings.GuiSpeedCoefficient : 0;
         ConfigurePlatformConnector();
+        floatFilter = new OneEuroFilter(fps, mc);
 
-        _expressionFilter = new ExpressionFilter(
-            minCutoff: Instance.Settings.GeneralSettings.GuiMinCutoff,                 // Lower values create more smoothing
-            speedCoefficient: Instance.Settings.GeneralSettings.GuiSpeedCoefficient,   // Increase to reduce lag during fast movements
-            dCutoff: 1.0f                                                              // Cutoff frequency for derivative
-        );
-        
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
         IsRunning = true;
@@ -159,16 +155,13 @@ public partial class BabbleCore
             arKitExpressions[(ARKitExpression)i] = Math.Clamp(output[i], 0f, 1f);
         }
 
-        // Prepare one-euro filter
-        double currentTimestamp = DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond;
-
         // Map unfiltered ARKit expressions to filtered Unified Expressions
         foreach (var exp in Utils.ExpressionMapping)
         {
             float filteredValue = arKitExpressions[exp.Key];
             foreach (var ue in exp.Value)
             {
-                filteredValue = _expressionFilter.FilterExpression(ue, filteredValue, currentTimestamp);
+                filteredValue = floatFilter.Filter(filteredValue);
                 CachedExpressionTable[ue] = filteredValue;
             }
         }
@@ -265,7 +258,8 @@ public partial class BabbleCore
         // Setup inference backend
         var sessionOptions = new SessionOptions();
         sessionOptions.InterOpNumThreads = 1;
-        sessionOptions.IntraOpNumThreads = Settings.GeneralSettings.GuiInferenceThreads;
+        sessionOptions.IntraOpNumThreads = Math.Clamp(Settings.GeneralSettings.GuiInferenceThreads, 0, 2);
+        // sessionOptions.ExecutionMode = ExecutionMode.ORT_PARALLEL; // Hmm
         sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
         // ~3% savings worth ~6ms avg latency. Not noticeable at 60fps?
         sessionOptions.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");  
