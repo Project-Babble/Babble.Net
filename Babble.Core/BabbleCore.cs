@@ -1,12 +1,15 @@
 ﻿using Babble.Core.Enums;
 using Babble.Core.Scripts;
+using Babble.Core.Scripts.Config;
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Scripts.EmguCV;
 using Babble.Core.Settings;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Stitching;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
+using Newtonsoft.Json;
 using System.Reflection;
 
 namespace Babble.Core;
@@ -26,6 +29,7 @@ public partial class BabbleCore
     private string _inputName;
 
     private OneEuroFilter floatFilter;
+    private Dictionary<string, CalibrationItem> _calibrationItems;
 
     static BabbleCore()
     {
@@ -47,6 +51,11 @@ public partial class BabbleCore
                 if (_platformConnector is not null)
                     _platformConnector!.Terminate();
                 ConfigurePlatformConnector();
+            }
+
+            if (normalizedSetting == "calibarray")
+            {
+                _calibrationItems = JsonConvert.DeserializeObject<CalibrationItem[]>(Instance.Settings.GeneralSettings.CalibArray)!.ToDictionary(x => x.ShapeName);
             }
         };
     }
@@ -87,12 +96,19 @@ public partial class BabbleCore
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
         Logger = factory.CreateLogger(nameof(BabbleCore));
 
+        _calibrationItems = JsonConvert.
+            DeserializeObject<CalibrationItem[]>(Instance.Settings.GeneralSettings.CalibArray)!.
+            ToDictionary(x => x.ShapeName);
+
         // Model manifest on Github?
         const string defaultModelName = "model.onnx";
         string modelPath = Path.Combine(AppContext.BaseDirectory, defaultModelName);
         Utils.ExtractEmbeddedResource(
             Assembly.GetExecutingAssembly(), 
-            Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(x => x.Contains(defaultModelName)).First(), // Babble model
+            Assembly.GetExecutingAssembly().
+                GetManifestResourceNames().
+                Where(x => x.Contains(defaultModelName)).
+                First(), // Babble model
             modelPath, 
             overwrite: false);
 
@@ -152,18 +168,21 @@ public partial class BabbleCore
         var arKitExpressions = Utils.ARKitExpressions;
         for (int i = 0; i < output.Length; i++)
         {
-            arKitExpressions[(ARKitExpression)i] = Math.Clamp(output[i], 0f, 1f);
+            arKitExpressions[(ARKitExpression)i] = output[i];
         }
 
         // Map unfiltered ARKit expressions to filtered Unified Expressions
+        int j = 0;
         foreach (var exp in Utils.ExpressionMapping)
         {
             float filteredValue = arKitExpressions[exp.Key];
             foreach (var ue in exp.Value)
             {
+                var babble = BabbleAddresses.Addresses[ue];
                 filteredValue = floatFilter.Filter(filteredValue);
-                CachedExpressionTable[ue] = filteredValue;
+                CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[babble].Min, _calibrationItems[babble].Max);
             }
+            j++;
         }
 
         UnifiedExpressions = CachedExpressionTable;

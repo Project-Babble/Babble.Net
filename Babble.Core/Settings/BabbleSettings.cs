@@ -1,4 +1,5 @@
-﻿using Babble.Core.Settings.Models;
+﻿using Babble.Core.Scripts.Config;
+using Babble.Core.Settings.Models;
 using Newtonsoft.Json;
 using System.Reflection;
 

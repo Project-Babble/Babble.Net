@@ -1,4 +1,4 @@
-﻿using Babble.Avalonia.OSC;
+﻿using Babble.Avalonia.ReactiveObjects;
 using Babble.Core;
 using Babble.Core.Settings;
 using Babble.Core.Settings.Models;
@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Rug.Osc;
 using System.Net;
-using System.Text;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
+using VRCFaceTracking.Core.Params.Expressions;
 
 namespace Babble.OSC;
 
@@ -157,9 +157,16 @@ public class BabbleOSC
         var mul = (float)generalSettings.GuiMultiply;
         foreach (var exp in BabbleMapping.Mapping)
         {
+            // Don't send the UE copies of pucker/funnel
             var address = BabbleAddresses.Addresses[exp.Key];
             var value = UnifiedTracking.Data.Shapes[(int)exp.Value].Weight;
-            if (value == 0)
+            if (value == 0 ||
+                exp.Value == UnifiedExpressions.LipFunnelLowerRight ||
+                exp.Value == UnifiedExpressions.LipFunnelUpperLeft ||
+                exp.Value == UnifiedExpressions.LipFunnelUpperRight ||
+                exp.Value == UnifiedExpressions.LipPuckerLowerRight ||
+                exp.Value == UnifiedExpressions.LipPuckerUpperLeft ||
+                exp.Value == UnifiedExpressions.LipPuckerUpperRight)
                 continue;
 
             _sender.Send(new OscMessage($"{prefix}{address}", value * mul));

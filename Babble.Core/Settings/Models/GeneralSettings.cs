@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Babble.Core.Scripts.Config;
+using Newtonsoft.Json;
+using System.Collections.ObjectModel;
 
 namespace Babble.Core.Settings.Models;
 
@@ -107,7 +109,20 @@ public sealed class GeneralSettings
 
         // Calibration settings
         CalibDeadzone = -0.1;
-        CalibArray = "[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]";
+
+        var CalibrationItems = new List<CalibrationItem>();
+        foreach (var item in BabbleAddresses.Addresses)
+        {
+            var ci = new CalibrationItem
+            {
+                ShapeName = item.Value,
+                Min = 0f,
+                Max = 1f,
+            };
+            CalibrationItems.Add(ci);
+        }
+        CalibArray = JsonConvert.SerializeObject(CalibrationItems)!;
+
         UseCalibration = false;
         CalibrationMode = "Neutral";
 

@@ -1,6 +1,6 @@
 ﻿using Babble.Core.Enums;
 
-namespace Babble.Avalonia.OSC;
+namespace Babble.Core.Settings;
 
 public static class BabbleAddresses
 {
