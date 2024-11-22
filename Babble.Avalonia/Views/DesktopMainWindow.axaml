@@ -25,6 +25,9 @@
 			<TabItem Header="{localization:Localize babble.algoSettingsPage}" x:Name="SettingsHeaderText" Foreground="White">
 				<views:SettingsView/>
 			</TabItem>
+			<TabItem Header="{localization:Localize babble.calibrationPage}" x:Name="CalibrationHeaderText" Foreground="White">
+				<views:CalibrationView/>
+			</TabItem>
         </TabControl>
     </Grid>
 </Window>

@@ -4,8 +4,10 @@ using Babble.Core.Settings;
 using Babble.Core.Settings.Models;
 using Hypernex.ExtendedTracking;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Rug.Osc;
 using System.Net;
+using System.Text;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
 
@@ -14,6 +16,7 @@ namespace Babble.OSC;
 public class BabbleOSC
 {
     private OscSender _sender;
+    private int _tcpPort;
     private ILogger _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly Task _sendTask;
@@ -38,10 +41,11 @@ public class BabbleOSC
         _logger = factory.CreateLogger("BabbleOSC");
 
         var settings = BabbleCore.Instance.Settings;
+        var ip = IPAddress.Parse(host ?? DEFAULT_HOST);
         OnBabbleSettingsChanged(settings);
 
         ConfigureReceiver(
-            IPAddress.Parse(host ?? DEFAULT_HOST), 
+            ip, 
             remotePort ?? DEFAULT_REMOTE_PORT);
 
         _cancellationTokenSource = new CancellationTokenSource();

@@ -76,9 +76,10 @@
                             Background="#2D2D2D"
                             Foreground="White"/>			
 
-				<CheckBox Content="Force relevancy"
+				<CheckBox Content="Force Relevancy"
 		                  x:Name="ForceRelevancy"
 		                  IsChecked="{Binding ForceRelevancy}"
+						  IsVisible="false"
 		                  Foreground="White"/>
 				<CheckBox Content="{localization:Localize general.receiver}"
                           ToolTip.Tip="{localization:Localize general.receiverTooltip}"

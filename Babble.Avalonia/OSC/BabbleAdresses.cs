@@ -4,7 +4,7 @@ namespace Babble.Avalonia.OSC;
 
 public static class BabbleAddresses
 {
-    public static readonly Dictionary<UnifiedExpression, string> Addresses = new Dictionary<UnifiedExpression, string>
+    public static readonly Dictionary<UnifiedExpression, string> Addresses = new()
     {
         {
             UnifiedExpression.CheekPuffLeft,

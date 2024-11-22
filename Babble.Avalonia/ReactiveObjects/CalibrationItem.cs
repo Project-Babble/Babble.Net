@@ -8,8 +8,8 @@ public partial class CalibrationItem : ObservableObject
     public string shapeName;
 
     [ObservableProperty]
-    public string leftValue;
+    public float min;
 
     [ObservableProperty]
-    public string rightValue;
+    public float max;
 }

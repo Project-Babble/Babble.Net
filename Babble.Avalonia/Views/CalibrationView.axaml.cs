@@ -31,4 +31,20 @@ public partial class CalibrationView : UserControl, IIsVisible
     {
         _isVisible = false;
     }
+
+    public void OnResetMinClicked(object? sender, RoutedEventArgs e)
+    {
+        foreach (var item in _viewModel.CalibrationItems)
+        {
+            item.Min = 0.0f;
+        }
+    }
+
+    public void OnResetMaxClicked(object? sender, RoutedEventArgs e)
+    {
+        foreach (var item in _viewModel.CalibrationItems)
+        {
+            item.Max = 1.0f;
+        }
+    }
 }
