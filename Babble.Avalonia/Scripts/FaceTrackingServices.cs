@@ -1,6 +1,5 @@
-﻿using Babble.Avalonia;
+﻿using Babble.Core;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.Reflection;
 using VRCFaceTracking.Core.Contracts.Services;
 
@@ -13,7 +12,7 @@ public static class FaceTrackingServices
     {
         private string p;
 
-        public FTLogger(string c) => p = $"[FT][{c}] ";
+        public FTLogger(string c) => p = $"[{c}] ";
         
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
@@ -22,19 +21,19 @@ public static class FaceTrackingServices
                 switch (logLevel)
                 {
                     case LogLevel.Information:
-                        App.Logger.LogInformation(p + state);
+                        BabbleCore.Instance.Logger.LogInformation(p + state);
                         break;
                     case LogLevel.Warning:
-                        App.Logger.LogWarning(p + state);
+                        BabbleCore.Instance.Logger.LogWarning(p + state);
                         break;
                     case LogLevel.Error:
-                        App.Logger.LogError(p + state);
+                        BabbleCore.Instance.Logger.LogError(p + state);
                         break;
                     case LogLevel.Critical:
-                        App.Logger.LogCritical(eventId, exception.Message);
+                        BabbleCore.Instance.Logger.LogCritical(eventId, exception.Message);
                         break;
                     default:
-                        App.Logger.LogDebug(p + state);
+                        BabbleCore.Instance.Logger.LogDebug(p + state);
                         break;
                 }
             }));

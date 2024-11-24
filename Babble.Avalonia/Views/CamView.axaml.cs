@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -20,12 +22,21 @@ public partial class CamView : UserControl, IIsVisible
 
     private readonly CamViewModel _viewModel;
     private CamViewMode camViewMode = CamViewMode.Tracking;
+    private Point? cropStartPoint;
+    private Rect? cropRectangle;
+    private bool isCropping;
 
     public CamView()
     {
         InitializeComponent();
         Loaded += CamView_OnLoaded;
         Unloaded += CamView_Unloaded;
+        MouthWindow.PointerPressed += OnPointerPressed;
+        MouthWindow.PointerMoved += OnPointerMoved;
+        MouthWindow.PointerReleased += OnPointerReleased;
+
+        TrackingModeButton.IsChecked = true;
+        CroppingModeButton.IsChecked = false;
 
         _viewModel = new CamViewModel();
         DataContext = _viewModel;
@@ -46,6 +57,60 @@ public partial class CamView : UserControl, IIsVisible
     private void CamView_Unloaded(object? sender, RoutedEventArgs e)
     {
         _isVisible = false;
+    }
+
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (camViewMode != CamViewMode.Cropping) return;
+
+        var position = e.GetPosition(MouthWindow);
+        cropStartPoint = position;
+        cropRectangle = new Rect(position.X, position.Y, 0, 0);
+        isCropping = true;
+    }
+
+    private void OnPointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (!isCropping || cropStartPoint is null) return;
+
+        var position = e.GetPosition(MouthWindow);
+        var x = Math.Min(cropStartPoint.Value.X, position.X);
+        var y = Math.Min(cropStartPoint.Value.Y, position.Y);
+        var clampedWidth = Math.Clamp(Math.Abs(cropStartPoint.Value.X - position.X), 0, _viewModel.MouthBitmap.Size.Width - cropStartPoint.Value.X);
+        var clampedHeight = Math.Clamp(Math.Abs(cropStartPoint.Value.Y - position.Y), 0, _viewModel.MouthBitmap.Size.Height - cropStartPoint.Value.Y);
+
+        cropRectangle = new Rect(x, y, clampedWidth, clampedHeight);
+    }
+
+    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (!isCropping) return;
+
+        isCropping = false;
+
+        if (cropStartPoint.HasValue)
+        {
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowX),
+                cropStartPoint.Value.X.ToString());
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowY),
+                cropStartPoint.Value.Y.ToString());
+
+            BabbleCore.Instance.Settings.Save();
+        }
+
+        if (cropRectangle.HasValue)
+        {
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowW),
+                cropRectangle.Value.Width.ToString());
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowH),
+                cropRectangle.Value.Height.ToString());
+
+            BabbleCore.Instance.Settings.Save();
+        }
     }
 
     private void RotationEntry_ValueChanged(object? sender, RangeBaseValueChangedEventArgs e)
@@ -101,6 +166,9 @@ public partial class CamView : UserControl, IIsVisible
 
     private void StartImageUpdates()
     {
+        RectangleWindow.Stroke = Brushes.Red;
+        RectangleWindow.StrokeThickness = 2;
+
         DispatcherTimer drawTimer = new()
         {
             Interval = TimeSpan.FromMilliseconds(10)
@@ -111,6 +179,10 @@ public partial class CamView : UserControl, IIsVisible
 
     private void UpdateImage()
     {
+        var isCroppingModeUIVisible = camViewMode == CamViewMode.Cropping;
+        RectangleWindow.IsVisible = isCroppingModeUIVisible;
+        SelectEntireFrame.IsVisible = isCroppingModeUIVisible;
+
         if (!BabbleCore.Instance.IsRunning) return;
 
         bool valid;
@@ -130,11 +202,17 @@ public partial class CamView : UserControl, IIsVisible
 
         if (valid && Visible)
         {
-            if (dims.width == 0 || dims.height == 0)
+            if (dims.width == 0 || dims.height == 0 || image is null)
             {
                 MouthWindow.Width = 0;
                 MouthWindow.Height = 0;
+                CanvasWindow.Width = 0;
+                CanvasWindow.Height = 0;
+                RectangleWindow.Width = 0;
+                RectangleWindow.Height = 0;
                 Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
+                Dispatcher.UIThread.Post(CanvasWindow.InvalidateVisual, DispatcherPriority.Render);
+                Dispatcher.UIThread.Post(RectangleWindow.InvalidateVisual, DispatcherPriority.Render);
                 return;
             }
 
@@ -158,16 +236,35 @@ public partial class CamView : UserControl, IIsVisible
             {
                 MouthWindow.Width = dims.width;
                 MouthWindow.Height = dims.height;
+                CanvasWindow.Width = dims.width;
+                CanvasWindow.Height = dims.height;
             }
 
-            Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
+            if (cropRectangle.HasValue)
+            {
+                RectangleWindow.Width = cropRectangle.Value.Width;
+                RectangleWindow.Height = cropRectangle.Value.Height;
+            }
+
+            if (cropStartPoint.HasValue)
+            {
+                _viewModel.OverlayRectangleCanvasX = ((int)cropStartPoint.Value.X);
+                _viewModel.OverlayRectangleCanvasY = ((int)cropStartPoint.Value.Y);
+            }
         }
         else
         {
             MouthWindow.Width = 0;
             MouthWindow.Height = 0;
-            Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
+            CanvasWindow.Width = 0;
+            CanvasWindow.Height = 0;
+            RectangleWindow.Width = 0;
+            RectangleWindow.Height = 0;   
         }
+
+        Dispatcher.UIThread.Post(MouthWindow.InvalidateVisual, DispatcherPriority.Render);
+        Dispatcher.UIThread.Post(CanvasWindow.InvalidateVisual, DispatcherPriority.Render);
+        Dispatcher.UIThread.Post(RectangleWindow.InvalidateVisual, DispatcherPriority.Render);
     }
 
     public void CameraAddressClicked(object? sender, RoutedEventArgs e)
@@ -181,6 +278,8 @@ public partial class CamView : UserControl, IIsVisible
     public void OnTrackingModeClicked(object sender, RoutedEventArgs args)
     {
         camViewMode = CamViewMode.Tracking;
+        isCropping = false;
+        OnPointerReleased(null, null); // Close and save any open crops
     }
 
     public void OnCroppingModeClicked(object sender, RoutedEventArgs args)
@@ -195,6 +294,29 @@ public partial class CamView : UserControl, IIsVisible
 
     public void StopCalibrationClicked(object sender, RoutedEventArgs args)
     {
+
+    }
+
+    public void SelectEntireFrameClicked(object sender, RoutedEventArgs args)
+    {
+        cropStartPoint = new Point(0, 0);
+        cropRectangle = new Rect(0, 0, _viewModel.MouthBitmap.Size.Width, _viewModel.MouthBitmap.Size.Height);
+
+        BabbleCore.Instance.Settings.UpdateSetting<int>(
+            nameof(BabbleCore.Instance.Settings.Cam.RoiWindowX),
+            cropStartPoint.Value.X.ToString());
+        BabbleCore.Instance.Settings.UpdateSetting<int>(
+            nameof(BabbleCore.Instance.Settings.Cam.RoiWindowY),
+            cropStartPoint.Value.Y.ToString());
+
+        BabbleCore.Instance.Settings.UpdateSetting<int>(
+            nameof(BabbleCore.Instance.Settings.Cam.RoiWindowW),
+            cropRectangle.Value.Width.ToString());
+        BabbleCore.Instance.Settings.UpdateSetting<int>(
+            nameof(BabbleCore.Instance.Settings.Cam.RoiWindowH),
+            cropRectangle.Value.Height.ToString());
+
+        BabbleCore.Instance.Settings.Save();
 
     }
 }

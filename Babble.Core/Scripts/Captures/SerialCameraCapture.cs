@@ -23,7 +23,7 @@ public class SerialCameraCapture : Capture, IDisposable
     private bool _isDisposed;
 
     public override string Url { get; set; }
-    public override Mat RawFrame { get; } = new Mat();
+    public override Mat RawMat { get; } = new Mat();
     public override (int width, int height) Dimensions => (240, 240);
     public override bool IsReady { get; protected set; }
 
@@ -92,7 +92,7 @@ public class SerialCameraCapture : Capture, IDisposable
                     if (jpegData.Length >= 2 && jpegData[0] == 0xFF && jpegData[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
                     {
                         _bufferPosition = 0;
-                        CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawFrame);
+                        CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawMat);
                         FrameCount++;
                         continue;
                     }

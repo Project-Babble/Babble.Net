@@ -114,6 +114,18 @@ public class MatProcessingChain : IDisposable
 
     public MatProcessingChain Crop(int x, int y, int width, int height)
     {
+        // Don't crop if we're using defaults
+        if (width == 0 && height == 0)
+        {
+            return this;
+        }
+
+        // Don't crop if we have the entire frame selected
+        if (x == 0 && y == 0 && width == _currentMat.Width && height == _currentMat.Height)
+        {
+            return this;
+        }
+
         EnsureCurrentMat();
 
         // Validate crop parameters

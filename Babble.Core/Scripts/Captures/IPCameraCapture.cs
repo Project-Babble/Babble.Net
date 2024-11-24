@@ -34,7 +34,7 @@ public class IPCameraCapture : Capture
     }
 
     public override uint FrameCount { get; protected set; }
-    public override Mat RawFrame { get; } = new Mat();
+    public override Mat RawMat { get; } = new Mat();
     public override bool IsReady { get; protected set; }
     public override string Url { get; set; }
 
@@ -154,7 +154,7 @@ public class IPCameraCapture : Capture
                     try
                     {
                         FrameCount++;
-                        CvInvoke.Imdecode(TrimEnd(frameBuffer), ImreadModes.Color, RawFrame);
+                        CvInvoke.Imdecode(TrimEnd(frameBuffer), ImreadModes.Color, RawMat);
                     }
                     catch (Exception e)
                     {

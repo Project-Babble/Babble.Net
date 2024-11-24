@@ -18,8 +18,6 @@ namespace Babble.Avalonia;
 
 public partial class App : AvaloniaMeadowApplication<Linux>
 {
-    internal static ILogger Logger { get; private set; }
-
     private MainIntegrated _mainIntegrated;
     private BabbleOSC _babbleOSC;
 
@@ -33,10 +31,6 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         BabbleCore.Instance.Start();
         var lang = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
         LocalizerCore.Localizer.SwitchLanguage(lang);
-
-        // Setup logging
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        Logger = factory.CreateLogger("Babble App");
 
         // Setup VRCFT
         var settings = new FaceTrackingServices.FTSettings();

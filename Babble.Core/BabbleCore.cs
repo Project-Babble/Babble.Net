@@ -6,10 +6,11 @@ using Babble.Core.Scripts.EmguCV;
 using Babble.Core.Settings;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Emgu.CV.Stitching;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using Newtonsoft.Json;
+using NReco.Logging.File;
 using System.Reflection;
 
 namespace Babble.Core;
@@ -21,7 +22,7 @@ public partial class BabbleCore
 {
     public static BabbleCore Instance { get; private set; }
     public BabbleSettings Settings { get; private set; }
-    internal ILogger Logger { get; private set; }
+    public ILogger<BabbleCore> Logger { get; private set; }
     public bool IsRunning { get; private set; }
     
     private PlatformConnector _platformConnector;
@@ -37,10 +38,16 @@ public partial class BabbleCore
     }
 
     private BabbleCore()
-    {       
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+    {
+        ServiceProvider serviceProvider = new ServiceCollection()
+            .AddLogging((loggingBuilder) => loggingBuilder
+                .AddConsole()
+                .AddDebug()
+                .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug)
+                .AddFile("Babble.log", append: false))
+            .BuildServiceProvider();
+        Logger = serviceProvider.GetService<ILoggerFactory>()!.CreateLogger<BabbleCore>();
 
-        Logger = factory.CreateLogger(nameof(BabbleCore));
         Settings = new BabbleSettings();
         Settings.OnUpdate += (setting) =>
         {
@@ -93,9 +100,6 @@ public partial class BabbleCore
         }
 
         Settings = settings;
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        Logger = factory.CreateLogger(nameof(BabbleCore));
-
         _calibrationItems = JsonConvert.
             DeserializeObject<CalibrationItem[]>(Instance.Settings.GeneralSettings.CalibArray)!.
             ToDictionary(x => x.ShapeName);
@@ -172,15 +176,16 @@ public partial class BabbleCore
         }
 
         // Map unfiltered ARKit expressions to filtered Unified Expressions
+        // TODO Replace clamp with remap?
         int j = 0;
         foreach (var exp in Utils.ExpressionMapping)
         {
             float filteredValue = arKitExpressions[exp.Key];
             foreach (var ue in exp.Value)
             {
-                var babble = BabbleAddresses.Addresses[ue];
+                var expressionName = BabbleAddresses.Addresses[ue];
                 filteredValue = floatFilter.Filter(filteredValue);
-                CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[babble].Min, _calibrationItems[babble].Max);
+                CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[expressionName].Min, _calibrationItems[expressionName].Max);
             }
             j++;
         }
@@ -200,28 +205,26 @@ public partial class BabbleCore
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
-        if (_platformConnector.Capture.RawFrame is null)
+        if (_platformConnector.Capture.RawMat is null)
         {
             return false;
         }
 
         dimensions = _platformConnector.Capture.Dimensions;
-        if (_platformConnector.Capture.RawFrame.NumberOfChannels == 3)
+        if (_platformConnector.Capture.RawMat.NumberOfChannels == 3)
         {
             using var grayMat = new Mat();
-            CvInvoke.CvtColor(_platformConnector.Capture.RawFrame, grayMat, ColorConversion.Bgr2Gray);
+            CvInvoke.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversion.Bgr2Gray);
             image = grayMat.GetRawData();
             return true;
         }
-        else if (_platformConnector.Capture.RawFrame.NumberOfChannels == 1)
+        else if (_platformConnector.Capture.RawMat.NumberOfChannels == 1)
         {
-            image = _platformConnector.Capture.RawFrame.GetRawData();
+            image = _platformConnector.Capture.RawMat.GetRawData();
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     /// <summary>

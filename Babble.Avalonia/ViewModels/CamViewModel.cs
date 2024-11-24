@@ -1,4 +1,7 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
+using Avalonia.Media.Imaging;
 using Babble.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -10,7 +13,19 @@ public partial class CamViewModel : ObservableObject
     private string cameraAddressEntryText;
 
     [ObservableProperty]
-    private WriteableBitmap? mouthBitmap;
+    private WriteableBitmap mouthBitmap;
+
+    [ObservableProperty]
+    private Canvas overlayCanvas;
+
+    [ObservableProperty]
+    private Rect overlayRectangle;
+
+    [ObservableProperty]
+    private int overlayRectangleCanvasX;
+
+    [ObservableProperty]
+    private int overlayRectangleCanvasY;
 
     [ObservableProperty]
     private double rotation;
@@ -32,7 +47,14 @@ public partial class CamViewModel : ObservableObject
         enableCalibration = settings.GeneralSettings.UseCalibration;
         isVerticalFlip = settings.Cam.GuiVerticalFlip;
         isHorizontalFlip = settings.Cam.GuiHorizontalFlip;
-        
+        overlayRectangleCanvasX = settings.Cam.RoiWindowX;
+        overlayRectangleCanvasY = settings.Cam.RoiWindowY;
+        overlayRectangle = new Rect(
+            overlayRectangleCanvasX,
+            overlayRectangleCanvasY,
+            settings.Cam.RoiWindowW,
+            settings.Cam.RoiWindowH);
+
         BabbleCore.Instance.Settings.OnUpdate += Settings_OnUpdate;
     }
 

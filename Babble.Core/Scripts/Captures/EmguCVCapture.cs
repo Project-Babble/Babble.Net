@@ -24,7 +24,7 @@ public class EmguCVCapture : Capture
     /// <xlinka>
     /// Retrieves a raw frame from the camera feed within a 2-second timeout to prevent blocking.
     /// </xlinka>
-    public override Mat RawFrame
+    public override Mat RawMat
     {
         get => _mat;
     }

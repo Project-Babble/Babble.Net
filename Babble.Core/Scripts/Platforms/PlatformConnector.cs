@@ -50,11 +50,11 @@ public abstract class PlatformConnector
         {
             return Array.Empty<float>();
         }
-        if (Capture.RawFrame is null)
+        if (Capture.RawMat is null)
         {
             return Array.Empty<float>();
         }
-        if (Capture.RawFrame.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
+        if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
         {
             return Array.Empty<float>();
         }
@@ -98,16 +98,15 @@ public abstract class PlatformConnector
         {
             return emptyMat;
         }
-        if (Capture.RawFrame is null)
+        if (Capture.RawMat is null)
         {
             return emptyMat;
         }
-        if (Capture.RawFrame.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
+        if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
         {
             return emptyMat;
         }
 
-        using var processingChain = new MatProcessingChain();
         var settings = BabbleCore.Instance.Settings;
         var camSettings = settings.Cam;
         var roiX = camSettings.RoiWindowX;
@@ -117,12 +116,47 @@ public abstract class PlatformConnector
         var rotationAngle = camSettings.RotationAngle;
         var useRedChannel = settings.GeneralSettings.GuiUseRedChannel;
 
+        // Check to see if the user's supplied crop is too large. IE, they were using a higher resolution camera, but they switched to a smaller one
+        if (roiX > Capture.RawMat.Width)
+        {
+            roiX = 0;
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowX),
+                roiX.ToString());
+            BabbleCore.Instance.Settings.Save();
+        }
+        if (roiY > Capture.RawMat.Height)
+        {
+            roiY = 0;
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowY),
+                roiY.ToString());
+            BabbleCore.Instance.Settings.Save();
+        }
+        if (roiWidth > Capture.RawMat.Width)
+        {
+            roiWidth = Math.Clamp(roiWidth, 0, Capture.RawMat.Width);
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowW),
+                roiWidth.ToString());
+            BabbleCore.Instance.Settings.Save();
+        }
+        if (roiHeight > Capture.RawMat.Width)
+        {
+            roiHeight = Math.Clamp(roiHeight, 0, Capture.RawMat.Height);
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.Cam.RoiWindowH),
+               roiHeight.ToString());
+            BabbleCore.Instance.Settings.Save();
+        }
+
         // Process the image through our chain of operations
+        using var processingChain = new MatProcessingChain();
         using Mat resultMat = processingChain
-            .StartWith(Capture.RawFrame, Capture.Dimensions)
+            .StartWith(Capture.RawMat, Capture.Dimensions)
             .UseRedChannel(useRedChannel)
+            .Crop(roiX, roiY, roiWidth, roiHeight)
             .Rotate(rotationAngle)
-            // .Crop(roiX, roiY, roiWidth, roiHeight)
             .Resize(new System.Drawing.Size(256, 256))
             .ApplyFlip(camSettings.GuiVerticalFlip, FlipType.Vertical)
             .ApplyFlip(camSettings.GuiHorizontalFlip, FlipType.Horizontal)

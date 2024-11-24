@@ -12,7 +12,7 @@ public class ImageCapture : Capture
         
     }
 
-    public override Mat RawFrame
+    public override Mat RawMat
     {
         get
         {

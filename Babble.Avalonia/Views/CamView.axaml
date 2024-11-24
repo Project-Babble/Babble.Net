@@ -40,24 +40,42 @@
 					Click="CameraAddressClicked"
                     Background="#4CAF50"
                     Foreground="White"/>
-			<Image x:Name="MouthWindow"
-                   Source="{Binding MouthBitmap}"
-                   Grid.Column="0"
-                   Grid.Row="0"
-                   Stretch="None"/>
-			<StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,0">
-				<Button Content="{localization:Localize camera.trackingMode}"
-						x:Name="TrackingModeText"
+			<Button Content="Select entire frame"
+					ToolTip.Tip=""
+					x:Name="SelectEntireFrame"
+					Click="SelectEntireFrameClicked"
+					Background="#4CAF50"
+					Foreground="White"/>
+
+			<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,0">
+				<RadioButton Content="{localization:Localize camera.trackingMode}"
+						x:Name="TrackingModeButton"
+						GroupName="ImageControlGroup"
 						ToolTip.Tip="{localization:Localize camera.trackingModeTooltip}"
 						Click="OnTrackingModeClicked"
-                        Background="#4CAF50"
                         Foreground="White"/>
-				<Button Content="{localization:Localize camera.croppingMode}"
-						x:Name="CroppingModeText"
+				<RadioButton Content="{localization:Localize camera.croppingMode}"
+						GroupName="ImageControlGroup"
+						x:Name="CroppingModeButton"
 						Click="OnCroppingModeClicked"
-                        Background="#4CAF50"
                         Foreground="White"/>
 			</StackPanel>
+
+			<Grid>
+				<Image x:Name="MouthWindow"
+					   Source="{Binding MouthBitmap}"
+					   IsHitTestVisible="True"
+					   Stretch="None"/>
+				<Canvas x:Name="CanvasWindow" 
+						Background="Transparent" 
+						IsHitTestVisible="False">
+					<Rectangle x:Name="RectangleWindow" 
+							   Fill="Transparent" 
+							   IsHitTestVisible="False"
+							   Canvas.Left="{Binding OverlayRectangleCanvasX}" 
+							   Canvas.Top="{Binding OverlayRectangleCanvasY}"/>
+				</Canvas>
+			</Grid>
 
 			<StackPanel Spacing="5"  Margin="0,5,0,0">
 				<TextBlock Text="{localization:Localize camera.rotation}"
