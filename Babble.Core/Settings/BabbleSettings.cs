@@ -6,7 +6,7 @@ namespace Babble.Core.Settings;
 
 public class BabbleSettings
 {
-    public event Action<string> OnUpdate;
+    public event Action<string>? OnUpdate;
 
     [JsonProperty("version")]
     public int Version { get; private set; }
@@ -90,7 +90,7 @@ public class BabbleSettings
         throw new ArgumentException($"Property '{propertyName}' does not exist.");
     }
 
-    private object GetPropertyTarget(string propertyName)
+    private object? GetPropertyTarget(string propertyName)
     {
         var parts = propertyName.Split('.');
         if (parts.Length == 1)

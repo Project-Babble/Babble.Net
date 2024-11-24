@@ -18,8 +18,8 @@ namespace Babble.Avalonia;
 
 public partial class App : AvaloniaMeadowApplication<Linux>
 {
-    private MainIntegrated _mainIntegrated;
-    private BabbleOSC _babbleOSC;
+    private MainIntegrated _mainIntegrated = null!;
+    private BabbleOSC _babbleOSC = null!;
 
     public override void Initialize()
     {

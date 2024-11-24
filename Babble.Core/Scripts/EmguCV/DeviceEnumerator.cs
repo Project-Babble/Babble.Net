@@ -9,7 +9,7 @@ namespace Babble.Core.Scripts;
 public static class DeviceEnumerator
 {
     private static List<int> camIdList = new List<int>();
-    private const int CONNECTION_ATTEPMTS = 5;
+    private const int CONNECTION_ATTEMPTS = 5;
 
     /// <summary>
     /// Lists all connected cameras to this PC and their respective IDs (as ints)
@@ -35,7 +35,7 @@ public static class DeviceEnumerator
                 var sum = (int)driverEnum + idx;
                 using VideoCapture cap = new VideoCapture(sum);      // open the camera
 
-                for (int i = 0; i < CONNECTION_ATTEPMTS; i++)
+                for (int i = 0; i < CONNECTION_ATTEMPTS; i++)
                 {
                     if (cap.IsOpened)                                // check if we succeeded after a timeout period
                     {

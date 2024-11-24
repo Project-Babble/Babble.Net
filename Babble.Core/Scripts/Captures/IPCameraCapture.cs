@@ -36,7 +36,7 @@ public class IPCameraCapture : Capture
     public override uint FrameCount { get; protected set; }
     public override Mat RawMat { get; } = new Mat();
     public override bool IsReady { get; protected set; }
-    public override string Url { get; set; }
+    public override string Url { get; set; } = null!;
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -70,7 +70,7 @@ public class IPCameraCapture : Capture
     /// <param name="frameBufferSize">Maximum frame byte size</param>
     /// <returns></returns>
     /// 
-    public async Task StartStreaming(string url, string login = null, string password = null, CancellationToken? token = null, int chunkMaxSize = 1024, int frameBufferSize = 1024 * 1024)
+    public async Task StartStreaming(string url, string? login = null, string? password = null, CancellationToken? token = null, int chunkMaxSize = 1024, int frameBufferSize = 1024 * 1024)
     {
         var tok = token ?? CancellationToken.None;
 
