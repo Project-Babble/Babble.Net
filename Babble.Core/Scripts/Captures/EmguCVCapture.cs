@@ -16,7 +16,7 @@ public class EmguCVCapture : Capture
     /// <xlinka>
     /// VideoCapture instance to handle camera frames.
     /// </xlinka>
-    private VideoCapture _videoCapture;
+    private VideoCapture? _videoCapture;
 
     /// <summary>
     /// Gets a raw frame from the camera with timeout for safety.
@@ -53,7 +53,7 @@ public class EmguCVCapture : Capture
     /// <summary>
     /// Camera URL or source identifier.
     /// </summary>
-    public override string Url { get; set; }
+    public override string Url { get; set; } = null!;
 
     /// <summary>
     /// Constructor that accepts a URL for the video source.
@@ -111,7 +111,7 @@ public class EmguCVCapture : Capture
     {
         try
         {
-            if (_videoCapture.Retrieve(_mat))
+            if (_videoCapture?.Retrieve(_mat) == true)
             {
                 FrameCount++;
                 _dimensions.width = _mat.Width;

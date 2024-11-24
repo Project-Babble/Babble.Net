@@ -12,7 +12,7 @@ public partial class AlgoSettingsViewModel : ObservableObject
     public int inferenceThreadsEntryText;
 
     [ObservableProperty]
-    public string runtimeEntryText;
+    public string? runtimeEntryText;
 
     [ObservableProperty]
     public int gpuIndexEntryText;

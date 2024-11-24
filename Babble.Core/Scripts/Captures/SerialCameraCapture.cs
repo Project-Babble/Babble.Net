@@ -22,7 +22,7 @@ public class SerialCameraCapture : Capture, IDisposable
     private int _bufferPosition;
     private bool _isDisposed;
 
-    public override string Url { get; set; }
+    public override string Url { get; set; } = null!;
     public override Mat RawMat { get; } = new Mat();
     public override (int width, int height) Dimensions => (240, 240);
     public override bool IsReady { get; protected set; }

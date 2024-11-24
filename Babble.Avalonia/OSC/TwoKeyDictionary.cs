@@ -14,11 +14,11 @@ namespace Babble.OSC.Collections;
 /// <typeparam name="TKey1"></typeparam>
 /// <typeparam name="TKey2"></typeparam>
 /// <typeparam name="TValue"></typeparam>
-public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable
+public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable where TKey1 : notnull where  TKey2 : notnull
 {
     private Dictionary<TKey1, TKey2> m_dic1 = new Dictionary<TKey1, TKey2>();
     private Dictionary<TKey2, TValue> m_dic2 = new Dictionary<TKey2, TValue>();
-    private IEnumerator<TKey1> m_cachedEnumerator;
+    private IEnumerator<TKey1>? m_cachedEnumerator;
 
     /// <summary>
     ///   Adds the specified key and value to the dictionary.
@@ -124,7 +124,7 @@ public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable
     /// </summary>
     /// <param name="key1"></param>
     /// <returns>The TValue for this Tkey1. </returns>
-    public bool TryGetByKey1(TKey1 key1, out TValue value)
+    public bool TryGetByKey1(TKey1 key1, out TValue? value)
     {
         if (!ContainsKey1(key1))
         {
@@ -147,7 +147,7 @@ public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable
     /// </summary>
     /// <param name="key2"></param>
     /// <returns>The TValue for this Tkey2. </returns>
-    public bool TryGetByKey2(TKey2 key2, out TValue value)
+    public bool TryGetByKey2(TKey2 key2, out TValue? value)
     {
         if (!ContainsKey2(key2))
         {
@@ -165,7 +165,7 @@ public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable
     /// <param name="key1"></param>
     public bool RemoveByKey1(TKey1 key1)
     {
-        if (!m_dic1.TryGetValue(key1, out TKey2 tmp_key2))
+        if (!m_dic1.TryGetValue(key1, out TKey2? tmp_key2))
         {
             return false;
         }

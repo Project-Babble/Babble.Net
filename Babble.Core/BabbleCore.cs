@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using Newtonsoft.Json;
 using NReco.Logging.File;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Babble.Core;
@@ -23,13 +24,14 @@ public partial class BabbleCore
     public static BabbleCore Instance { get; private set; }
     public BabbleSettings Settings { get; private set; }
     public ILogger<BabbleCore> Logger { get; private set; }
+    [MemberNotNullWhen(true, nameof(_platformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
     public bool IsRunning { get; private set; }
     
-    private PlatformConnector _platformConnector;
-    private InferenceSession _session;
-    private Dictionary<string, CalibrationItem> _calibrationItems;
-    private OneEuroFilter floatFilter;
-    private string _inputName;
+    private PlatformConnector? _platformConnector;
+    private InferenceSession? _session;
+    private Dictionary<string, CalibrationItem>? _calibrationItems;
+    private OneEuroFilter? _floatFilter;
+    private string? _inputName;
     
     static BabbleCore()
     {
@@ -137,7 +139,7 @@ public partial class BabbleCore
         var mc = settings.GeneralSettings.GuiMinCutoff > 0 ? settings.GeneralSettings.GuiMinCutoff : 1;
         var sc = settings.GeneralSettings.GuiSpeedCoefficient > 0 ? settings.GeneralSettings.GuiSpeedCoefficient : 0;
         ConfigurePlatformConnector();
-        floatFilter = new OneEuroFilter(fps, mc);
+        _floatFilter = new OneEuroFilter(fps, mc);
 
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
@@ -152,7 +154,7 @@ public partial class BabbleCore
     /// </summary>
     /// <param name="UnifiedExpressions"></param>
     /// <returns></returns>
-    public bool GetExpressionData(out Dictionary<UnifiedExpression, float> UnifiedExpressions)
+    public bool GetExpressionData(out Dictionary<UnifiedExpression, float>? UnifiedExpressions)
     {
         UnifiedExpressions = null;
         if (!IsRunning || Instance is null)
@@ -193,7 +195,7 @@ public partial class BabbleCore
             foreach (var ue in exp.Value)
             {
                 var expressionName = BabbleAddresses.Addresses[ue];
-                filteredValue = floatFilter.Filter(filteredValue);
+                filteredValue = _floatFilter.Filter(filteredValue);
                 CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[expressionName].Min, _calibrationItems[expressionName].Max);
             }
             j++;
@@ -214,7 +216,7 @@ public partial class BabbleCore
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
-        if (_platformConnector.Capture.RawMat is null)
+        if (_platformConnector?.Capture.RawMat is null)
         {
             return false;
         }
@@ -247,7 +249,7 @@ public partial class BabbleCore
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
-        using var transformedImageCandidate = _platformConnector.TransformRawImage();
+        using var transformedImageCandidate = _platformConnector?.TransformRawImage();
         if (transformedImageCandidate is null) return false;
 
         dimensions = (256, 256);

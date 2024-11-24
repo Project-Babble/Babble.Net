@@ -5,7 +5,7 @@
 /// </summary>
 public class CalibrationItem
 {
-    public string ShapeName;
+    public required string ShapeName;
     public float Min;
     public float Max;
 }

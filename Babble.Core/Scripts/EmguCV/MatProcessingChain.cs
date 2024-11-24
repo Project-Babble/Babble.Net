@@ -1,6 +1,7 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
@@ -171,6 +172,7 @@ public class MatProcessingChain : IDisposable
         return this;
     }
 
+    [MemberNotNull(nameof(_currentMat))]
     private void EnsureCurrentMat()
     {
         if (_currentMat == null)

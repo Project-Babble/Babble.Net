@@ -6,6 +6,7 @@ using Hypernex.ExtendedTracking;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Rug.Osc;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
@@ -16,7 +17,6 @@ namespace Babble.OSC;
 public class BabbleOSC
 {
     private OscSender _sender;
-    private int _tcpPort;
     private ILogger _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly Task _sendTask;
@@ -76,6 +76,7 @@ public class BabbleOSC
         };
     }
 
+    [MemberNotNull(nameof(_sender))]
     private void ConfigureReceiver(IPAddress host, int remotePort)
     {
         _sender = new OscSender(host, DEFAULT_LOCAL_PORT, remotePort)
