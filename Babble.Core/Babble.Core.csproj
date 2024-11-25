@@ -1,8 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+	  <TargetFrameworks>net8.0-android34.0;net8.0-windows10.0.19041.0;net8.0-maccatalyst;net8.0;net8.0-ios11.0</TargetFrameworks>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+	  <TargetFrameworks>net8.0</TargetFrameworks>
+	</PropertyGroup>
+
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net8.0-android34.0;net8.0-windows10.0.19041.0;net8.0-maccatalyst;net8.0;net8.0-ios11.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
