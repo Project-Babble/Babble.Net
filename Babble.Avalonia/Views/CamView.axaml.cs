@@ -304,6 +304,8 @@ public partial class CamView : UserControl, IIsVisible
 
     public void SelectEntireFrameClicked(object sender, RoutedEventArgs args)
     {
+        if (_viewModel.MouthBitmap is null) return;
+
         cropStartPoint = new Point(0, 0);
         cropRectangle = new Rect(0, 0, _viewModel.MouthBitmap.Size.Width, _viewModel.MouthBitmap.Size.Height);
 
