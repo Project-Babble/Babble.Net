@@ -115,7 +115,7 @@ public class MatProcessingChain : IDisposable
     public MatProcessingChain Crop(int x, int y, int width, int height)
     {
         // Don't crop if we're using defaults
-        if (width == 0 && height == 0)
+        if (width == 0 || height == 0)
         {
             return this;
         }
@@ -129,8 +129,12 @@ public class MatProcessingChain : IDisposable
         EnsureCurrentMat();
 
         // Validate crop parameters
-        if (x < 0 || y < 0 || width <= 0 || height <= 0 ||
-            x + width > _currentMat.Cols || y + height > _currentMat.Rows)
+        if (x > _currentMat.Rows ||             // Is the starting x pixel out of range?
+            width > _currentMat.Rows ||         // Is the starting x crop wider than the image input
+            y > _currentMat.Cols ||             // Is the starting y pixel out of range?
+            height > _currentMat.Cols ||        // Is the starting y crop wider than the image input
+            x + width > _currentMat.Rows ||     // Is the starting x pixel + the x crop out of range?
+            y + height > _currentMat.Cols)      // Is the starting y pixel + the y crop wider than the image input
         {
             throw new ArgumentException($"Invalid crop parameters: x={x}, y={y}, width={width}, height={height}. " +
                                         $"Image size is {_currentMat.Cols}x{_currentMat.Rows}");

@@ -111,8 +111,12 @@ public sealed class GeneralSettings
         CalibDeadzone = -0.1;
 
         var CalibrationItems = new List<CalibrationItem>();
+        var seenExpressions = new HashSet<string>(); // Mainly for pucker/funnel
         foreach (var item in BabbleAddresses.Addresses)
         {
+            if (seenExpressions.Contains(item.Value)) continue;
+            seenExpressions.Add(item.Value);
+
             var ci = new CalibrationItem
             {
                 ShapeName = item.Value,

@@ -13,6 +13,7 @@ public partial class SettingsView : UserControl, IIsVisible
     private bool _isVisible;
 
     private readonly SettingsViewModel _viewModel;
+    private readonly ComboBox comboBox;
 
     public SettingsView()
     {
@@ -34,6 +35,15 @@ public partial class SettingsView : UserControl, IIsVisible
         this.FindControl<TextBox>("XResolutionEntry")!.LostFocus += XResolution_LostFocus;
         this.FindControl<TextBox>("YResolutionEntry")!.LostFocus += YResolution_LostFocus;
         this.FindControl<TextBox>("FramerateEntry")!.LostFocus += Framerate_LostFocus;
+
+        comboBox = this.Find<ComboBox>("LanguageCombo")!;
+        comboBox!.Items.Clear();
+        foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
+        {
+            comboBox.Items.Add(item);
+        }
+        comboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
+        comboBox.SelectionChanged += ComboBox_SelectionChanged;
     }
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)
@@ -158,6 +168,15 @@ public partial class SettingsView : UserControl, IIsVisible
         BabbleCore.Instance.Settings.UpdateSetting<int>(
             nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiCamFramerate),
             _viewModel.Framerate.ToString());
+        BabbleCore.Instance.Settings.Save();
+    }
+
+    private void ComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[comboBox.SelectedIndex]);
+        BabbleCore.Instance.Settings.UpdateSetting<string>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage),
+            LocalizerCore.Localizer.Language);
         BabbleCore.Instance.Settings.Save();
     }
 }

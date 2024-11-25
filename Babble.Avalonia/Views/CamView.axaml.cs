@@ -34,6 +34,8 @@ public partial class CamView : UserControl, IIsVisible
         MouthWindow.PointerPressed += OnPointerPressed;
         MouthWindow.PointerMoved += OnPointerMoved;
         MouthWindow.PointerReleased += OnPointerReleased;
+        //MouthWindow.Tapped += OnTapped;
+        //MouthWindow.DoubleTapped += OnDoubleTapped;
 
         TrackingModeButton.IsChecked = true;
         CroppingModeButton.IsChecked = false;
@@ -59,11 +61,21 @@ public partial class CamView : UserControl, IIsVisible
         _isVisible = false;
     }
 
+
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        OnContactEnter(e.GetPosition(MouthWindow));
+    }
+
+    //private void OnTapped(object? sender, TappedEventArgs e)
+    //{
+    //    OnContactEnter(e.GetPosition(MouthWindow));
+    //}
+
+    private void OnContactEnter(Point position)
     {
         if (camViewMode != CamViewMode.Cropping) return;
 
-        var position = e.GetPosition(MouthWindow);
         cropStartPoint = position;
         cropRectangle = new Rect(position.X, position.Y, 0, 0);
         isCropping = true;
@@ -71,15 +83,26 @@ public partial class CamView : UserControl, IIsVisible
 
     private void OnPointerMoved(object? sender, PointerEventArgs e)
     {
+        OnContactMoved(e.GetPosition(MouthWindow));
+    }
+
+    //private void OnDoubleTapped(object? sender, TappedEventArgs e)
+    //{
+    //    OnContactMoved(e.GetPosition(MouthWindow));
+    //}
+
+    private void OnContactMoved(Point position)
+    {
         if (!isCropping || cropStartPoint is null) return;
 
-        var position = e.GetPosition(MouthWindow);
         var x = Math.Min(cropStartPoint.Value.X, position.X);
         var y = Math.Min(cropStartPoint.Value.Y, position.Y);
         var clampedWidth = Math.Clamp(Math.Abs(cropStartPoint.Value.X - position.X), 0, _viewModel.MouthBitmap.Size.Width - cropStartPoint.Value.X);
         var clampedHeight = Math.Clamp(Math.Abs(cropStartPoint.Value.Y - position.Y), 0, _viewModel.MouthBitmap.Size.Height - cropStartPoint.Value.Y);
 
         cropRectangle = new Rect(x, y, clampedWidth, clampedHeight);
+
+        OnPointerReleased(null, null);
     }
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -92,10 +115,10 @@ public partial class CamView : UserControl, IIsVisible
         {
             BabbleCore.Instance.Settings.UpdateSetting<int>(
                 nameof(BabbleCore.Instance.Settings.Cam.RoiWindowX),
-                cropStartPoint.Value.X.ToString());
+                ((int)cropStartPoint.Value.X).ToString());
             BabbleCore.Instance.Settings.UpdateSetting<int>(
                 nameof(BabbleCore.Instance.Settings.Cam.RoiWindowY),
-                cropStartPoint.Value.Y.ToString());
+                ((int)cropStartPoint.Value.Y).ToString());
 
             BabbleCore.Instance.Settings.Save();
         }
@@ -104,10 +127,10 @@ public partial class CamView : UserControl, IIsVisible
         {
             BabbleCore.Instance.Settings.UpdateSetting<int>(
                 nameof(BabbleCore.Instance.Settings.Cam.RoiWindowW),
-                cropRectangle.Value.Width.ToString());
+                ((int)cropRectangle.Value.Width).ToString());
             BabbleCore.Instance.Settings.UpdateSetting<int>(
                 nameof(BabbleCore.Instance.Settings.Cam.RoiWindowH),
-                cropRectangle.Value.Height.ToString());
+                ((int)cropRectangle.Value.Height).ToString());
 
             BabbleCore.Instance.Settings.Save();
         }
@@ -304,17 +327,17 @@ public partial class CamView : UserControl, IIsVisible
 
         BabbleCore.Instance.Settings.UpdateSetting<int>(
             nameof(BabbleCore.Instance.Settings.Cam.RoiWindowX),
-            cropStartPoint.Value.X.ToString());
+            ((int)cropStartPoint.Value.X).ToString());
         BabbleCore.Instance.Settings.UpdateSetting<int>(
             nameof(BabbleCore.Instance.Settings.Cam.RoiWindowY),
-            cropStartPoint.Value.Y.ToString());
+            ((int)cropStartPoint.Value.Y).ToString());
 
         BabbleCore.Instance.Settings.UpdateSetting<int>(
             nameof(BabbleCore.Instance.Settings.Cam.RoiWindowW),
-            cropRectangle.Value.Width.ToString());
+            ((int)cropRectangle.Value.Width).ToString());
         BabbleCore.Instance.Settings.UpdateSetting<int>(
             nameof(BabbleCore.Instance.Settings.Cam.RoiWindowH),
-            cropRectangle.Value.Height.ToString());
+            ((int)cropRectangle.Value.Height).ToString());
 
         BabbleCore.Instance.Settings.Save();
 

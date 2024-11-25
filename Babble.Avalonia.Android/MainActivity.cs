@@ -1,11 +1,10 @@
 ﻿using Android.App;
-using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Avalonia;
 using Avalonia.Android;
-using Babble.Avalonia.Android.Services;
 using Emgu.CV;
+using static Android.OS.PowerManager;
 
 namespace Babble.Avalonia.Android;
 
@@ -17,56 +16,26 @@ namespace Babble.Avalonia.Android;
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>
 {
-    private bool _isServiceRunning;
-    private Intent _backgroundServiceIntent;
+    private PowerManager _pmanager;
+    private WakeLock _wakelock;
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
         CvInvokeAndroid.Init();
+
+        _pmanager = (PowerManager)GetSystemService(PowerService)!;
+        _wakelock = _pmanager.NewWakeLock(WakeLockFlags.Partial, "babble-app")!;
+        _wakelock.SetReferenceCounted(false);
+        _wakelock.Acquire();
+
         return base.CustomizeAppBuilder(builder)
             .WithInterFont();
     }
 
-    protected override void OnCreate(Bundle savedInstanceState)
+    protected override void Dispose(bool disposing)
     {
-        base.OnCreate(savedInstanceState);
-        _backgroundServiceIntent = new Intent(this, typeof(BackgroundService));
-    }
-
-
-    public void StartBackgroundService()
-    {
-        if (!_isServiceRunning)
-        {
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            {
-                StartForegroundService(_backgroundServiceIntent);
-            }
-            else
-            {
-                StartService(_backgroundServiceIntent);
-            }
-            _isServiceRunning = true;
-        }
-    }
-
-    public void StopBackgroundService()
-    {
-        if (_isServiceRunning)
-        {
-            StopService(_backgroundServiceIntent);
-            _isServiceRunning = false;
-        }
-    }
-
-    protected override void OnDestroy()
-    {
-        // Only stop the service if the app is actually being destroyed,
-        // not just configured
-        if (IsFinishing)
-        {
-            StopBackgroundService();
-        }
-        base.OnDestroy();
+        _wakelock.Release();
+        _pmanager.Dispose();
+        base.Dispose(disposing);
     }
 }
