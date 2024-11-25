@@ -69,36 +69,34 @@ public class EmguCVCapture : Capture
     /// Initializes the VideoCapture with the given URL or defaults to camera index 0 if unavailable.
     /// Applies custom resolution and framerate settings based on BabbleCore.
     /// </xlinka>
-    public override bool StartCapture()
+    public override async Task<bool> StartCapture()
     {
-        using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
-        {
-            try
-            {
-                // Initialize VideoCapture with URL, timeout for robustness
-                _videoCapture = Task.Run(() => new VideoCapture(Url), cts.Token).Result;
-            }
-            catch (AggregateException)
-            {
-                // Default to camera index 0 if URL-based capture fails
-                const string defaultSource = "0";
-                _videoCapture = new VideoCapture(defaultSource);
-                BabbleCore.Instance.Settings.UpdateSetting<string>(
-                    nameof(BabbleCore.Instance.Settings.Cam.CaptureSource), 
-                    defaultSource);
-                BabbleCore.Instance.Logger.LogWarning($"Failed to initialize VideoCapture with URL: {Url}. Defaulted to camera at index 0.");
-            }
-        }
-
         // Retrieve resolution and framerate settings from BabbleCore and apply
         var generalSettings = BabbleCore.Instance.Settings.GeneralSettings;
         var x = generalSettings.GuiCamResolutionX;
         var y = generalSettings.GuiCamResolutionY;
         var fr = generalSettings.GuiCamFramerate;
 
-        if (x > 0) _videoCapture.Set(CapProp.FrameWidth, x);
-        if (y > 0) _videoCapture.Set(CapProp.FrameHeight, y);
-        if (fr > 0) _videoCapture.Set(CapProp.Fps, fr);
+        using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+        {
+            try
+            {
+                // Initialize VideoCapture with URL, timeout for robustness
+                _videoCapture = await Task.Run(() => new VideoCapture(Url, VideoCapture.API.Any,
+                    new(CapProp.FrameWidth, x), new(CapProp.FrameHeight, y), new(CapProp.Fps, fr)), cts.Token);
+            }
+            catch (AggregateException)
+            {
+                // Default to camera index 0 if URL-based capture fails
+                const string defaultSource = "0";
+                _videoCapture = new VideoCapture(defaultSource, VideoCapture.API.Any,
+                    new(CapProp.FrameWidth, x), new(CapProp.FrameHeight, y), new(CapProp.Fps, fr));
+                BabbleCore.Instance.Settings.UpdateSetting<string>(
+                    nameof(BabbleCore.Instance.Settings.Cam.CaptureSource), 
+                    defaultSource);
+                BabbleCore.Instance.Logger.LogWarning($"Failed to initialize VideoCapture with URL: {Url}. Defaulted to camera at index 0.");
+            }
+        }
 
         _videoCapture.Start();
         _videoCapture.ImageGrabbed += VideoCapture_ImageGrabbed;
@@ -131,7 +129,7 @@ public class EmguCVCapture : Capture
     public override bool StopCapture()
     {
         if (_videoCapture is null)
-            throw new InvalidOperationException("VideoCapture is not initialized.");
+            return false;
 
         _videoCapture.ImageGrabbed -= VideoCapture_ImageGrabbed;
 

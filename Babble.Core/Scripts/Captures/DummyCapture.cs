@@ -24,10 +24,10 @@ public class DummyCapture : Capture
     {
     }
 
-    public override bool StartCapture()
+    public override Task<bool> StartCapture()
     {
         IsReady = true;
-        return true;
+        return Task.FromResult(true);
     }
 
     public override bool StopCapture()

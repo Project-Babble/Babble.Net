@@ -52,11 +52,11 @@ public class IPCameraCapture : Capture
     {
     }
 
-    public override bool StartCapture()
+    public override Task<bool> StartCapture()
     {
         Task.Run(() => StartStreaming(Url, null, null, _cancellationTokenSource.Token, 1024, Dimensions.width * Dimensions.height));
         IsReady = true;
-        return true;
+        return Task.FromResult(true);
     }
 
     /// <summary>
