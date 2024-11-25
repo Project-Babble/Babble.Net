@@ -49,10 +49,10 @@ public class ImageCapture : Capture
     public override bool IsReady { get; protected set; }
     public override string Url { get; set; } = null!;
 
-    public override bool StartCapture()
+    public override Task<bool> StartCapture()
     {
         IsReady = true;
-        return true;
+        return Task.FromResult(true);
     }
 
     public override bool StopCapture()
