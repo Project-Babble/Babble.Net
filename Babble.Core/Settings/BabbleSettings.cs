@@ -1,5 +1,4 @@
-﻿using Babble.Core.Scripts.Config;
-using Babble.Core.Settings.Models;
+﻿using Babble.Core.Settings.Models;
 using Newtonsoft.Json;
 using System.Reflection;
 
@@ -7,9 +6,6 @@ namespace Babble.Core.Settings;
 
 public class BabbleSettings
 {
-    // This is hacky. This MUST return something
-    private static readonly string[] prefixes = ["", "cam.", "generalsettings."];
-
     public event Action<string> OnUpdate;
 
     [JsonProperty("version")]
@@ -26,8 +22,9 @@ public class BabbleSettings
 
     private static string AppConfigFile => Path.Combine(AppContext.BaseDirectory, "AppConfiguration.json");
 
-    // Dictionary to cache PropertyInfo for faster access
+    // Dictionary to cache PropertyInfo for faster access. Needs prefix dict below to work
     private readonly Dictionary<string, PropertyInfo> _propertyCache;
+    private static readonly string[] prefixes = ["", "cam.", "generalsettings."];
 
     public BabbleSettings()
     {

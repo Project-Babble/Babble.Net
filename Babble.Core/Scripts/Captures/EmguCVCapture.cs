@@ -83,7 +83,9 @@ public class EmguCVCapture : Capture
                 // Default to camera index 0 if URL-based capture fails
                 const string defaultSource = "0";
                 _videoCapture = new VideoCapture(defaultSource);
-                BabbleCore.Instance.Settings.UpdateSetting<string>("capture_source", defaultSource);
+                BabbleCore.Instance.Settings.UpdateSetting<string>(
+                    nameof(BabbleCore.Instance.Settings.Cam.CaptureSource), 
+                    defaultSource);
                 BabbleCore.Instance.Logger.LogWarning($"Failed to initialize VideoCapture with URL: {Url}. Defaulted to camera at index 0.");
             }
         }
@@ -116,10 +118,7 @@ public class EmguCVCapture : Capture
                 _dimensions.height = _mat.Height;
             }
         }
-        catch (Exception)
-        {
-
-        }
+        catch (Exception) { }
     }
 
     /// <summary>

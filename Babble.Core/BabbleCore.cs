@@ -27,11 +27,10 @@ public partial class BabbleCore
     
     private PlatformConnector _platformConnector;
     private InferenceSession _session;
-    private string _inputName;
-
-    private OneEuroFilter floatFilter;
     private Dictionary<string, CalibrationItem> _calibrationItems;
-
+    private OneEuroFilter floatFilter;
+    private string _inputName;
+    
     static BabbleCore()
     {
         Instance = new BabbleCore();
@@ -39,30 +38,40 @@ public partial class BabbleCore
 
     private BabbleCore()
     {
+        var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ProjectBabble");
+
+        if (!Directory.Exists(logPath))
+        {
+            Directory.CreateDirectory(logPath);
+        }
+
         ServiceProvider serviceProvider = new ServiceCollection()
             .AddLogging((loggingBuilder) => loggingBuilder
                 .AddConsole()
                 .AddDebug()
                 .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug)
-                .AddFile("Babble.log", append: false))
+                .AddFile(Path.Combine(logPath, "latest.log"), append: false))
             .BuildServiceProvider();
         Logger = serviceProvider.GetService<ILoggerFactory>()!.CreateLogger<BabbleCore>();
 
         Settings = new BabbleSettings();
         Settings.OnUpdate += (setting) =>
         {
-            // Hacky but it works
-            var normalizedSetting = setting.Replace("_", string.Empty).ToLower();
-            if (normalizedSetting == "capturesource")
+            var captureSource = nameof(Settings.Cam.CaptureSource);
+            var calibArray = nameof(Settings.GeneralSettings.CalibArray);
+
+            if (setting == captureSource)
             {
                 if (_platformConnector is not null)
                     _platformConnector!.Terminate();
                 ConfigurePlatformConnector();
             }
 
-            if (normalizedSetting == "calibarray")
+            if (setting == calibArray)
             {
-                _calibrationItems = JsonConvert.DeserializeObject<CalibrationItem[]>(Instance.Settings.GeneralSettings.CalibArray)!.ToDictionary(x => x.ShapeName);
+                _calibrationItems = JsonConvert.
+                    DeserializeObject<CalibrationItem[]>(Instance.Settings.GeneralSettings.CalibArray)!.
+                    ToDictionary(x => x.ShapeName);
             }
         };
     }

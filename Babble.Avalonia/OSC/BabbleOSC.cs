@@ -54,11 +54,12 @@ public class BabbleOSC
 
     private void OnBabbleSettingsChanged(BabbleSettings settings)
     {
+        var guiOSCAddress = nameof(settings.GeneralSettings.GuiOscAddress);
+        var guiOSCPort= nameof(settings.GeneralSettings.GuiOscPort);
+
         settings.OnUpdate += async (setting) =>
         {
-            // Hacky but it works
-            var normalizedSetting = setting.Replace("_", string.Empty).ToLower();
-            if (normalizedSetting == "guioscaddress" || normalizedSetting == "guioscport")
+            if (setting == guiOSCAddress || setting == guiOSCPort)
             {
                 // Close and dispose the current sender
                 _sender.Close();
