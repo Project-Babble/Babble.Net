@@ -43,6 +43,7 @@
     <PackageReference Include="Meadow.Linux" Version="1.15.0" />
     <PackageReference Include="Meadow.Windows" Version="1.15.0" />
     <PackageReference Include="Rug.Osc" Version="1.2.5" />
+    <PackageReference Include="VRChat.OSCQuery" Version="0.0.7" />
   </ItemGroup>
 
   <ItemGroup>

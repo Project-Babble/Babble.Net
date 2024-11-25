@@ -11,6 +11,7 @@ using Babble.Avalonia.ReactiveObjects;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.Scripts.Enums;
 using Babble.Core;
+using Silk.NET.Input;
 using System.Runtime.InteropServices;
 
 namespace Babble.Avalonia;
@@ -34,8 +35,6 @@ public partial class CamView : UserControl, IIsVisible
         MouthWindow.PointerPressed += OnPointerPressed;
         MouthWindow.PointerMoved += OnPointerMoved;
         MouthWindow.PointerReleased += OnPointerReleased;
-        //MouthWindow.Tapped += OnTapped;
-        //MouthWindow.DoubleTapped += OnDoubleTapped;
 
         TrackingModeButton.IsChecked = true;
         CroppingModeButton.IsChecked = false;
@@ -64,38 +63,21 @@ public partial class CamView : UserControl, IIsVisible
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        OnContactEnter(e.GetPosition(MouthWindow));
-    }
-
-    //private void OnTapped(object? sender, TappedEventArgs e)
-    //{
-    //    OnContactEnter(e.GetPosition(MouthWindow));
-    //}
-
-    private void OnContactEnter(Point position)
-    {
         if (camViewMode != CamViewMode.Cropping) return;
 
+        ScrollBar.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+        var position = e.GetPosition(MouthWindow);
         cropStartPoint = position;
         cropRectangle = new Rect(position.X, position.Y, 0, 0);
         isCropping = true;
     }
 
+
     private void OnPointerMoved(object? sender, PointerEventArgs e)
-    {
-        OnContactMoved(e.GetPosition(MouthWindow));
-    }
-
-    //private void OnDoubleTapped(object? sender, TappedEventArgs e)
-    //{
-    //    OnContactMoved(e.GetPosition(MouthWindow));
-    //    OnPointerReleased(null, null);
-    //}
-
-    private void OnContactMoved(Point position)
     {
         if (!isCropping || cropStartPoint is null) return;
 
+        var position = e.GetPosition(MouthWindow);
         var x = Math.Min(cropStartPoint.Value.X, position.X);
         var y = Math.Min(cropStartPoint.Value.Y, position.Y);
         var clampedWidth = Math.Clamp(Math.Abs(cropStartPoint.Value.X - position.X), 0, _viewModel.MouthBitmap.Size.Width - cropStartPoint.Value.X);
@@ -108,6 +90,7 @@ public partial class CamView : UserControl, IIsVisible
     {
         if (!isCropping) return;
 
+        ScrollBar.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
         isCropping = false;
 
         if (cropStartPoint.HasValue)
