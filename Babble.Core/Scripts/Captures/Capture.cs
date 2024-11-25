@@ -44,7 +44,7 @@ public abstract class Capture
     /// Start Capture on this source
     /// </summary>
     /// <returns></returns>
-    public abstract bool StartCapture();
+    public abstract Task<bool> StartCapture();
 
     /// <summary>
     /// Stop Capture on this source

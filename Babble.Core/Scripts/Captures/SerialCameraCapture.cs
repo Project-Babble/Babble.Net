@@ -40,20 +40,20 @@ public class SerialCameraCapture : Capture, IDisposable
         };
     }
 
-    public override bool StartCapture()
+    public override Task<bool> StartCapture()
     {
         try
         {
             _serialPort.Open();
             Task.Run(GetNextFrame, _cancellationTokenSource.Token);
             IsReady = true;
-            return true;
+            return Task.FromResult(true);
         }
         catch (Exception ex)
         {
             BabbleCore.Instance.Logger.LogError($"Failed to open serial port {Url}: {ex.Message}"); // xlinka 11/8/24: Improved logging.
             IsReady = false;
-            return false;
+            return Task.FromResult(false);
         }
     }
 
