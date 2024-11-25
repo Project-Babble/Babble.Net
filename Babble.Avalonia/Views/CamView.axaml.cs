@@ -89,6 +89,7 @@ public partial class CamView : UserControl, IIsVisible
     //private void OnDoubleTapped(object? sender, TappedEventArgs e)
     //{
     //    OnContactMoved(e.GetPosition(MouthWindow));
+    //    OnPointerReleased(null, null);
     //}
 
     private void OnContactMoved(Point position)
@@ -101,8 +102,6 @@ public partial class CamView : UserControl, IIsVisible
         var clampedHeight = Math.Clamp(Math.Abs(cropStartPoint.Value.Y - position.Y), 0, _viewModel.MouthBitmap.Size.Height - cropStartPoint.Value.Y);
 
         cropRectangle = new Rect(x, y, clampedWidth, clampedHeight);
-
-        OnPointerReleased(null, null);
     }
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
