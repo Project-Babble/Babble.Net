@@ -7,7 +7,7 @@ internal abstract class Validator<T> where T : struct
         if (string.IsNullOrEmpty(str))
             throw new ArgumentException("Invalid event args passed.");
 
-        if (ParseValue<T>(str, out var newValue))
+        if (ParseValue(str, out var newValue))
         {
             return newValue;
         }
@@ -17,7 +17,7 @@ internal abstract class Validator<T> where T : struct
         }
     }
 
-    private static bool ParseValue<T>(string value, out T parsed) where T : struct
+    private static bool ParseValue(string value, out T parsed)
     {
         if (string.IsNullOrWhiteSpace(value))
         {

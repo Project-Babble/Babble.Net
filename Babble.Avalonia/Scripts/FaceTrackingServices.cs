@@ -14,7 +14,7 @@ public static class FaceTrackingServices
 
         public FTLogger(string c) => p = $"[{c}] ";
         
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             Task.Run(new Action(() =>
             {
@@ -62,17 +62,17 @@ public static class FaceTrackingServices
 
     public class FTSettings : ILocalSettingsService
     {
-        public Task<T> ReadSettingAsync<T>(string key)
+        public Task<T>? ReadSettingAsync<T>(string key)
         {
             return default;
         }
 
-        public Task SaveSettingAsync<T>(string key, T value)
+        public Task? SaveSettingAsync<T>(string key, T value)
         {
             return default;
         }
 
-        public Task<T> ReadSettingAsync<T>(string key, T defaultValue = default(T), bool forceLocal = false)
+        public Task<T> ReadSettingAsync<T>(string key, T? defaultValue = default(T?), bool forceLocal = false)
         {
             return default;
         }

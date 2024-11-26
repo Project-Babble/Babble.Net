@@ -10,7 +10,7 @@ namespace Babble.Core.Scripts.Decoders;
 /// </summary>
 public class DummyCapture : Capture
 {
-    public override string Url { get; set; }
+    public override string Url { get; set; } = null!;
 
     public override uint FrameCount { get; protected set; }
 

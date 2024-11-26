@@ -18,7 +18,7 @@ public abstract class PlatformConnector
     /// A Platform may have many Capture sources, but only one may ever be active at a time.
     /// This represents the current (and a valid) Capture source for this Platform
     /// </summary>
-    public Capture Capture { get; set; }
+    public Capture? Capture { get; set; }
 
     private uint _lastFrameCount = 0;
 

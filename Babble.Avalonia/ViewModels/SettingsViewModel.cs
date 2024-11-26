@@ -7,7 +7,7 @@ namespace Babble.Avalonia.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     [ObservableProperty]
-    public ComboBox languageCombo;
+    public ComboBox? languageCombo;
 
     [ObservableProperty]
     public bool checkForUpdates;
@@ -46,7 +46,7 @@ public partial class SettingsViewModel : ObservableObject
     public int framerate;
 
     [ObservableProperty]
-    public string selectedLanguage;
+    public string? selectedLanguage;
 
     [ObservableProperty]
     public int selectedIndex;

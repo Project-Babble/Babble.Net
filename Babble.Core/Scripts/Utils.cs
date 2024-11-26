@@ -141,9 +141,9 @@ public static class Utils
     /// <typeparam name="TEnum"></typeparam>
     /// <returns></returns>
     public static IEnumerable<TEnum> EnumerateEnum<TEnum>()
-        where TEnum : struct, IConvertible, IComparable, IFormattable
+        where TEnum : struct, System.Enum
     {
-        return Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
+        return Enum.GetValues<TEnum>();
     }
 
     public static void ExtractEmbeddedResource(Assembly assembly, string resourceName, string file, bool overwrite = false)
