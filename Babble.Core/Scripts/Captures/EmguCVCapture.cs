@@ -71,26 +71,18 @@ public class EmguCVCapture : Capture
     /// </xlinka>
     public override async Task<bool> StartCapture()
     {
-        // Retrieve resolution and framerate settings from BabbleCore and apply
-        var generalSettings = BabbleCore.Instance.Settings.GeneralSettings;
-        var x = generalSettings.GuiCamResolutionX;
-        var y = generalSettings.GuiCamResolutionY;
-        var fr = generalSettings.GuiCamFramerate;
-
         using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
         {
             try
             {
                 // Initialize VideoCapture with URL, timeout for robustness
-                _videoCapture = await Task.Run(() => new VideoCapture(Url, VideoCapture.API.Any,
-                    new(CapProp.FrameWidth, x), new(CapProp.FrameHeight, y), new(CapProp.Fps, fr)), cts.Token);
+                _videoCapture = await Task.Run(() => new VideoCapture(Url), cts.Token);
             }
             catch (AggregateException)
             {
                 // Default to camera index 0 if URL-based capture fails
                 const string defaultSource = "0";
-                _videoCapture = new VideoCapture(defaultSource, VideoCapture.API.Any,
-                    new(CapProp.FrameWidth, x), new(CapProp.FrameHeight, y), new(CapProp.Fps, fr));
+                _videoCapture = new VideoCapture(defaultSource);
                 BabbleCore.Instance.Settings.UpdateSetting<string>(
                     nameof(BabbleCore.Instance.Settings.Cam.CaptureSource), 
                     defaultSource);
@@ -109,7 +101,8 @@ public class EmguCVCapture : Capture
     {
         try
         {
-            if (_videoCapture?.Retrieve(_mat) == true)
+            IsReady = _videoCapture?.Retrieve(_mat) == true;
+            if (IsReady)
             {
                 FrameCount++;
                 _dimensions.width = _mat.Width;
