@@ -76,10 +76,9 @@
                             Background="#2D2D2D"
                             Foreground="White"/>			
 
-				<CheckBox Content="Force Relevancy"
-		                  x:Name="ForceRelevancy"
-		                  IsChecked="{Binding ForceRelevancy}"
-						  IsVisible="false"
+				<CheckBox Content="Use OSCQuery"
+		                  x:Name="UseOSCQuery"
+		                  IsChecked="{Binding UseOSCQuery}"
 		                  Foreground="White"/>
 				<CheckBox Content="{localization:Localize general.receiver}"
                           ToolTip.Tip="{localization:Localize general.receiverTooltip}"

@@ -65,6 +65,7 @@ public partial class CamView : UserControl, IIsVisible
     {
         if (camViewMode != CamViewMode.Cropping) return;
 
+        ScrollBar.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
         ScrollBar.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
         var position = e.GetPosition(MouthWindow);
         cropStartPoint = position;
@@ -90,6 +91,7 @@ public partial class CamView : UserControl, IIsVisible
     {
         if (!isCropping) return;
 
+        ScrollBar.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
         ScrollBar.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
         isCropping = false;
 

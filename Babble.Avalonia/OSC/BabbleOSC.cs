@@ -1,25 +1,28 @@
-﻿using Babble.Avalonia.ReactiveObjects;
+﻿using Babble.Avalonia.Scripts;
 using Babble.Core;
 using Babble.Core.Settings;
 using Babble.Core.Settings.Models;
-using Hypernex.ExtendedTracking;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Rug.Osc;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Text.RegularExpressions;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
 using VRCFaceTracking.Core.Params.Expressions;
+using VRCFTReceiver;
+using static Hypernex.ExtendedTracking.VRCFTParameters;
 
 namespace Babble.OSC;
 
 public class BabbleOSC
 {
     private OscSender _sender;
-    private ILogger _logger;
+    private OSCQuery _query;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly Task _sendTask;
+    private readonly List<VRCFTProgrammableExpression> _allParams = GetParameters();
+    private readonly HashSet<VRCFTProgrammableExpression> _currentFloatParams = [];
+    private readonly HashSet<VRCFTProgrammableExpression> _currentBinaryParams = [];
 
     private const string DEFAULT_HOST = "127.0.0.1";
 
@@ -37,11 +40,11 @@ public class BabbleOSC
 
     public BabbleOSC(string? host = null, int? remotePort = null)
     {
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        _logger = factory.CreateLogger("BabbleOSC");
-
         var settings = BabbleCore.Instance.Settings;
         var ip = IPAddress.Parse(host ?? DEFAULT_HOST);
+        _query = new OSCQuery(ip, BabbleCore.Instance.Settings.GeneralSettings.GuiOscReceiverPort); // 9001 by default
+        _query.OnAvatarChange += DetermineNewParameters;
+
         OnBabbleSettingsChanged(settings);
 
         ConfigureReceiver(
@@ -89,7 +92,6 @@ public class BabbleOSC
     private async Task SendLoopAsync(CancellationToken cancellationToken)
     {
         var generalSettings = BabbleCore.Instance.Settings.GeneralSettings;
-        var allParams = VRCFTParameters.GetParameters();
         int[] binaryPowers = [1, 2, 4, 8];
 
         while (!cancellationToken.IsCancellationRequested)
@@ -100,13 +102,16 @@ public class BabbleOSC
                 continue;
             }
 
-            var forceRelevancy = generalSettings.GuiForceRelevancy;
+            var useOSCQuery = generalSettings.GuiForceRelevancy;
             var prefix = generalSettings.GuiOscLocation;
 
             try
             {
-                await SendMobileParameters(allParams, forceRelevancy, prefix, cancellationToken);
-                await SendDesktopParameters(generalSettings, prefix, cancellationToken);
+                //if (useOSCQuery)
+                //    await SendMobileParameters(cancellationToken);
+                //else
+                    await SendDesktopParameters(generalSettings, prefix, cancellationToken);
+
                 await PollConnectionStatus(cancellationToken);
             }
             catch (Exception)
@@ -117,34 +122,34 @@ public class BabbleOSC
         }
     }
 
-    private async Task SendMobileParameters(List<VRCFTParameters.VRCFTProgrammableExpression> allParams, bool forceRelevancy, string prefix, CancellationToken cancellationToken)
+    private async Task SendMobileParameters(CancellationToken cancellationToken)
     {
-        if (!forceRelevancy || _sender.State != OscSocketState.Connected)
+        if (_sender.State != OscSocketState.Connected)
         {
             return;
         }
 
-        foreach (var param in allParams)
+        foreach (var param in _currentFloatParams)
         {
-            var value = param.GetWeight(UnifiedTracking.Data);
+            float value = param.GetWeight(UnifiedTracking.Data);
             if (value == 0 || float.IsNaN(value))
                 continue;
 
-            var trimmed = param.Name.TrimEnd('/');
-            _sender.Send(new OscMessage($"{prefix}{trimmed}", value));
-
-            // To be replaced with OSCQuery
-            // _sender.Send(new OscMessage($"{prefix}v2/{trimmed}", value));
-            // _sender.Send(new OscMessage($"{prefix}{trimmed}Negative", -value));
-            // _sender.Send(new OscMessage($"{prefix}v2/{trimmed}Negative", -value));
-            //var bitsWithPowers = Float8Converter.GetBits(param.GetWeight(UnifiedTracking.Data));
-            //for (int i = 0; i < binaryPowers.Length; i++)
-            //{
-            //    _sender.Send(new OscMessage($"{prefix}{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
-            //    _sender.Send(new OscMessage($"{prefix}v2/{trimmed}{binaryPowers[i]}", bitsWithPowers[i]));
-            //}
+            _sender.Send(new OscMessage($"/avatar/parameters/{param.Name}", value));
         }
 
+        foreach (var param in _currentBinaryParams)
+        {
+            bool[] bitsWithPowers = Float8Converter.GetBits(param.GetWeight(UnifiedTracking.Data));
+            _sender.Send(new OscMessage($"/avatar/parameters/{param.Name}Negative", bitsWithPowers[0])); // 0 bit is negative
+
+            for (int i = 0; i < 3; i++) // Hardcoded power level (Max resolution of 8 here)
+            {
+                var power = (int)Math.Pow(2, i);
+                _sender.Send(new OscMessage($"/avatar/parameters/{param.Name}{power}", bitsWithPowers[bitsWithPowers.Length - 1 - i]));
+            }
+        }
+        
         // If sending directly to VRChat, make sure we don't spam the queue
         await Task.Delay(SEND_INTERVAL_MS_MOBILE, cancellationToken);
     }
@@ -193,6 +198,60 @@ public class BabbleOSC
 
         // Attempt to reconfigure the receiver and reconnect
         ConfigureReceiver(_sender.RemoteAddress, _sender.Port);
+    }
+
+    private void DetermineNewParameters(HashSet<string> set)
+    {
+        // Here, determine from OSCQuery what VRCFTProgrammableExpressions we need to update for this (new!) avatar
+        // This method is intense, but only runs when a user changes their avatar so it should be OK
+
+        _currentFloatParams.Clear();
+        _currentBinaryParams.Clear();
+
+        foreach (var param in _allParams)
+        {
+            foreach (var item in set)
+            {
+                // For floats
+                if (param.IsMatch(item))
+                {
+                    _currentFloatParams.Add(param);
+                    break;
+                }
+
+                // For binary parameters, we need to do some extract work. We'll ask it some questions:
+
+                // 1) Does this parameter, with any and all numbers from the end removed, constitute a possible parameter?                
+                (string strippedString, int extractedNumber) pairing = StripTrailingNumbers(item);
+                if (param.IsMatch(pairing.strippedString))
+                {
+                    // Or is this our first time seeing this param?
+                    if (_currentBinaryParams.Add(param))
+                    {
+                        // If it is, fly
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private static (string strippedString, int extractedNumber) StripTrailingNumbers(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return (input, 0);
+
+        // Regex to match trailing numbers
+        var match = Regex.Match(input, @"(\d+)$", RegexOptions.Compiled);
+
+        if (match.Success)
+        {
+            string numberPart = match.Value;
+            string strippedString = input.Substring(0, input.Length - numberPart.Length);
+            return (strippedString, int.Parse(numberPart));
+        }
+
+        return (input, 0);
     }
 
     public void Teardown()

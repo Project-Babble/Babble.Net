@@ -8,6 +8,8 @@ namespace Babble.Core.Scripts;
 /// </summary>
 public static class Utils
 {
+    private const string k_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
     internal static readonly Dictionary<ARKitExpression, List<UnifiedExpression>> ExpressionMapping = new()
     {
         { ARKitExpression.CheekPuffLeft, new List<UnifiedExpression>() { UnifiedExpression.CheekPuffLeft } },
@@ -167,5 +169,10 @@ public static class Utils
                 outFile.Write(buf, 0, nRead);
             }
         }
+    }
+
+    public static string RandomString(int length = 6)
+    {
+        return new string(Enumerable.Repeat(k_chars, length).Select(s => s[Random.Shared.Next(s.Length)]).ToArray());
     }
 }

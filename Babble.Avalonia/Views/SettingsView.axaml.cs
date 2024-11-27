@@ -26,7 +26,7 @@ public partial class SettingsView : UserControl, IIsVisible
         
         this.FindControl<CheckBox>("CheckForUpdates")!.IsCheckedChanged += CheckForUpdates_Changed;
         this.FindControl<CheckBox>("UseRedChannel")!.IsCheckedChanged += UseRedChannel_Changed;
-        this.FindControl<CheckBox>("ForceRelevancy")!.IsCheckedChanged += ForceRelevancy_Changed;
+        this.FindControl<CheckBox>("UseOSCQuery")!.IsCheckedChanged += UseOSCQuery_Changed;
         this.FindControl<TextBox>("LocationPrefixEntry")!.LostFocus += LocationPrefix_LostFocus;
         this.FindControl<TextBox>("IpAddressEntry")!.LostFocus += IpAddress_LostFocus;
         this.FindControl<TextBox>("PortEntry")!.LostFocus += Port_LostFocus;
@@ -56,7 +56,7 @@ public partial class SettingsView : UserControl, IIsVisible
         _isVisible = false;
     }
 
-    private void ForceRelevancy_Changed(object? sender, RoutedEventArgs e)
+    private void UseOSCQuery_Changed(object? sender, RoutedEventArgs e)
     {
         if (sender is not CheckBox checkBox)
             return;
