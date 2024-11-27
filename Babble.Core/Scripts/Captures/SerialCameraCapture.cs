@@ -1,7 +1,10 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
+﻿using Emgu.CV.CvEnum;
+using Emgu.CV.Util;
+using Emgu.CV;
 using Microsoft.Extensions.Logging;
+using System.Buffers.Binary;
 using System.IO.Ports;
+using System.Numerics;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -14,20 +17,17 @@ public class SerialCameraCapture : Capture, IDisposable
     public override uint FrameCount { get; protected set; }
 
     private const int BAUD_RATE = 3000000;
-    private static readonly byte[] ETVR_HEADER = { 0xff, 0xa0, 0xff, 0xa1 };       // xlinka 11/8/24: Changed to use array initializer
-    private const int ETVR_HEADER_LEN = 6;                                         // 2 bytes header + 2 bytes frame type + 2 bytes size
+    private const ulong ETVR_HEADER = 0xd8ff0000a1ffa0ff, ETVR_HEADER_MASK = 0xffff0000ffffffff;
 
     private readonly SerialPort _serialPort;
-    private byte[] _buffer = new byte[2048];
-    private int _bufferPosition;
     private bool _isDisposed;
 
     public override string Url { get; set; } = null!;
     public override Mat RawMat { get; } = new Mat();
-    public override (int width, int height) Dimensions => (240, 240);
-    public override bool IsReady { get; protected set; }
 
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    public override (int width, int height) Dimensions => (RawMat.Width, RawMat.Height);
+
+    public override bool IsReady { get; protected set; }
 
     public SerialCameraCapture(string portName) : base(portName)
     {
@@ -35,8 +35,7 @@ public class SerialCameraCapture : Capture, IDisposable
         {
             PortName = portName,
             BaudRate = BAUD_RATE,
-            ReadTimeout = 1000,
-            WriteTimeout = 1000
+            ReadTimeout = SerialPort.InfiniteTimeout,
         };
     }
 
@@ -45,23 +44,21 @@ public class SerialCameraCapture : Capture, IDisposable
         try
         {
             _serialPort.Open();
-            Task.Run(GetNextFrame, _cancellationTokenSource.Token);
             IsReady = true;
-            return Task.FromResult(true);
+            DataLoop();
         }
         catch (Exception ex)
         {
             BabbleCore.Instance.Logger.LogError($"Failed to open serial port {Url}: {ex.Message}"); // xlinka 11/8/24: Improved logging.
             IsReady = false;
-            return Task.FromResult(false);
         }
+        return Task.FromResult(IsReady);
     }
 
     public override bool StopCapture()
     {
         try
         {
-            _cancellationTokenSource.Cancel();
             _serialPort.Close();
             IsReady = false;
             return true;
@@ -73,105 +70,41 @@ public class SerialCameraCapture : Capture, IDisposable
         }
     }
 
-    private Task GetNextFrame()
+    private async void DataLoop()
     {
-        while (!_cancellationTokenSource.IsCancellationRequested)
+        byte[] buffer = new byte[2048];
+        try
         {
-            if (!IsReady || !_serialPort.IsOpen) continue;
-
-            try
+            while (_serialPort.IsOpen)
             {
-                if (_serialPort.BytesToRead > 0)
+                Stream stream = _serialPort.BaseStream;
+                for (int bufferPosition = 0; bufferPosition < sizeof(ulong);)
+                    bufferPosition += await stream.ReadAsync(buffer, bufferPosition, sizeof(ulong) - bufferPosition);
+                ulong header = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+                for (; (header & ETVR_HEADER_MASK) != ETVR_HEADER; header = header >> 8 | (ulong)buffer[0] << 56)
+                    while (await stream.ReadAsync(buffer, 0, 1) == 0) /**/;
+
+                ushort jpegSize = (ushort)(header >> BitOperations.TrailingZeroCount(~ETVR_HEADER_MASK));
+                if (buffer.Length < jpegSize)
+                    Array.Resize(ref buffer, jpegSize);
+
+                BinaryPrimitives.WriteUInt16LittleEndian(buffer, 0xd8ff);
+                for (int bufferPosition = 2; bufferPosition < jpegSize;)
+                    bufferPosition += await stream.ReadAsync(buffer, bufferPosition, jpegSize - bufferPosition);
+                using (var nativeBuffer = new VectorOfByte(new Span<byte>(buffer, 0, jpegSize)))
                 {
-                    var (start, jpegSize) = GetNextPacketBounds();
-                    if (start == -1 || jpegSize == -1) continue;
-
-                    byte[] jpegData = new byte[jpegSize];
-                    Array.Copy(_buffer, start + ETVR_HEADER_LEN, jpegData, 0, jpegSize);
-
-                    if (jpegData.Length >= 2 && jpegData[0] == 0xFF && jpegData[1] == 0xD8) // xlinka 11/8/24: Check for valid JPEG header
-                    {
-                        _bufferPosition = 0;
-                        CvInvoke.Imdecode(jpegData, ImreadModes.Color, RawMat);
-                        FrameCount++;
-                        continue;
-                    }
-
-                    // xlinka 11/8/24: Clear buffer after processing each frame to prevent leftover data
-                    Array.Clear(_buffer, 0, _buffer.Length);
-                    _bufferPosition = 0;
+                    CvInvoke.Imdecode(nativeBuffer, ImreadModes.Color, RawMat);
                 }
-            }
-            catch (Exception ex)
-            {
-                IsReady = false;
-                _serialPort.Close();
-                BabbleCore.Instance.Logger.LogError($"Error reading frame on port {Url} at buffer position {_bufferPosition}: {ex.Message}"); // xlinka 11/8/24: Added detailed logging for frame reading errors
-            }
-
-            Task.Delay(100);
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private (int start, int size) GetNextPacketBounds()
-    {
-        int headerPos = -1;
-
-        // Keep reading until we find a valid header
-        while (headerPos == -1)
-        {
-            // xlinka 11/8/24: Read data into buffer, respecting current buffer position to avoid overwriting data
-            int bytesRead = _serialPort.Read(_buffer, _bufferPosition, Math.Min(2048, _buffer.Length - _bufferPosition));
-            
-            if (bytesRead == 0)
-            {
-                return (-1, -1);
-            }
-
-            _bufferPosition += bytesRead;
-
-            // Search for the protocol header
-            for (int i = 0; i <= _bufferPosition - ETVR_HEADER.Length; i++)
-            {
-                if (CompareBytes(_buffer, i, ETVR_HEADER))
-                {
-                    headerPos = i;
-                    break;
-                }
+                FrameCount++;
             }
         }
-
-        // Extract the JPEG data size from the header
-        int jpegSize = BitConverter.ToUInt16(_buffer, headerPos + 4); // xlinka 11/8/24: Read size directly after header
-
-        // Ensure buffer has enough space for JPEG data
-        // Adjusted buffer resizing logic in GetNextPacketBounds to dynamically expand the buffer if the JPEG data size exceeds its current capacity. This ensures sufficient buffer space without truncating data.
-        if (_buffer.Length < headerPos + ETVR_HEADER_LEN + jpegSize)
+        catch (Exception ex)
         {
-            Array.Resize(ref _buffer, headerPos + ETVR_HEADER_LEN + jpegSize); // xlinka 11/8/24: Resize buffer if necessary
+            if (ex is ObjectDisposedException)
+                return;
+            BabbleCore.Instance.Logger.LogError($"Error reading frame on port {Url}: {ex.Message}");
+            StopCapture();
         }
-
-        // Read any remaining data for the complete JPEG
-        while (_bufferPosition < headerPos + ETVR_HEADER_LEN + jpegSize)
-        {
-            int bytesRead = _serialPort.Read(_buffer, _bufferPosition, Math.Min(2048, headerPos + ETVR_HEADER_LEN + jpegSize - _bufferPosition));
-            _bufferPosition += bytesRead;
-        }
-
-        return (headerPos, jpegSize);
-    }
-
-    private bool CompareBytes(byte[] buffer, int start, byte[] pattern)
-    {
-        if (start + pattern.Length > buffer.Length) return false;
-
-        for (int i = 0; i < pattern.Length; i++)
-        {
-            if (buffer[start + i] != pattern[i]) return false;
-        }
-        return true;
     }
 
     protected virtual void Dispose(bool disposing)
