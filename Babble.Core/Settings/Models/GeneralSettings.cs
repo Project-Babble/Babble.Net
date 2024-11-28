@@ -85,7 +85,7 @@ public sealed class GeneralSettings
     {
         // Filter settings
         GuiMinCutoff = 1.0f;
-        GuiSpeedCoefficient = 1.0f;
+        GuiSpeedCoefficient = 0.007f;
 
         // OSC communication settings
         GuiOscAddress = "127.0.0.1";
