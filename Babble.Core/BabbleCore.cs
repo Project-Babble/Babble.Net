@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using Newtonsoft.Json;
 using NReco.Logging.File;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -31,6 +32,8 @@ public partial class BabbleCore
     private InferenceSession? _session;
     private Dictionary<string, CalibrationItem>? _calibrationItems;
     private OneEuroFilter? _floatFilter;
+    private Stopwatch sw = Stopwatch.StartNew();
+    private float _lastTime = 0;
     private string? _inputName;
     
     static BabbleCore()
@@ -135,11 +138,15 @@ public partial class BabbleCore
         SessionOptions sessionOptions = SetupSessionOptions();
         ConfigurePlatformSpecificGPU(sessionOptions);
 
-        var fps = settings.GeneralSettings.GuiCamFramerate > 0 ? settings.GeneralSettings.GuiCamFramerate : 30;
-        var mc = settings.GeneralSettings.GuiMinCutoff > 0 ? settings.GeneralSettings.GuiMinCutoff : 1;
-        var sc = settings.GeneralSettings.GuiSpeedCoefficient > 0 ? settings.GeneralSettings.GuiSpeedCoefficient : 0;
         ConfigurePlatformConnector();
-        _floatFilter = new OneEuroFilter(fps, mc);
+
+        var fps = settings.GeneralSettings.GuiCamFramerate > 0 ? settings.GeneralSettings.GuiCamFramerate : 30;
+        var minCutoff = settings.GeneralSettings.GuiMinCutoff > 0 ? settings.GeneralSettings.GuiMinCutoff : 1.0f;
+        var speedCoeff = settings.GeneralSettings.GuiSpeedCoefficient > 0 ? settings.GeneralSettings.GuiSpeedCoefficient : 0.007f;
+        _floatFilter = new OneEuroFilter(
+            minCutoff: 1.0f,
+            beta: 0.007f
+        );
 
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
@@ -195,7 +202,8 @@ public partial class BabbleCore
             foreach (var ue in exp.Value)
             {
                 var expressionName = BabbleAddresses.Addresses[ue];
-                filteredValue = _floatFilter.Filter(filteredValue);
+                filteredValue = _floatFilter.Filter(filteredValue, (float)sw.Elapsed.TotalSeconds - _lastTime);
+                _lastTime = (float)sw.Elapsed.TotalSeconds;
                 CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[expressionName].Min, _calibrationItems[expressionName].Max);
             }
             j++;

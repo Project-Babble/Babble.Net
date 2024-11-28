@@ -2,78 +2,62 @@
 
 public static class Float8Converter
 {
-    private const int TOTAL_BITS = 8;
-    private const int EXPONENT_BITS = 4;
-    private const int SIGNIFICAND_BITS = 3;
-
-    private const int BIAS = 7; // 2^(4-1) - 1 for 4 exponent bits
-    private const float EPSILON = 1.0f / 1024.0f; // Smallest representable positive number
-
-    public static bool[] GetBits(float value)
+    public static BinaryParameterResult ConvertFloatToBinaryParameter(float value, bool isCombined = false)
     {
-        bool[] bits = new bool[TOTAL_BITS];
-
-        // Handle special cases first
-        if (Math.Abs(value) < EPSILON)
+        // Validate and clamp input range
+        if (isCombined)
         {
-            return bits; // Return all zeros for values very close to zero
+            value = Math.Clamp(value, -1f, 1f);
+        }
+        else
+        {
+            value = Math.Clamp(value, 0f, 1f);
         }
 
-        if (float.IsInfinity(value))
+        var result = new BinaryParameterResult();
+
+        // Handle negative values
+        if (isCombined)
         {
-            bits[7] = value < 0; // Sign bit
-                                 // Set all exponent bits to 1
-            for (int i = 3; i < 7; i++)
-                bits[i] = true;
-            // Set all significand bits to 0
-            return bits;
+            result.Negative = value < 0;
+            value = Math.Abs(value);
         }
 
-        if (float.IsNaN(value))
-        {
-            bits[7] = false; // Sign bit for NaN
-                             // Set all exponent bits to 1
-            for (int i = 3; i < 7; i++)
-                bits[i] = true;
-            // Set at least one significand bit to 1 for NaN
-            bits[0] = true;
-            return bits;
-        }
+        // Convert the float to a normalized value between 0 and 31 (for 5 bits)
+        int normalizedValue = (int)(value * 31);
 
-        // Handle sign
-        bits[7] = value < 0;
-        value = Math.Abs(value);
+        // Extract individual parameters using bitwise operations
+        result.Parameter8 = (normalizedValue & 16) != 0;  // 2^4 (16)
+        result.Parameter4 = (normalizedValue & 8) != 0;   // 2^3 (8)
+        result.Parameter2 = (normalizedValue & 4) != 0;   // 2^2 (4)
+        result.Parameter1 = (normalizedValue & 2) != 0;   // 2^1 (2)
 
-        // Get exponent and significand
-        int exponent = (int)Math.Floor(Math.Log2(value));
-        float significand = value / (float)Math.Pow(2, exponent) - 1;
+        return result;
+    }
 
-        // Normalize
-        exponent += BIAS;
+    // Helper method to convert binary parameters back to float for verification
+    public static float ConvertBinaryParameterToFloat(BinaryParameterResult param)
+    {
+        float value = 0f;
 
-        // Handle denormalized numbers
-        if (exponent <= 0)
-        {
-            exponent = 0;
-            significand = value / (float)Math.Pow(2, -6); // -6 is the smallest normalized exponent
-        }
+        // Add up the values based on the binary parameters
+        if (param.Parameter1) value += 1f / 16f;  // 2^(-4)
+        if (param.Parameter2) value += 1f / 8f;   // 2^(-3)
+        if (param.Parameter4) value += 1f / 4f;   // 2^(-2)
+        if (param.Parameter8) value += 1f / 2f;   // 2^(-1)
 
-        // Clamp exponent
-        exponent = Math.Clamp(exponent, 0, 15); // 4 bits = max value of 15
+        // Apply sign if negative
+        if (param.Negative) value = -value;
 
-        // Set exponent bits (bits 6-3)
-        for (int i = 0; i < EXPONENT_BITS; i++)
-        {
-            bits[6 - i] = (exponent & (1 << i)) != 0;
-        }
+        return value;
+    }
 
-        // Set significand bits (bits 2-0)
-        int significandInt = (int)(significand * 8); // 3 bits = 8 values
-        for (int i = 0; i < SIGNIFICAND_BITS; i++)
-        {
-            bits[i] = (significandInt & (1 << i)) != 0;
-        }
-
-        return bits;
+    public class BinaryParameterResult
+    {
+        public bool Negative { get; set; }
+        public bool Parameter1 { get; set; }
+        public bool Parameter2 { get; set; }
+        public bool Parameter4 { get; set; }
+        public bool Parameter8 { get; set; }
     }
 }

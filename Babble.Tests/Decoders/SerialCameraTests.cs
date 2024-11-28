@@ -32,11 +32,11 @@ public class SerialCameraTests : IDisposable
         // Assert
         camera.Url.Should().Be(TEST_PORT);
         camera.IsReady.Should().BeFalse();
-        camera.RawFrame.Should().BeNull();
+        camera.RawMat.Should().BeNull();
     }
 
     [Fact]
-    public void StartCapture_WhenPortIsValid_ShouldReturnTrue()
+    public async void StartCapture_WhenPortIsValid_ShouldReturnTrue()
     {
         // Arrange
         // This test requires a mock SerialPort or actual hardware
@@ -45,7 +45,7 @@ public class SerialCameraTests : IDisposable
         // Act & Assert
         try
         {
-            var result = _camera.StartCapture();
+            var result = await Task.Run(_camera.StartCapture);
             result.Should().BeTrue();
             _camera.IsReady.Should().BeTrue();
         }
@@ -83,9 +83,9 @@ public class SerialCameraTests : IDisposable
         try
         {
             // Act
-            _camera.StartCapture();
+            var result = await Task.Run(_camera.StartCapture);
             await Task.Delay(1000); // Wait for potential frame capture
-            var updatedFrame = _camera.RawFrame;
+            var updatedFrame = _camera.RawMat;
 
             // Assert
             // In real testing with actual hardware or mocks,

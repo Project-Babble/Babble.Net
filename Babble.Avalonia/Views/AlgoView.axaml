@@ -54,7 +54,7 @@
 							Foreground="White"/>
 				</StackPanel>
 
-				<StackPanel Grid.Column="1" Spacing="5" Margin="0,0,0,12">
+				<StackPanel Grid.Column="1" Spacing="5" Margin="0,0,0,6">
 					<TextBlock Text="{localization:Localize algorithm.runtime}"
 								x:Name="RuntimeText"
 								Foreground="White"/>
@@ -71,6 +71,7 @@
 						 x:Name="UseGpu"
 						 IsChecked="{Binding UseGpu}"
 						 Foreground="White"
+						 Margin="0,0,0,6"
 						 VerticalAlignment="Bottom"/>
 
 					<TextBlock Text="{localization:Localize algorithm.GPUIndex}"
@@ -98,7 +99,7 @@
 						Background="#2D2D2D"
 						Foreground="White"/>
 
-				<TextBlock Text="{localization:Localize algorithm.oneEuroFilterParameters}"
+				<TextBlock Text="{localization:Localize algorithm.oneEuroFilterParameters}" 
 						 x:Name="OneEuroFilterText"
 						 Foreground="White"
 						 FontWeight="Bold"

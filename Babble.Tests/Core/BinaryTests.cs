@@ -1,89 +1,164 @@
-﻿using Babble.Avalonia.Scripts;
+﻿using static Babble.Avalonia.Scripts.Float8Converter;
 
-namespace Babble.Tests.Core;
-
-public class BinaryTests
+public class BinaryParameterConverterTests
 {
-    // Helper method to convert bit array to string representation
-    private string BitsToString(bool[] bits)
+    [Theory]
+    [InlineData(0f)]
+    [InlineData(1f)]
+    [InlineData(0.5f)]
+    public void ConvertFloatToBinaryParameter_ValidPositiveRange_ReturnsExpectedResult(float value)
     {
-        return string.Join(" ", new[]
-        {
-            bits[7] ? "1" : "0",                                    // Sign
-            string.Join("", bits[3..7].Select(b => b ? "1" : "0")), // Exponent
-            string.Join("", bits[0..3].Select(b => b ? "1" : "0"))  // Significand
-        });
+        // Act
+        var result = ConvertFloatToBinaryParameter(value);
+
+        // Assert
+        Assert.False(result.Negative);
+        // Verify the converted value is within expected range when converted back
+        var convertedBack = ConvertBinaryParameterToFloat(result);
+        Assert.InRange(convertedBack, 0f, 1f);
     }
 
     [Theory]
-    [InlineData(0.0f, "0 0000 000")]
-    [InlineData(0.5f, "0 0110 000")]
-    [InlineData(-0.5f, "1 0110 000")]
-    [InlineData(1.0f, "0 0111 000")]
-    [InlineData(-1.0f, "1 0111 000")]
-    [InlineData(0.25f, "0 0101 000")]
-    [InlineData(-0.25f, "1 0101 000")]
-    public void StandardValues_ShouldConvertCorrectly(float input, string expected)
+    [InlineData(-1f)]
+    [InlineData(-0.5f)]
+    [InlineData(0f)]
+    [InlineData(0.5f)]
+    [InlineData(1f)]
+    public void ConvertFloatToBinaryParameter_ValidNegativeRange_ReturnsExpectedResult(float value)
     {
-        bool[] result = Float8Converter.GetBits(input);
-        string resultString = BitsToString(result);
-        Assert.Equal(expected, resultString);
+        // Act
+        var result = ConvertFloatToBinaryParameter(value, isCombined: true);
+
+        // Assert
+        Assert.Equal(value < 0, result.Negative);
+        // Verify the converted value is within expected range when converted back
+        var convertedBack = ConvertBinaryParameterToFloat(result);
+        Assert.InRange(convertedBack, -1f, 1f);
     }
 
     [Theory]
-    [InlineData(0.015625f, "0 0001 000")]
-    [InlineData(0.01953125f, "0 0001 010")]
-    // Values less than ~0.029296875, the ~2nd smallest representable (positive) get funky. Ignore them!
-    // [InlineData(0.017578125f, "0 0001 001")]
-    // [InlineData(0.021484375f, "0 0001 011")]
-    public void SmallValues_ShouldConvertCorrectly(float input, string expected)
+    [InlineData(1.5f)]
+    [InlineData(2f)]
+    [InlineData(float.MaxValue)]
+    public void ConvertFloatToBinaryParameter_AboveRange_ClampedToOne(float value)
     {
-        bool[] result = Float8Converter.GetBits(input);
-        string resultString = BitsToString(result);
-        Assert.Equal(expected, resultString);
+        // Act
+        var result = ConvertFloatToBinaryParameter(value);
+
+        // Assert
+        Assert.False(result.Negative);
+        var convertedBack = ConvertBinaryParameterToFloat(result);
+        Assert.InRange(convertedBack, 0f, 1f);
     }
 
     [Theory]
-    [InlineData(0.25f, 0.28125f)]  // Testing some values with non-zero significands
-    [InlineData(0.75f, 0.8125f)]
-    public void NonZeroSignificand_ShouldConvertCorrectly(float input1, float input2)
+    [InlineData(-1.5f)]
+    [InlineData(-2f)]
+    [InlineData(float.MinValue)]
+    public void ConvertFloatToBinaryParameter_BelowRange_ClampedToNegativeOne(float value)
     {
-        bool[] result1 = Float8Converter.GetBits(input1);
-        bool[] result2 = Float8Converter.GetBits(input2);
+        // Act
+        var result = ConvertFloatToBinaryParameter(value, isCombined: true);
 
-        // The results should be different due to different significands
-        Assert.NotEqual(BitsToString(result1), BitsToString(result2));
+        // Assert
+        Assert.True(result.Negative);
+        var convertedBack = ConvertBinaryParameterToFloat(result);
+        Assert.InRange(convertedBack, -1f, 1f);
     }
 
     [Theory]
-    [InlineData(1e-10f)]   // Very small positive
-    [InlineData(-1e-10f)]  // Very small negative
-    public void VerySmallValues_ShouldConvertToZero(float input)
+    [InlineData(-1f)]
+    [InlineData(-0.5f)]
+    public void ConvertFloatToBinaryParameter_NegativeValueWithoutisCombined_ClampsToZero(float value)
     {
-        bool[] result = Float8Converter.GetBits(input);
-        string resultString = BitsToString(result);
-        Assert.Equal("0 0000 000", resultString);
+        // Act
+        var result = ConvertFloatToBinaryParameter(value, isCombined: false);
+
+        // Assert
+        Assert.False(result.Negative);
+        var convertedBack = ConvertBinaryParameterToFloat(result);
+        Assert.InRange(convertedBack, 0f, 1f);
     }
 
     [Fact]
-    public void DenormalizedNumbers_ShouldConvertCorrectly()
+    public void ConvertFloatToBinaryParameter_NegativeOneValue_ReturnsAllTrue()
     {
-        // Test some denormalized numbers (values smaller than 0.015625)
-        float[] denormalized = { 0.005f, 0.01f, 0.015f };
-        foreach (float value in denormalized)
-        {
-            bool[] result = Float8Converter.GetBits(value);
-            // Ensure exponent bits are all zero for denormalized numbers
-            Assert.All(result[3..7], bit => Assert.False(bit));
-            // But some significand bits should be non-zero
-            Assert.Contains(result[0..3], bit => bit);
-        }
+        // Act
+        var result = ConvertFloatToBinaryParameter(-1f, isCombined: true);
+
+        // Assert
+        Assert.True(result.Negative);
+        Assert.True(result.Parameter1);
+        Assert.True(result.Parameter2);
+        Assert.True(result.Parameter4);
+        Assert.True(result.Parameter8);
     }
 
     [Fact]
-    public void AllBitsAreReturned()
+    public void ConvertFloatToBinaryParameter_ZeroValue_ReturnsAllFalse()
     {
-        bool[] result = Float8Converter.GetBits(1.0f);
-        Assert.Equal(8, result.Length);
+        // Act
+        var result = ConvertFloatToBinaryParameter(0f);
+
+        // Assert
+        Assert.False(result.Negative);
+        Assert.False(result.Parameter1);
+        Assert.False(result.Parameter2);
+        Assert.False(result.Parameter4);
+        Assert.False(result.Parameter8);
+    }
+
+    [Fact]
+    public void ConvertFloatToBinaryParameter_OneValue_ReturnsAllTrue()
+    {
+        // Act
+        var result = ConvertFloatToBinaryParameter(1f);
+
+        // Assert
+        Assert.False(result.Negative);
+        Assert.True(result.Parameter1);
+        Assert.True(result.Parameter2);
+        Assert.True(result.Parameter4);
+        Assert.True(result.Parameter8);
+    }
+
+    [Fact]
+    public void ConvertBinaryParameterToFloat_AllFalse_ReturnsZero()
+    {
+        // Arrange
+        var param = new BinaryParameterResult
+        {
+            Negative = false,
+            Parameter1 = false,
+            Parameter2 = false,
+            Parameter4 = false,
+            Parameter8 = false
+        };
+
+        // Act
+        var result = ConvertBinaryParameterToFloat(param);
+
+        // Assert
+        Assert.Equal(0f, result);
+    }
+
+    [Fact]
+    public void ConvertBinaryParameterToFloat_AllTrue_ReturnsOne()
+    {
+        // Arrange
+        var param = new BinaryParameterResult
+        {
+            Negative = false,
+            Parameter1 = true,
+            Parameter2 = true,
+            Parameter4 = true,
+            Parameter8 = true
+        };
+
+        // Act
+        var result = ConvertBinaryParameterToFloat(param);
+
+        // Assert
+        Assert.Equal(0.9375f, result); // 15/16 = 0.9375
     }
 }

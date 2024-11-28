@@ -2,6 +2,7 @@
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Settings;
 using Emgu.CV;
+using Meadow.Peripherals.Sensors.Cameras;
 
 namespace Babble.Tests.Decoders;
 
@@ -36,10 +37,11 @@ public class ImageCaptureTests : IDisposable
     }
 
     [Fact]
-    public void GetFrameData_ShouldProcessAndDisplayImage()
+    public async void GetFrameData_ShouldProcessAndDisplayImage()
     {
         // Arrange
-        Assert.True(_connector.Capture.StartCapture());
+        var result = await Task.Run(_connector.Capture.StartCapture);
+        Assert.True(result);
 
         // Act
         float[] frameData = _connector.ExtractFrameData();

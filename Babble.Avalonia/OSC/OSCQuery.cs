@@ -3,12 +3,13 @@ using Babble.Core.Scripts;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using VRC.OSCQuery;
+using VRCFaceTracking.Core.OSC.Query;
 
 namespace VRCFTReceiver;
 
 public class OSCQuery
 {
-    public event Action<HashSet<string>> OnAvatarChange;
+    public event Action<OscQueryNode> OnAvatarChange;
 
     private OSCQueryService service = null!;
     private readonly List<OSCQueryServiceProfile> profiles = [];
@@ -43,8 +44,6 @@ public class OSCQuery
 
         service.AddEndpoint<string>("/avatar/change", Attributes.AccessValues.ReadWrite, ["default"]);
 
-        // AddParametersToEndpoint();
-
         service.OnOscQueryServiceAdded += AddProfileToList;
 
         StartAutoRefreshServices(5000, _cancellationTokenSource.Token);
@@ -62,14 +61,6 @@ public class OSCQuery
         }
         BabbleCore.Instance.Logger.LogInformation($"[VRCFTReceiver] Added {profile.name} to list of OSCQuery profiles, at address http://{profile.address}:{profile.port}");
     }
-
-    //private void AddParametersToEndpoint()
-    //{
-    //    foreach (var parameter in VRCParameters)
-    //    {
-    //        service.AddEndpoint<float>(parameter, Attributes.AccessValues.ReadWrite, [0f]);
-    //    }
-    //}
 
     private void StartAutoRefreshServices(double interval, CancellationToken cancellationToken)
     {
@@ -139,23 +130,41 @@ public class OSCQuery
             if (avatar is null) return;
             if (avatar.Contents is null) return;
 
-            var currentAvatarID = (string)avatar.Contents["change"].Value.First();
-
-            if (_lastAvatarID != currentAvatarID)
+            if (avatar.Contents["change"] is not null)
             {
-                _lastAvatarID = currentAvatarID;
-                var parameters = avatar.Contents["parameters"].Contents;
-                if (parameters is null) return;
-
-                var vrcParametersSet = new HashSet<string>();
-                foreach (var item in parameters)
+                var currentAvatarID = (string)avatar.Contents["change"].Value.First();
+                if (_lastAvatarID != currentAvatarID)
                 {
-                    vrcParametersSet.Add(item.Key);
-                }
+                    _lastAvatarID = currentAvatarID;
 
-                OnAvatarChange?.Invoke(vrcParametersSet);
+                    // Convert VRC to VRCFT Query Node
+                    VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
+                    OnAvatarChange?.Invoke(vrcftQueryNode);
+                }
             }
         }
+    }
+
+    private VRCFaceTracking.Core.OSC.Query.OscQueryNode ConvertOscQueryNodeTree(VRC.OSCQuery.OSCQueryNode rootNode)
+    {
+        VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = new();
+        vrcftQueryNode.Value = rootNode.Value;
+        vrcftQueryNode.Access = AccessValues.ReadWrite;
+        vrcftQueryNode.Description = rootNode.Description;
+        vrcftQueryNode.OscType = rootNode.OscType;
+        vrcftQueryNode.FullPath = rootNode.FullPath;
+
+        vrcftQueryNode.Contents = new();
+
+        if (rootNode.Contents is not null)
+        {
+            foreach (var child in rootNode.Contents)
+            {
+                vrcftQueryNode.Contents.Add(child.Key, ConvertOscQueryNodeTree(child.Value));
+            }
+        }
+
+        return vrcftQueryNode;
     }
 
     public void Teardown()
