@@ -11,7 +11,6 @@ using Babble.Avalonia.ReactiveObjects;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.Scripts.Enums;
 using Babble.Core;
-using Silk.NET.Input;
 using System.Runtime.InteropServices;
 
 namespace Babble.Avalonia;

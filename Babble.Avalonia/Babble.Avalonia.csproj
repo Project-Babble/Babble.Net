@@ -39,9 +39,6 @@
 
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.2" />
-    <PackageReference Include="Meadow.Foundation" Version="1.15.0" />
-    <PackageReference Include="Meadow.Linux" Version="1.15.0" />
-    <PackageReference Include="Meadow.Windows" Version="1.15.0" />
     <PackageReference Include="Rug.Osc" Version="1.2.5" />
     <PackageReference Include="VRChat.OSCQuery" Version="0.0.7" />
   </ItemGroup>

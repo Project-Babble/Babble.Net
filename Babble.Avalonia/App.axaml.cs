@@ -2,12 +2,12 @@
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Localizer.Core;
 using Avalonia.Markup.Xaml;
+using Avalonia;
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
 using Babble.OSC;
 using Hypernex.ExtendedTracking;
-using Meadow;
 using Microsoft.Extensions.Logging;
 using VRCFaceTracking;
 using VRCFaceTracking.Core.Library;
@@ -16,7 +16,7 @@ using VRCFaceTracking.Core.Services;
 
 namespace Babble.Avalonia;
 
-public partial class App : AvaloniaMeadowApplication<Linux>
+public partial class App : Application
 {
     private MainIntegrated _mainIntegrated = null!;
     private BabbleOSC _babbleOSC = null!;
@@ -24,7 +24,6 @@ public partial class App : AvaloniaMeadowApplication<Linux>
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        LoadMeadowOS();
 
         // Start BabbleCore early so we can load settings.
         // In the VRCFT module, we skip init if we're already started
@@ -49,23 +48,6 @@ public partial class App : AvaloniaMeadowApplication<Linux>
         var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
         var port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
         _babbleOSC = new BabbleOSC(ip, port);
-    }
-
-    public override Task InitializeMeadow()
-    {
-        var r = Resolver.Services.Get<IMeadowDevice>();
-
-        if (r == null)
-        {
-            Resolver.Log.Info("IMeadowDevice is null");
-        }
-        else
-        {
-            Resolver.Log.Info($"IMeadowDevice is {r.GetType().Name}");
-        }
-
-        return Task.CompletedTask;
-
     }
 
     public override void OnFrameworkInitializationCompleted()
