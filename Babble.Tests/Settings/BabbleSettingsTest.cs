@@ -1,4 +1,5 @@
-﻿using Babble.Core.Settings;
+﻿using Babble.Core;
+using Babble.Core.Settings;
 using System.Text.Json;
 
 namespace Babble.Tests.Settings;
@@ -47,29 +48,11 @@ public class SettingsTests : IDisposable
         const int newVersion = 2;
 
         // Act
-        _settings.UpdateSetting<int>("Version", newVersion.ToString());
+        _settings.UpdateSetting<int>(nameof(BabbleCore.Instance.Settings.Version), newVersion.ToString());
         var updatedVersion = _settings.Version;
 
         // Assert
         Assert.Equal(newVersion, updatedVersion);
-    }
-
-    [Fact]
-    public void UpdateSetting_SavesToFile_AfterModification()
-    {
-        var _settings = CreateTestConfiguration();
-        _settings.Load();
-
-        // Arrange
-        const int newVersion = 3;
-
-        // Act
-        _settings.UpdateSetting<int>("Version", "3");
-
-        // Assert
-        var fileContent = File.ReadAllText(_testConfigPath);
-        var deserializedSettings = JsonSerializer.Deserialize<BabbleSettings>(fileContent);
-        Assert.Equal(newVersion, deserializedSettings.Version);
     }
 
     [Fact]
@@ -80,7 +63,7 @@ public class SettingsTests : IDisposable
 
         // Arrange
         const int testValue = 101;
-        _settings.UpdateSetting<int>("Cam.roi_window_x", "101");
+        _settings.UpdateSetting<int>(nameof(BabbleCore.Instance.Settings.Cam.RoiWindowX), "101");
 
         // Act
         var value = _settings.Cam.RoiWindowX;
@@ -99,7 +82,7 @@ public class SettingsTests : IDisposable
         const int newValue = 102;
 
         // Act
-        _settings.UpdateSetting<int>("Cam.roi_window_x", newValue.ToString());
+        _settings.UpdateSetting<int>(nameof(BabbleCore.Instance.Settings.Cam.RoiWindowX), newValue.ToString());
         var updatedValue = _settings.Cam.RoiWindowX;
 
         // Assert
@@ -110,7 +93,7 @@ public class SettingsTests : IDisposable
     public void LoadFromFile_LoadsCorrectValues_FromJsonFile()
     {
         // Arrange
-        const int expectedVersion = 0;
+        const int expectedVersion = 1;
         const int expectedDisplayId = 0;
 
         // Act

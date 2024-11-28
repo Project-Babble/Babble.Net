@@ -1,6 +1,7 @@
 ﻿using Babble.Core.Scripts.EmguCV;
-using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV;
+using System.Drawing;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -40,7 +41,7 @@ public abstract class PlatformConnector
     /// Converts Capture.Frame into something Babble can understand
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public float[] ExtractFrameData()
+    public float[] ExtractFrameData(Size size)
     {
         if (Capture is null)
         {
@@ -65,13 +66,13 @@ public abstract class PlatformConnector
 
         _lastFrameCount = Capture.FrameCount;
 
-        using Mat resultMat = TransformRawImage();
+        using Mat resultMat = TransformRawImage(size);
 
         using var finalMat = new Mat();
         resultMat.ConvertTo(finalMat, DepthType.Cv32F);
 
         // Convert to float array and normalize
-        float[] floatArray = new float[finalMat.Rows * finalMat.Cols];
+        float[] floatArray = new float[finalMat.Height * finalMat.Width];
         finalMat.CopyTo(floatArray);
 
         // Normalize pixel values to [0, 1]
@@ -83,7 +84,7 @@ public abstract class PlatformConnector
         return floatArray;
     }
     
-    public Mat TransformRawImage()
+    public Mat TransformRawImage(Size size)
     {
         // If this method is called from above, then the below checks don't apply
         // We need this in case we poll from Babble.Core.cs, in which the developer
@@ -113,7 +114,7 @@ public abstract class PlatformConnector
         var roiY = camSettings.RoiWindowY;
         var roiWidth = camSettings.RoiWindowW;
         var roiHeight = camSettings.RoiWindowH;
-        var rotationAngle = camSettings.RotationAngle;
+        var rotationRadians = camSettings.RotationAngle * Math.PI / 180.0;
         var useRedChannel = settings.GeneralSettings.GuiUseRedChannel;
 
         // Check to see if the user's supplied crop is too large. IE, they were using a higher resolution camera, but they switched to a smaller one
@@ -150,26 +151,50 @@ public abstract class PlatformConnector
             BabbleCore.Instance.Settings.Save();
         }
 
-        // Process the image through our chain of operations
-        using var processingChain = new MatProcessingChain();
-        using Mat resultMat = processingChain
-            .StartWith(Capture.RawMat, Capture.Dimensions)
-            .UseRedChannel(useRedChannel)
-            .Crop(roiX, roiY, roiWidth, roiHeight)
-            .Rotate(rotationAngle)
-            .Resize(new System.Drawing.Size(256, 256))
-            .ApplyFlip(camSettings.GuiVerticalFlip, FlipType.Vertical)
-            .ApplyFlip(camSettings.GuiHorizontalFlip, FlipType.Horizontal)
-            .Result;
-
-        // Verify That the matrix is in continuous memory layout - xlinka
-        if (!resultMat.IsContinuous)
+        Mat sourceMat = Capture.RawMat, resultMat = new Mat(sourceMat, (roiX == 0 || roiY == 0 || roiWidth == 0 || roiHeight == 0 ||
+            roiWidth == sourceMat.Width || roiHeight == sourceMat.Height) ? new(0, 0, sourceMat.Width, sourceMat.Height) : new(roiX, roiY, roiWidth, roiHeight));
+        if (resultMat.NumberOfChannels >= 2)
         {
-            throw new InvalidOperationException("Image Matrix is not continuous in memory layout");
+            var newMat = new Mat();
+            if (useRedChannel)
+                CvInvoke.ExtractChannel(resultMat, newMat, 0);
+            else
+                CvInvoke.CvtColor(resultMat, newMat, ColorConversion.Bgr2Gray);
+            resultMat.Dispose();
+            resultMat = newMat;
+        }
+        {
+            var newMat = new Mat();
+            if (rotationRadians != 0 || camSettings.GuiHorizontalFlip || camSettings.GuiVerticalFlip)
+            {
+                double cos = Math.Cos(rotationRadians), sin = Math.Sin(rotationRadians);
+                double scale = 1.0 / (Math.Abs(cos) + Math.Abs(sin));
+                double hscale = (camSettings.GuiHorizontalFlip ? -1.0 : 1.0) * scale;
+                double vscale = (camSettings.GuiVerticalFlip ? -1.0 : 1.0) * scale;
+                using var matrix = new Mat(2, 3, DepthType.Cv64F, 1);
+                Span<double> data = matrix.GetSpan<double>(6);
+                data[0] = (double)size.Width / (double)resultMat.Width * cos * hscale;
+                data[1] = (double)size.Height / (double)resultMat.Height * sin * hscale;
+                data[2] = ((double)size.Width - ((double)size.Width * cos + (double)size.Height * sin) * hscale) * 0.5;
+                data[3] = -(double)size.Width / (double)resultMat.Width * sin * vscale;
+                data[4] = (double)size.Height / (double)resultMat.Height * cos * vscale;
+                data[5] = ((double)size.Height + ((double)size.Width * sin - (double)size.Height * cos) * vscale) * 0.5;
+                CvInvoke.WarpAffine(resultMat, newMat, matrix, size);
+            }
+            else
+            {
+                CvInvoke.Resize(resultMat, newMat, size);
+            }
+            resultMat.Dispose();
+            resultMat = newMat;
         }
 
-        var clone = resultMat.Clone();
-        return clone;
+        // Verify That the matrix is in continuous memory layout - xlinka
+        if (!resultMat.IsContinuous) {
+            resultMat.Dispose();
+            throw new InvalidOperationException("Image Matrix is not continuous in memory layout");
+        }
+        return resultMat;
     }
 
     /// <summary>

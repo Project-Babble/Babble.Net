@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using NReco.Logging.File;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Reflection;
 
 namespace Babble.Core;
@@ -28,11 +29,12 @@ public partial class BabbleCore
     [MemberNotNullWhen(true, nameof(_platformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
     public bool IsRunning { get; private set; }
     
+    private Dictionary<string, CalibrationItem>? _calibrationItems;
     private PlatformConnector? _platformConnector;
     private InferenceSession? _session;
-    private Dictionary<string, CalibrationItem>? _calibrationItems;
     private OneEuroFilter? _floatFilter;
     private Stopwatch sw = Stopwatch.StartNew();
+    private Size _inputSize;
     private float _lastTime = 0;
     private string? _inputName;
     
@@ -150,6 +152,8 @@ public partial class BabbleCore
 
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
+        int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
+        _inputSize = new(dimensions[2], dimensions[3]);
         IsRunning = true;
 
 
@@ -171,7 +175,7 @@ public partial class BabbleCore
         }
         
         // Test if the camera is not ready or connecting to new source
-        var data = _platformConnector.ExtractFrameData();
+        var data = _platformConnector.ExtractFrameData(_inputSize);
         if (data is null) return false;
         if (data.Length == 0) return false;
 
@@ -237,7 +241,7 @@ public partial class BabbleCore
             image = grayMat.GetRawData();
             return true;
         }
-        else if (_platformConnector.Capture.RawMat.NumberOfChannels == 1)
+        if (_platformConnector.Capture.RawMat.NumberOfChannels == 1)
         {
             image = _platformConnector.Capture.RawMat.GetRawData();
             return true;
@@ -248,7 +252,7 @@ public partial class BabbleCore
 
     /// <summary>
     /// Gets the prost-transform lip image for this frame
-    /// This image will be 256*256px, Rgb888x
+    /// This image will be 256*256px, single-channel
     /// </summary>
     /// <param name="image"></param>
     /// <param name="dimensions"></param>
@@ -257,10 +261,10 @@ public partial class BabbleCore
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
-        using var transformedImageCandidate = _platformConnector?.TransformRawImage();
+        using var transformedImageCandidate = _platformConnector?.TransformRawImage(_inputSize);
         if (transformedImageCandidate is null) return false;
 
-        dimensions = (256, 256);
+        dimensions = (transformedImageCandidate.Width, transformedImageCandidate.Height);
         image = transformedImageCandidate.GetRawData();
         if (image is null) return false;
         if (image.Length == 0) return false;

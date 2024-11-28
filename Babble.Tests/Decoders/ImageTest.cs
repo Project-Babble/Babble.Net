@@ -2,7 +2,6 @@
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Settings;
 using Emgu.CV;
-using Meadow.Peripherals.Sensors.Cameras;
 
 namespace Babble.Tests.Decoders;
 
@@ -44,7 +43,7 @@ public class ImageCaptureTests : IDisposable
         Assert.True(result);
 
         // Act
-        float[] frameData = _connector.ExtractFrameData();
+        float[] frameData = _connector.ExtractFrameData(new(256, 256));
 
         // Assert
         Assert.NotNull(frameData);
@@ -61,7 +60,7 @@ public class ImageCaptureTests : IDisposable
 
         // Act/Assert
         Assert.Throws<FileNotFoundException>(() =>
-            _connector.ExtractFrameData());
+            _connector.ExtractFrameData(new(256, 256)));
     }
 
     [Fact]
