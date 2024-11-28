@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Reflection;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Babble.Core;
 
@@ -343,10 +344,14 @@ public partial class BabbleCore
         sessionOptions.AppendExecutionProvider_CPU();
         if (Settings.GeneralSettings.GuiUseGpu)
         {
-            if (OperatingSystem.IsAndroid())
+            // "The Android Neural Networks API (NNAPI) is an Android C API designed for
+            // running computationally intensive operations for machine learning on Android devices."
+            // It was added in Android 8.1 and will be deprecated in Android 15
+            if (OperatingSystem.IsAndroid() && 
+                OperatingSystem.IsAndroidVersionAtLeast(8, 1) && // At least 8.1
+                !OperatingSystem.IsAndroidVersionAtLeast(15))    // At most 15
             {
-                // This will be deprecated in Android 15+
-                // EmguCV TF might be a good option here
+                // EmguCV TF might be a good option here instead
                 sessionOptions.AppendExecutionProvider_Nnapi();
             }
             else if (OperatingSystem.IsIOS() ||
