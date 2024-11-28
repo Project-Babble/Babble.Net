@@ -122,16 +122,13 @@ public class BabbleSettings
     /// </summary>
     public void Load()
     {
-        BabbleSettings config;
+        BabbleSettings? config = null;
         if (File.Exists(AppConfigFile))
         {
             var json = File.ReadAllText(AppConfigFile);
             config = JsonConvert.DeserializeObject<BabbleSettings>(json)!;
         }
-        else
-        {
-            config = new BabbleSettings();
-        }
+        config ??= new BabbleSettings();
 
         Version = config.Version;
         Cam = config.Cam;
