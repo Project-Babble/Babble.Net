@@ -2,7 +2,6 @@
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Settings;
 using Emgu.CV;
-using Meadow.Peripherals.Sensors.Cameras;
 
 namespace Babble.Tests.Decoders;
 

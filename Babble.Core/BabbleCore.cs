@@ -29,14 +29,14 @@ public partial class BabbleCore
     [MemberNotNullWhen(true, nameof(_platformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
     public bool IsRunning { get; private set; }
     
+    private Dictionary<string, CalibrationItem>? _calibrationItems;
     private PlatformConnector? _platformConnector;
     private InferenceSession? _session;
-    private Dictionary<string, CalibrationItem>? _calibrationItems;
     private OneEuroFilter? _floatFilter;
     private Stopwatch sw = Stopwatch.StartNew();
+    private Size _inputSize;
     private float _lastTime = 0;
     private string? _inputName;
-    private Size _inputSize;
     
     static BabbleCore()
     {

@@ -30,7 +30,7 @@ public class BabbleSettings
     {
         _propertyCache = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
         CacheProperties(GetType());
-        Version = 0;
+        Version = 1;
         CamDisplayId = 0;
         Cam = new CameraSettings();
         GeneralSettings = new GeneralSettings();

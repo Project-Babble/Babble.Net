@@ -39,8 +39,8 @@ public sealed class CameraSettings
         // Default ROI window to 256x256 (with no crop)
         RoiWindowX = 0;
         RoiWindowY = 0;
-        RoiWindowW = 256;
-        RoiWindowH = 256;
+        RoiWindowW = 0;
+        RoiWindowH = 0;
 
         // Default to first available camera
         CaptureSource = "0";
