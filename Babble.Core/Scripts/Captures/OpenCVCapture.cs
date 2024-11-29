@@ -34,10 +34,7 @@ public class OpenCVCapture : Capture
     /// <xlinka>
     /// Queries the dimensions (width, height) of the video feed frame within a 2-second timeout.
     /// </xlinka>
-    public override (int width, int height) Dimensions
-    {
-        get => _dimensions;
-    }
+    public override (int width, int height) Dimensions => _dimensions;
 
     private (int width, int height) _dimensions;
 

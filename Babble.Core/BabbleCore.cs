@@ -178,12 +178,9 @@ public partial class BabbleCore
         }
         
         // Test if the camera is not ready or connecting to new source
-        var data = PlatformConnector.ExtractFrameData(_inputSize);
-        if (data is null) return false;
-        if (data.Length == 0) return false;
+        if (!PlatformConnector.ExtractFrameData(_inputTensor.Buffer.Span, _inputSize)) return false;
 
         // Camera ready, prepare Mat as DenseTensor
-        data.AsSpan().CopyTo(_inputTensor.Buffer.Span);
         var inputs = new List<NamedOnnxValue>
         {
             NamedOnnxValue.CreateFromTensor(_inputName, _inputTensor)
@@ -230,52 +227,31 @@ public partial class BabbleCore
     /// <returns></returns>
     public bool GetRawImage(ColorType color, out byte[] image, out (int width, int height) dimensions)
     {
-        dimensions = (0, 0);
-        image = Array.Empty<byte>();
         if (PlatformConnector?.Capture!.RawMat is null)
         {
+            dimensions = (0, 0);
+            image = Array.Empty<byte>();
             return false;
         }
-        
-        // https://github.com/shimat/opencvsharp/issues/952
+
         dimensions = PlatformConnector.Capture.Dimensions;
-        switch (color)
+        if (color == ((PlatformConnector.Capture.RawMat.Channels() == 1) ? ColorType.GRAY_8 : ColorType.BGR_24))
         {
-            case ColorType.GRAY_8:
-            {
-                using var grayMat = new Mat();
-                Cv2.CvtColor(PlatformConnector.Capture.RawMat, grayMat, ColorConversionCodes.BGR2GRAY);
-                grayMat.GetArray(out image);
-                break;
-            }
-            case ColorType.BGR_24:
-            {
-                PlatformConnector.Capture.RawMat.GetArray<Vec3b>(out var pixels);
-                ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
-                image = new byte[pixels.Length * 3];
-                Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
-                break;
-            }
-            case ColorType.RGB_24:
-            {
-                using var rgbMat = new Mat();
-                Cv2.CvtColor(PlatformConnector.Capture.RawMat, rgbMat, ColorConversionCodes.BGR2RGB);
-                rgbMat.GetArray<Vec3b>(out var pixels);
-                ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
-                image = new byte[pixels.Length * 3];
-                Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
-                break;
-            }
-            case ColorType.RGBA_32:
-            {
-                using var rgbaMat = new Mat();
-                Cv2.CvtColor(PlatformConnector.Capture.RawMat, rgbaMat, ColorConversionCodes.BGR2RGBA);
-                rgbaMat.GetArray<Vec4b>(out var pixels);
-                ref var bytes = ref Unsafe.As<Vec4b, byte>(ref pixels[0]);
-                image = new byte[pixels.Length * 4];
-                Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
-                break;
-            }
+            image = PlatformConnector.Capture.RawMat.AsSpan<byte>().ToArray();
+        }
+        else
+        {
+            using var convertedMat = new Mat();
+            Cv2.CvtColor(PlatformConnector.Capture.RawMat, convertedMat, (PlatformConnector.Capture.RawMat.Channels() == 1) ? color switch {
+                ColorType.BGR_24 => ColorConversionCodes.GRAY2BGR,
+                ColorType.RGB_24 => ColorConversionCodes.GRAY2RGB,
+                ColorType.RGBA_32 => ColorConversionCodes.GRAY2RGBA,
+            } : color switch {
+                ColorType.GRAY_8 => ColorConversionCodes.BGR2GRAY,
+                ColorType.RGB_24 => ColorConversionCodes.BGR2RGB,
+                ColorType.RGBA_32 => ColorConversionCodes.BGR2RGBA,
+            });
+            image = convertedMat.AsSpan<byte>().ToArray();
         }
 
         return true;
@@ -288,18 +264,17 @@ public partial class BabbleCore
     /// <param name="image"></param>
     /// <param name="dimensions"></param>
     /// <returns></returns>
-    public bool GetImage(out byte[] image, out (int width, int height) dimensions)
+    public unsafe bool GetImage(out byte[]? image, out (int width, int height) dimensions)
     {
-        image = Array.Empty<byte>();
+        image = null;
         dimensions = (0, 0);
-        using var transformedImageCandidate = PlatformConnector?.TransformRawImage(_inputSize);
-        if (transformedImageCandidate is null) return false;
 
-        dimensions = (transformedImageCandidate.Width, transformedImageCandidate.Height);
-        transformedImageCandidate.GetArray(out image);
-        if (image is null) return false;
-        if (image.Length == 0) return false;
-        
+        byte[] data = new byte[_inputSize.Width * _inputSize.Height];
+        using var imageMat = Mat<byte>.FromPixelData(_inputSize.Height, _inputSize.Width, data);
+        if (PlatformConnector?.TransformRawImage(imageMat) != true) return false;
+
+        image = data;
+        dimensions = (imageMat.Width, imageMat.Height);
         return true;
     }
 
