@@ -321,9 +321,13 @@ public partial class BabbleCore
     /// </summary>
     private void ConfigurePlatformConnector()
     {
-        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+        if (OperatingSystem.IsAndroid())
         {
-            _platformConnector = new MobileConnector(Settings.Cam.CaptureSource);
+            _platformConnector = new AndroidConnector(Settings.Cam.CaptureSource);
+        } 
+        else if (OperatingSystem.IsIOS())
+        {
+            _platformConnector = new iOSConnector(Settings.Cam.CaptureSource);
         }
         else
         {

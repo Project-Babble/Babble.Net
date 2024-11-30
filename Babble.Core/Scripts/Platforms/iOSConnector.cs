@@ -6,9 +6,9 @@ namespace Babble.Core.Scripts.Decoders;
 /// Special class for iOS, Android and UWP platforms where EmguCV VideoCapture is not fully implemented
 /// Support for MJPEG video streams only presently!
 /// </summary>
-public class MobileConnector : PlatformConnector
+public class iOSConnector : PlatformConnector
 {
-    public MobileConnector(string Url) : base(Url)
+    public iOSConnector(string Url) : base(Url)
     {
     }
     
