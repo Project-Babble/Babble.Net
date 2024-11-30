@@ -1,5 +1,4 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
+﻿using OpenCvSharp;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -18,10 +17,10 @@ public class ImageCapture : Capture
         {
             if (File.Exists(Url))
             {
-                if (CvInvoke.HaveImageReader(Url))
+                if (Cv2.HaveImageReader(Url))
                 {
                     FrameCount++;
-                    return CvInvoke.Imread(Url, ImreadModes.Color);
+                    return Cv2.ImRead(Url, ImreadModes.Color);
                 }
             }
 
@@ -35,9 +34,9 @@ public class ImageCapture : Capture
         {
             if (File.Exists(Url))
             {
-                if (CvInvoke.HaveImageReader(Url))
+                if (Cv2.HaveImageReader(Url))
                 {
-                    var mat = CvInvoke.Imread(Url, ImreadModes.Color);
+                    var mat = Cv2.ImRead(Url, ImreadModes.Color);
                     return (mat.Width, mat.Height);
                 }
             }

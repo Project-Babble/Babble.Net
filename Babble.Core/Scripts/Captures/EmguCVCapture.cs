@@ -1,7 +1,5 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using OpenCvSharp;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -90,10 +88,10 @@ public class EmguCVCapture : Capture
             }
         }
 
-        _videoCapture.Start();
-        _videoCapture.ImageGrabbed += VideoCapture_ImageGrabbed;
+        // _videoCapture.Start();
+        // _videoCapture.ImageGrabbed += VideoCapture_ImageGrabbed;
 
-        IsReady = _videoCapture.IsOpened;
+        IsReady = _videoCapture.IsOpened();
         return IsReady;
     }
 
@@ -124,11 +122,12 @@ public class EmguCVCapture : Capture
         if (_videoCapture is null)
             return false;
 
-        _videoCapture.ImageGrabbed -= VideoCapture_ImageGrabbed;
+        // _videoCapture.ImageGrabbed -= VideoCapture_ImageGrabbed;
 
         // Don't call _videoCapture.Dispose or Release here, it will crash us
         IsReady = false;
-        _videoCapture.Stop();
+        _videoCapture.Release();
+        _videoCapture.Dispose();
         _videoCapture = null;
         return true;
     }

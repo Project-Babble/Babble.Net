@@ -4,18 +4,15 @@ using Babble.Core.Scripts.Config;
 using Babble.Core.Scripts.Decoders;
 using Babble.Core.Scripts.EmguCV;
 using Babble.Core.Settings;
-using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using Newtonsoft.Json;
 using NReco.Logging.File;
+using OpenCvSharp;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 using System.Reflection;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Babble.Core;
 
@@ -35,7 +32,7 @@ public partial class BabbleCore
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
     private Stopwatch sw = Stopwatch.StartNew();
-    private Size _inputSize;
+    private Size _inputSize = new Size(256, 256);
     private float _lastTime = 0;
     private string? _inputName;
     
@@ -153,8 +150,8 @@ public partial class BabbleCore
 
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
-        int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
-        _inputSize = new(dimensions[2], dimensions[3]);
+        //int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
+        //_inputSize = new(dimensions[2], dimensions[3]);
         IsRunning = true;
 
 
@@ -235,17 +232,15 @@ public partial class BabbleCore
         }
 
         dimensions = _platformConnector.Capture.Dimensions;
-        if (_platformConnector.Capture.RawMat.NumberOfChannels == 3)
+        if (_platformConnector.Capture.RawMat.Channels() == 3)
         {
             using var grayMat = new Mat();
-            CvInvoke.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversion.Bgr2Gray);
-            image = grayMat.GetRawData();
-            return true;
+            Cv2.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversionCodes.BGR2GRAY);
+            return grayMat.GetArray(out image);
         }
-        if (_platformConnector.Capture.RawMat.NumberOfChannels == 1)
+        if (_platformConnector.Capture.RawMat.Channels() == 1)
         {
-            image = _platformConnector.Capture.RawMat.GetRawData();
-            return true;
+            return _platformConnector.Capture.RawMat.GetArray(out image);
         }
 
         return false;
@@ -266,7 +261,7 @@ public partial class BabbleCore
         if (transformedImageCandidate is null) return false;
 
         dimensions = (transformedImageCandidate.Width, transformedImageCandidate.Height);
-        image = transformedImageCandidate.GetRawData();
+        transformedImageCandidate.GetArray(out image);
         if (image is null) return false;
         if (image.Length == 0) return false;
         

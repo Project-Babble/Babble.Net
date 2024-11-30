@@ -27,11 +27,11 @@
 	<ItemGroup>
 	  <PackageReference Include="Avalonia.Desktop" Version="11.2.1" />
 	  <PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.2.1" />
-	  <PackageReference Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />
 	  <PackageReference Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.20.1" />
 	  <PackageReference Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="Emgu.CV.runtime.mini.macos" Version="4.9.0.5494" />
 	  <PackageReference Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
 	  <PackageReference Condition="$([MSBuild]::IsOSPlatform('Linux'))" Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.20.1" />
+	  <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20241108" />
 	</ItemGroup>
 
 

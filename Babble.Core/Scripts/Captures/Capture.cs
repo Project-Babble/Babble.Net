@@ -1,5 +1,4 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
+﻿using OpenCvSharp;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -17,7 +16,7 @@ public abstract class Capture
     /// <summary>
     /// Empty frame, used when data is bad and we need to return something
     /// </summary>
-    protected virtual Mat EmptyMat => Mat.Zeros(DefaultFrameDimensions.width, DefaultFrameDimensions.height, DepthType.Cv8U, 3);
+    protected virtual Mat EmptyMat => Mat.Zeros(DefaultFrameDimensions.width, DefaultFrameDimensions.height, MatType.CV_8U, 3);
 
     public abstract string Url { get; set; }
 

@@ -1,7 +1,4 @@
-﻿using Babble.Core.Scripts.EmguCV;
-using Emgu.CV.CvEnum;
-using Emgu.CV;
-using System.Drawing;
+﻿using OpenCvSharp;
 
 namespace Babble.Core.Scripts.Decoders;
 
@@ -41,7 +38,7 @@ public abstract class PlatformConnector
     /// Converts Capture.Frame into something Babble can understand
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public float[] ExtractFrameData(Size size)
+    public unsafe float[] ExtractFrameData(Size size)
     {
         if (Capture is null)
         {
@@ -55,10 +52,10 @@ public abstract class PlatformConnector
         {
             return Array.Empty<float>();
         }
-        if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
-        {
-            return Array.Empty<float>();
-        }
+        //if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
+        //{
+        //    return Array.Empty<float>();
+        //}
         if (Capture.FrameCount == _lastFrameCount)
         {
             return Array.Empty<float>();
@@ -69,13 +66,13 @@ public abstract class PlatformConnector
         using Mat resultMat = TransformRawImage(size);
 
         using var finalMat = new Mat();
-        resultMat.ConvertTo(finalMat, DepthType.Cv32F);
+        resultMat.ConvertTo(finalMat, MatType.CV_32F);
 
         // Convert to float array and normalize
-        float[] floatArray = new float[finalMat.Height * finalMat.Width];
-        finalMat.CopyTo(floatArray);
+        // float[] floatArray = new float[finalMat.Height * finalMat.Width];
+        finalMat.GetArray<float>(out var floatArray);
 
-        // Normalize pixel values to [0, 1]
+        // Normalize pixel values to [0, 1]?
         for (int i = 0; i < floatArray.Length; i++)
         {
             floatArray[i] /= 255f;
@@ -84,13 +81,13 @@ public abstract class PlatformConnector
         return floatArray;
     }
     
-    public Mat TransformRawImage(Size size)
+    public unsafe Mat TransformRawImage(Size size)
     {
         // If this method is called from above, then the below checks don't apply
         // We need this in case we poll from Babble.Core.cs, in which the developer
         // Just wants the frame data, not expression data
 
-        var emptyMat = Mat.Zeros(0, 0, DepthType.Cv8U, 1);
+        var emptyMat = Mat.Zeros(0, 0, MatType.CV_8U, 1);
         if (Capture is null)
         {
             return emptyMat;
@@ -103,10 +100,10 @@ public abstract class PlatformConnector
         {
             return emptyMat;
         }
-        if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
-        {
-            return emptyMat;
-        }
+        //if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
+        //{
+        //    return emptyMat;
+        //}
 
         var settings = BabbleCore.Instance.Settings;
         var camSettings = settings.Cam;
@@ -152,14 +149,14 @@ public abstract class PlatformConnector
         }
 
         Mat sourceMat = Capture.RawMat, resultMat = new Mat(sourceMat, (roiX == 0 || roiY == 0 || roiWidth == 0 || roiHeight == 0 ||
-            roiWidth == sourceMat.Width || roiHeight == sourceMat.Height) ? new(0, 0, sourceMat.Width, sourceMat.Height) : new(roiX, roiY, roiWidth, roiHeight));
-        if (resultMat.NumberOfChannels >= 2)
+            roiWidth == sourceMat.Width || roiHeight == sourceMat.Height) ? new Rect(0, 0, sourceMat.Width, sourceMat.Height) : new Rect(roiX, roiY, roiWidth, roiHeight));
+        if (resultMat.Channels() >= 2)
         {
             var newMat = new Mat();
             if (useRedChannel)
-                CvInvoke.ExtractChannel(resultMat, newMat, 0);
+                Cv2.ExtractChannel(resultMat, newMat, 0);
             else
-                CvInvoke.CvtColor(resultMat, newMat, ColorConversion.Bgr2Gray);
+                Cv2.CvtColor(resultMat, newMat, ColorConversionCodes.BGR2GRAY);
             resultMat.Dispose();
             resultMat = newMat;
         }
@@ -171,26 +168,26 @@ public abstract class PlatformConnector
                 double scale = 1.0 / (Math.Abs(cos) + Math.Abs(sin));
                 double hscale = (camSettings.GuiHorizontalFlip ? -1.0 : 1.0) * scale;
                 double vscale = (camSettings.GuiVerticalFlip ? -1.0 : 1.0) * scale;
-                using var matrix = new Mat(2, 3, DepthType.Cv64F, 1);
-                Span<double> data = matrix.GetSpan<double>(6);
+                using var matrix = new Mat(2, 3, MatType.CV_64F);
+                matrix.GetArray<double>(out var data);
                 data[0] = (double)size.Width / (double)resultMat.Width * cos * hscale;
                 data[1] = (double)size.Height / (double)resultMat.Height * sin * hscale;
                 data[2] = ((double)size.Width - ((double)size.Width * cos + (double)size.Height * sin) * hscale) * 0.5;
                 data[3] = -(double)size.Width / (double)resultMat.Width * sin * vscale;
                 data[4] = (double)size.Height / (double)resultMat.Height * cos * vscale;
                 data[5] = ((double)size.Height + ((double)size.Width * sin - (double)size.Height * cos) * vscale) * 0.5;
-                CvInvoke.WarpAffine(resultMat, newMat, matrix, size);
+                Cv2.WarpAffine(resultMat, newMat, matrix, size);
             }
             else
             {
-                CvInvoke.Resize(resultMat, newMat, size);
+                Cv2.Resize(resultMat, newMat, size);
             }
             resultMat.Dispose();
             resultMat = newMat;
         }
 
         // Verify That the matrix is in continuous memory layout - xlinka
-        if (!resultMat.IsContinuous) {
+        if (!resultMat.IsContinuous()) {
             resultMat.Dispose();
             throw new InvalidOperationException("Image Matrix is not continuous in memory layout");
         }

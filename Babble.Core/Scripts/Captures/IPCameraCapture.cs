@@ -1,6 +1,5 @@
-using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Microsoft.Extensions.Logging;
+using OpenCvSharp;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -154,7 +153,7 @@ public class IPCameraCapture : Capture
                     try
                     {
                         FrameCount++;
-                        CvInvoke.Imdecode(TrimEnd(frameBuffer), ImreadModes.Color, RawMat);
+                        Mat.FromImageData(TrimEnd(frameBuffer)).CopyTo(RawMat);
                     }
                     catch (Exception e)
                     {
