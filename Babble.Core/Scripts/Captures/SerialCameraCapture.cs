@@ -1,7 +1,5 @@
-﻿using Emgu.CV.CvEnum;
-using Emgu.CV.Util;
-using Emgu.CV;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using OpenCvSharp;
 using System.Buffers.Binary;
 using System.IO.Ports;
 using System.Numerics;
@@ -91,17 +89,19 @@ public class SerialCameraCapture : Capture, IDisposable
                 BinaryPrimitives.WriteUInt16LittleEndian(buffer, 0xd8ff);
                 for (int bufferPosition = 2; bufferPosition < jpegSize;)
                     bufferPosition += await stream.ReadAsync(buffer, bufferPosition, jpegSize - bufferPosition);
-                using (var nativeBuffer = new VectorOfByte(new Span<byte>(buffer, 0, jpegSize)))
-                {
-                    CvInvoke.Imdecode(nativeBuffer, ImreadModes.Color, RawMat);
-                }
+                Mat.FromImageData(buffer, ImreadModes.Color).CopyTo(RawMat);
                 FrameCount++;
             }
         }
+        catch (ObjectDisposedException ex)
+        {
+            // Handle when the device is unplugged
+            StopCapture();
+            Dispose();
+
+        }
         catch (Exception ex)
         {
-            if (ex is ObjectDisposedException)
-                return;
             BabbleCore.Instance.Logger.LogError($"Error reading frame on port {Url}: {ex.Message}");
             StopCapture();
         }

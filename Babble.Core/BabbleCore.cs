@@ -2,20 +2,18 @@
 using Babble.Core.Scripts;
 using Babble.Core.Scripts.Config;
 using Babble.Core.Scripts.Decoders;
-using Babble.Core.Scripts.EmguCV;
 using Babble.Core.Settings;
-using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
 using NReco.Logging.File;
+using OpenCvSharp;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 using System.Reflection;
-using static System.Net.Mime.MediaTypeNames;
+using System.Runtime.CompilerServices;
 
 namespace Babble.Core;
 
@@ -35,7 +33,8 @@ public partial class BabbleCore
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
     private Stopwatch sw = Stopwatch.StartNew();
-    private Size _inputSize;
+    private Size _inputSize = new Size(256, 256);
+    private DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
     private float _lastTime = 0;
     private string? _inputName;
     
@@ -153,8 +152,8 @@ public partial class BabbleCore
 
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
-        int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
-        _inputSize = new(dimensions[2], dimensions[3]);
+        //int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
+        //_inputSize = new(dimensions[2], dimensions[3]);
         IsRunning = true;
 
 
@@ -181,10 +180,10 @@ public partial class BabbleCore
         if (data.Length == 0) return false;
 
         // Camera ready, prepare Mat as DenseTensor
-        var inputTensor = TensorUtils.PreprocessFrame(data);
+        data.AsSpan().CopyTo(_inputTensor.Buffer.Span);
         var inputs = new List<NamedOnnxValue>
         {
-            NamedOnnxValue.CreateFromTensor(_inputName, inputTensor)
+            NamedOnnxValue.CreateFromTensor(_inputName, _inputTensor)
         };
 
         // Run inference!
@@ -220,12 +219,12 @@ public partial class BabbleCore
 
     /// <summary>
     /// Gets the pre-transform lip image for this frame
-    /// This image will be (dimensions.width)px * (dimensions.height)px, Rgb888x
+    /// This image will be (dimensions.width)px * (dimensions.height)px in provided ColorType
     /// </summary>
     /// <param name="image"></param>
     /// <param name="dimensions"></param>
     /// <returns></returns>
-    public bool GetRawImage(out byte[] image, out (int width, int height) dimensions)
+    public bool GetRawImage(ColorType color, out byte[] image, out (int width, int height) dimensions)
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
@@ -233,22 +232,43 @@ public partial class BabbleCore
         {
             return false;
         }
-
+        
+        // https://github.com/shimat/opencvsharp/issues/952
         dimensions = _platformConnector.Capture.Dimensions;
-        if (_platformConnector.Capture.RawMat.NumberOfChannels == 3)
+        if (color == ColorType.GRAY_8)
         {
             using var grayMat = new Mat();
-            CvInvoke.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversion.Bgr2Gray);
-            image = grayMat.GetRawData();
-            return true;
+            Cv2.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversionCodes.BGR2GRAY);
+            grayMat.GetArray(out image);
         }
-        if (_platformConnector.Capture.RawMat.NumberOfChannels == 1)
+        else if (color == ColorType.BGR_24)
         {
-            image = _platformConnector.Capture.RawMat.GetRawData();
-            return true;
+            _platformConnector.Capture.RawMat.GetArray<Vec3b>(out var pixels);
+            ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
+            image = new byte[pixels.Length * 3];
+            Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
+        }       
+        else if (color == ColorType.RGB_24)
+        {
+            using var rgbMat = new Mat();
+            Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbMat, ColorConversionCodes.BGR2RGB);
+            rgbMat.GetArray<Vec3b>(out var pixels);
+            ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
+            image = new byte[pixels.Length * 3];
+            Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
+
+        }
+        else if (color == ColorType.RGBA_32)
+        {
+            using var rgbaMat = new Mat();
+            Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbaMat, ColorConversionCodes.BGR2RGBA);
+            rgbaMat.GetArray<Vec4b>(out var pixels);
+            ref var bytes = ref Unsafe.As<Vec4b, byte>(ref pixels[0]);
+            image = new byte[pixels.Length * 4];
+            Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
         }
 
-        return false;
+        return true;
     }
 
     /// <summary>
@@ -260,13 +280,13 @@ public partial class BabbleCore
     /// <returns></returns>
     public bool GetImage(out byte[] image, out (int width, int height) dimensions)
     {
-        dimensions = (0, 0);
         image = Array.Empty<byte>();
+        dimensions = (0, 0);
         using var transformedImageCandidate = _platformConnector?.TransformRawImage(_inputSize);
         if (transformedImageCandidate is null) return false;
 
         dimensions = (transformedImageCandidate.Width, transformedImageCandidate.Height);
-        image = transformedImageCandidate.GetRawData();
+        transformedImageCandidate.GetArray(out image);
         if (image is null) return false;
         if (image.Length == 0) return false;
         
@@ -346,33 +366,56 @@ public partial class BabbleCore
     private void ConfigurePlatformSpecificGPU(SessionOptions sessionOptions)
     {
         sessionOptions.AppendExecutionProvider_CPU();
-        if (Settings.GeneralSettings.GuiUseGpu)
+        if (!Settings.GeneralSettings.GuiUseGpu)
         {
-            // "The Android Neural Networks API (NNAPI) is an Android C API designed for
-            // running computationally intensive operations for machine learning on Android devices."
-            // It was added in Android 8.1 and will be deprecated in Android 15
-            if (OperatingSystem.IsAndroid() && 
-                OperatingSystem.IsAndroidVersionAtLeast(8, 1) && // At least 8.1
-                !OperatingSystem.IsAndroidVersionAtLeast(15))    // At most 15
+            return;
+        }
+
+        var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
+
+        // "The Android Neural Networks API (NNAPI) is an Android C API designed for
+        // running computationally intensive operations for machine learning on Android devices."
+        // It was added in Android 8.1 and will be deprecated in Android 15
+        if (OperatingSystem.IsAndroid() &&
+            OperatingSystem.IsAndroidVersionAtLeast(8, 1) && // At least 8.1
+            !OperatingSystem.IsAndroidVersionAtLeast(15))    // At most 15
+        {
+            sessionOptions.AppendExecutionProvider_Nnapi();
+        }
+        else if (OperatingSystem.IsIOS() ||
+                 OperatingSystem.IsMacCatalyst() ||
+                 OperatingSystem.IsMacOS() ||
+                 OperatingSystem.IsWatchOS() ||
+                 OperatingSystem.IsTvOS())
+        {
+            sessionOptions.AppendExecutionProvider_CoreML();
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            // If DirectML is supported on the user's system, try using it first.
+            // This has support for both AMD and Nvidia GPUs, and uses less memory in my testing
+            try
             {
-                // EmguCV TF might be a good option here instead
-                sessionOptions.AppendExecutionProvider_Nnapi();
+                sessionOptions.AppendExecutionProvider_DML(gpuIndex);
+                return;
             }
-            else if (OperatingSystem.IsIOS() ||
-                     OperatingSystem.IsMacCatalyst() ||
-                     OperatingSystem.IsMacOS() ||
-                     OperatingSystem.IsWatchOS() ||
-                     OperatingSystem.IsTvOS())
+            catch { }
+
+            // If the user's system does not support DirectML (for whatever reason,
+            // it's shipped with Windows 10, version 1903(10.0; Build 18362)+
+            // Fallback on good ol' CUDA
+            try
             {
-                sessionOptions.AppendExecutionProvider_CoreML();
-            }
-            // Replace Microsoft.ML.OnnxRuntime with Microsoft.ML.OnnxRuntime.Gpu for Desktop builds.
-            // TODO: Add this to .csproj?
-            else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
-            {
-                var gpuIndex = Settings.GeneralSettings.GuiGpuIndex;
                 sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+                return;
             }
+            catch { }
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            // This will crash Linux users without Nvidia GPUs.
+            // TODO: Fix this!
+            sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
         }
     }
 }

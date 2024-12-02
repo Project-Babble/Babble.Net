@@ -3,7 +3,7 @@ using Android.Content.PM;
 using Android.OS;
 using Avalonia;
 using Avalonia.Android;
-using Emgu.CV;
+using OpenCvSharp;
 using static Android.OS.PowerManager;
 
 namespace Babble.Avalonia.Android;
@@ -21,8 +21,6 @@ public class MainActivity : AvaloniaMainActivity<App>
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
-        CvInvokeAndroid.Init();
-
         _pmanager = (PowerManager)GetSystemService(PowerService)!;
         _wakelock = _pmanager.NewWakeLock(WakeLockFlags.Partial, "babble-app")!;
         _wakelock.SetReferenceCounted(false);

@@ -10,6 +10,7 @@
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
 	<UseMaui>true</UseMaui>
+	<Configurations>Debug;Release;Windows</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,8 +21,8 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" Version="11.2.1" />
-    <PackageReference Include="Emgu.CV.runtime.maui.mini.android" Version="4.9.0.5494" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
+    <PackageReference Include="Sdcb.OpenCvSharp4.mini.runtime.android-arm64" Version="4.8.0.20230708" />
     <PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.5.1" />
     <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.4.5.1" />
     <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.13" />

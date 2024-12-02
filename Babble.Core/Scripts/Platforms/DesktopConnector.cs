@@ -8,7 +8,10 @@ public class DesktopConnector : PlatformConnector
     private static readonly HashSet<string> SerialConnections 
         = new(StringComparer.OrdinalIgnoreCase) { "com" };
 
-    private static readonly HashSet<string> IPConnections 
+    private static readonly HashSet<string> IPConnectionsPrefixes
+    = new(StringComparer.OrdinalIgnoreCase) { "http", };
+
+    private static readonly HashSet<string> IPConnectionsSuffixes
         = new(StringComparer.OrdinalIgnoreCase) { "local", "local/" };
 
     private static readonly HashSet<string> ImageConnections 
@@ -27,14 +30,15 @@ public class DesktopConnector : PlatformConnector
         {
             Capture = new SerialCameraCapture(Url);
         }
-        else if (ImageConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
-        {
-            Capture = new ImageCapture(Url);
-        }
+        //else if (IPConnectionsPrefixes.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
+        //         IPConnectionsSuffixes.Any(suffix => Url.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))))
+        //{
+        //    Capture = new IPCameraCapture(Url);
+        //}
         else
         {
             // TODO: Fix the IP Camera thingy in this lmao
-            Capture = new EmguCVCapture(Url); 
+            Capture = new OpenCVCapture(Url); 
         }
 
         Capture.StartCapture();

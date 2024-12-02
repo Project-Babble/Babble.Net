@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-	  <TargetFrameworks>net8.0-android34.0;net8.0-windows10.0.19041.0;net8.0-maccatalyst;net8.0;net8.0-ios11.0</TargetFrameworks>
+	  <TargetFrameworks>net8.0-android34.0;net8.0-windows10.0.19041.0;net8.0-maccatalyst;net8.0;net8.0-ios18.0</TargetFrameworks>
+	  <Configurations>Debug;Release;Windows</Configurations>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
 	  <TargetFrameworks>net8.0</TargetFrameworks>
@@ -17,12 +18,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Emgu.CV" Version="4.9.0.5494">
-      <TreatAsUsed>true</TreatAsUsed>
-    </PackageReference>
-    <PackageReference Include="Emgu.CV.Bitmap" Version="4.9.0.5494">
-      <TreatAsUsed>true</TreatAsUsed>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
@@ -44,6 +39,7 @@
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.20.1" />
     <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="4.0.0" />
     <PackageReference Include="NReco.Logging.File" Version="1.2.2" />
+    <PackageReference Include="OpenCvSharp4" Version="4.10.0.20241108" />
     <PackageReference Include="System.IO.Ports" Version="9.0.0" />
     <PackageReference Include="System.Resources.Extensions" Version="9.0.0">
       <TreatAsUsed>true</TreatAsUsed>
