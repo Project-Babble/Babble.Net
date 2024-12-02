@@ -6,4 +6,4 @@
 	url = https://github.com/TigersUniverse/VRCFaceTracking
 [submodule "DesktopNotifications"]
 	path = DesktopNotifications
-	url = https://github.com/pr8x/DesktopNotifications.git
+	url = https://github.com/pr8x/DesktopNotifications

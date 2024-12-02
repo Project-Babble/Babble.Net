@@ -2,15 +2,14 @@
 using Babble.Core.Scripts;
 using Babble.Core.Scripts.Config;
 using Babble.Core.Scripts.Decoders;
-using Babble.Core.Scripts.EmguCV;
 using Babble.Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
 using NReco.Logging.File;
 using OpenCvSharp;
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -35,6 +34,7 @@ public partial class BabbleCore
     private OneEuroFilter? _floatFilter;
     private Stopwatch sw = Stopwatch.StartNew();
     private Size _inputSize = new Size(256, 256);
+    private DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
     private float _lastTime = 0;
     private string? _inputName;
     
@@ -180,10 +180,10 @@ public partial class BabbleCore
         if (data.Length == 0) return false;
 
         // Camera ready, prepare Mat as DenseTensor
-        var inputTensor = TensorUtils.PreprocessFrame(data);
+        data.AsSpan().CopyTo(_inputTensor.Buffer.Span);
         var inputs = new List<NamedOnnxValue>
         {
-            NamedOnnxValue.CreateFromTensor(_inputName, inputTensor)
+            NamedOnnxValue.CreateFromTensor(_inputName, _inputTensor)
         };
 
         // Run inference!

@@ -1,9 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+	  <TargetFrameworks>net8.0-windows10.0.19041.0;</TargetFrameworks>
+	  <Configurations>Debug;Release;Windows</Configurations>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+	  <TargetFrameworks>net8.0</TargetFrameworks>
+	  <Configurations>Debug;Release</Configurations>
+	</PropertyGroup>
+	
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
     One for Windows with net8.0-windows TFM, one for MacOS with net8.0-macos and one with net8.0 TFM for Linux.-->
-    <TargetFramework>net8.0</TargetFramework>
+	
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -12,8 +21,22 @@
     <PackageProjectUrl>https://github.com/Project-Babble/ProjectBabble</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Project-Babble/ProjectBabble</RepositoryUrl>
     <RepositoryType>git</RepositoryType>	
-    <ApplicationIcon>IconOpaque_32x32.ico</ApplicationIcon>
+    <ApplicationIcon>IconOpaque_32x32.ico</ApplicationIcon>	
+    <Configurations>Debug;Release;Windows</Configurations>	
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>	
+    <StartupObject>Babble.Avalonia.Desktop.Program</StartupObject>	
+    <Title>Babble App</Title>	
+    <Authors>dfgHiatus</Authors>	
+    <Company>Paradigm Enhancement Reality Labs</Company>	
+    <Product>Babble App</Product>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <AvaloniaXaml Remove="Notifications\**" />
+    <Compile Remove="Notifications\**" />
+    <EmbeddedResource Remove="Notifications\**" />
+    <None Remove="Notifications\**" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="IconOpaque_32x32.ico" />
   </ItemGroup>
@@ -35,8 +58,8 @@
 	  <!-- Add Linux runtimes here! -->
 	</ItemGroup>
 
-
   <ItemGroup>
     <ProjectReference Include="..\Babble.Avalonia\Babble.Avalonia.csproj" />
+    <ProjectReference Include="..\DesktopNotifications\DesktopNotifications.Avalonia\DesktopNotifications.Avalonia.csproj" />
   </ItemGroup>
 </Project>

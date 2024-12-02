@@ -1,8 +1,8 @@
-﻿using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Localizer.Core;
 using Avalonia.Markup.Xaml;
-using Avalonia;
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
@@ -13,11 +13,22 @@ using VRCFaceTracking;
 using VRCFaceTracking.Core.Library;
 using VRCFaceTracking.Core.Params.Data;
 using VRCFaceTracking.Core.Services;
-
 namespace Babble.Avalonia;
 
 public partial class App : Application
 {
+    // Platform-agnostic Notification representation.
+    // Implementers can subscribe to this Action when a notification is to be raised
+    // Ex: SendNotification.Invoke("Title", "Body", string.Empty, string.Empty, null, null, null);
+    public static event Action<                      
+        string?,                                     // Title
+        string?,                                     // Body
+        string?,                                     // Body Image Path 
+        string,                                      // Body Alt. Text
+        List<(string Title, string ActionId)?>,      // Action Buttons
+        DateTimeOffset?,                             // Optional: Scheduled time to send Notification
+        DateTimeOffset?> SendNotification;           // Optional: Expiration time for sent Notification
+
     private MainIntegrated _mainIntegrated = null!;
     private BabbleOSC _babbleOSC = null!;
 
@@ -42,7 +53,6 @@ public partial class App : Application
         var mutator = new UnifiedTrackingMutator(mutatorLogger, settings);
         _mainIntegrated = new MainIntegrated(loggerFactory, libManager, mutator);
         Task.Run(async () => await _mainIntegrated.InitializeAsync());
-        ParameterSenderService.AllParametersRelevant = true;
 
         // Setup custom OSC handler
         var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
