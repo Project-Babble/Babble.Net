@@ -31,9 +31,13 @@ class Program
         }
 
         App.SendNotification += NotificationRequested;
-        _notificationManager.NotificationActivated += OnNotificationActivated;
-        _notificationManager.NotificationDismissed += OnNotificationDismissed;
 
+        if (_notificationManager is not null)
+        {
+            _notificationManager.NotificationActivated += OnNotificationActivated;
+            _notificationManager.NotificationDismissed += OnNotificationDismissed;
+        }
+        
         return builder.StartWithClassicDesktopLifetime(args);
     }
 
