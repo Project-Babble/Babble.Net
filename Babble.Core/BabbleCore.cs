@@ -231,7 +231,7 @@ public partial class BabbleCore
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
-        if (_platformConnector?.Capture.RawMat is null)
+        if (_platformConnector?.Capture!.RawMat is null)
         {
             return false;
         }
@@ -328,7 +328,6 @@ public partial class BabbleCore
         var sessionOptions = new SessionOptions();
         sessionOptions.InterOpNumThreads = 1;
         sessionOptions.IntraOpNumThreads = Math.Clamp(Settings.GeneralSettings.GuiInferenceThreads, 0, 2);
-        // sessionOptions.ExecutionMode = ExecutionMode.ORT_PARALLEL; // Hmm
         sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
         // ~3% savings worth ~6ms avg latency. Not noticeable at 60fps?
         sessionOptions.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");  
@@ -348,10 +347,6 @@ public partial class BabbleCore
         {
             _platformConnector = new AndroidConnector(Settings.Cam.CaptureSource);
         } 
-        else if (OperatingSystem.IsIOS())
-        {
-            _platformConnector = new iOSConnector(Settings.Cam.CaptureSource);
-        }
         else
         {
             // Else, for WinUI, macOS, watchOS, MacCatalyst, tvOS, Tizen, etc...
