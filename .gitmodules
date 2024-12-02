@@ -3,7 +3,7 @@
 	url = https://github.com/benaclejames/SimpleRustOSC
 [submodule "VRCFaceTracking"]
 	path = VRCFaceTracking
-	url = https://github.com/TigersUniverse/VRCFaceTracking
+	url = https://github.com/dfgHiatus/VRCFaceTracking
 [submodule "DesktopNotifications"]
 	path = DesktopNotifications
-	url = https://github.com/pr8x/DesktopNotifications
+	url = https://github.com/dfgHiatus/DesktopNotifications
