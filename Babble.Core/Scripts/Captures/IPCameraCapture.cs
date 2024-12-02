@@ -12,7 +12,7 @@ namespace Babble.Core.Scripts.Decoders;
 /// https://stackoverflow.com/questions/3801275/how-to-convert-image-to-byte-array
 /// </summary>
 public class IPCameraCapture : Capture
-{
+{ 
     public override (int width, int height) Dimensions 
     {
         get
@@ -21,7 +21,8 @@ public class IPCameraCapture : Capture
             var y = BabbleCore.Instance.Settings.GeneralSettings.GuiCamResolutionY;
             if (x > 0 && y > 0)
             {
-                // Support custom IP camera resolutions
+                // Support custom IP camera resolutions.
+                // This must be set by the user, we need res to create the Mat below
                 return (x, y);
             }
             else
@@ -153,7 +154,7 @@ public class IPCameraCapture : Capture
                     try
                     {
                         FrameCount++;
-                        Mat.FromImageData(TrimEnd(frameBuffer)).CopyTo(RawMat);
+                        Mat.FromImageData(TrimEnd(frameBuffer), ImreadModes.Color).CopyTo(RawMat);
                     }
                     catch (Exception e)
                     {

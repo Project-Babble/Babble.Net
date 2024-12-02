@@ -16,7 +16,7 @@ public abstract class Capture
     /// <summary>
     /// Empty frame, used when data is bad and we need to return something
     /// </summary>
-    protected virtual Mat EmptyMat => Mat.Zeros(DefaultFrameDimensions.width, DefaultFrameDimensions.height, MatType.CV_8U, 3);
+    protected virtual Mat EmptyMat => Mat.Zeros(DefaultFrameDimensions.width, DefaultFrameDimensions.height, MatType.CV_32F, 3);
 
     public abstract string Url { get; set; }
 
@@ -24,7 +24,7 @@ public abstract class Capture
 
     /// <summary>
     /// Represents the incoming frame data for this capture source. 
-    /// Can be any dimension, BGR color space
+    /// Will be `dimension` in BGR color space
     /// </summary>
     public abstract Mat RawMat { get;  }
 

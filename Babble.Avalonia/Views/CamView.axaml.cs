@@ -11,6 +11,7 @@ using Babble.Avalonia.ReactiveObjects;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.Scripts.Enums;
 using Babble.Core;
+using Babble.Core.Enums;
 using System.Runtime.InteropServices;
 
 namespace Babble.Avalonia;
@@ -192,15 +193,18 @@ public partial class CamView : UserControl, IIsVisible
         if (!BabbleCore.Instance.IsRunning) return;
 
         bool valid;
+        bool useColor;
         byte[] image;
         (int width, int height) dims;
         switch (camViewMode)
         {
             case CamViewMode.Tracking:
+                useColor = false;
                 valid = BabbleCore.Instance.GetImage(out image, out dims);
                 break;
             case CamViewMode.Cropping:
-                valid = BabbleCore.Instance.GetRawImage(out image, out dims);
+                useColor = true;
+                valid = BabbleCore.Instance.GetRawImage(ColorType.BGR_24, out image, out dims);
                 break;
             default:
                 return;
@@ -208,7 +212,8 @@ public partial class CamView : UserControl, IIsVisible
 
         if (valid && Visible)
         {
-            if (dims.width == 0 || dims.height == 0 || image is null)
+            if (dims.width == 0 || dims.height == 0 || image is null || 
+                double.IsNaN(MouthWindow.Width) || double.IsNaN(MouthWindow.Height))
             {
                 MouthWindow.Width = 0;
                 MouthWindow.Height = 0;
@@ -229,7 +234,7 @@ public partial class CamView : UserControl, IIsVisible
                 _viewModel.MouthBitmap = new WriteableBitmap(
                     new PixelSize(dims.width, dims.height),
                     new Vector(96, 96),
-                    PixelFormats.Gray8,
+                    useColor ? PixelFormats.Bgr24 : PixelFormats.Gray8,
                     AlphaFormat.Opaque);
             }
 

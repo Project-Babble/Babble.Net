@@ -52,10 +52,10 @@ public abstract class PlatformConnector
         {
             return Array.Empty<float>();
         }
-        //if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
-        //{
-        //    return Array.Empty<float>();
-        //}
+        if (Capture.RawMat.DataPointer == null) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
+        {
+            return Array.Empty<float>();
+        }
         if (Capture.FrameCount == _lastFrameCount)
         {
             return Array.Empty<float>();
@@ -87,7 +87,7 @@ public abstract class PlatformConnector
         // We need this in case we poll from Babble.Core.cs, in which the developer
         // Just wants the frame data, not expression data
 
-        var emptyMat = Mat.Zeros(0, 0, MatType.CV_8U, 1);
+        var emptyMat = Mat.Zeros(0, 0);
         if (Capture is null)
         {
             return emptyMat;
@@ -100,10 +100,10 @@ public abstract class PlatformConnector
         {
             return emptyMat;
         }
-        //if (Capture.RawMat.DataPointer == IntPtr.Zero) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
-        //{
-        //    return emptyMat;
-        //}
+        if (Capture.RawMat.DataPointer == null) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
+        {
+            return emptyMat;
+        }
 
         var settings = BabbleCore.Instance.Settings;
         var camSettings = settings.Cam;
@@ -180,7 +180,14 @@ public abstract class PlatformConnector
             }
             else
             {
-                Cv2.Resize(resultMat, newMat, size);
+                try
+                {
+                    Cv2.Resize(resultMat, newMat, size);
+                }
+                catch (Exception e)
+                {
+                    return Mat.Zeros(0, 0);
+                }
             }
             resultMat.Dispose();
             resultMat = newMat;

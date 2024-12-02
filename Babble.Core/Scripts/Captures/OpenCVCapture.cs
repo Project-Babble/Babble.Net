@@ -4,12 +4,12 @@ using OpenCvSharp;
 namespace Babble.Core.Scripts.Decoders;
 
 /// <summary>
-/// Wrapper class for EmguCV. We use this class when we know our camera isn't a:
+/// Wrapper class for OpenCV. We use this class when we know our camera isn't a:
 /// 1) Serial Camera
 /// 2) IP Camera capture
 /// 3) Or we aren't on an unsupported mobile platform (iOS or Android. Tizen/WatchOS are ok though??)
 /// </summary>
-public class EmguCVCapture : Capture
+public class OpenCVCapture : Capture
 {
     /// <xlinka>
     /// VideoCapture instance to handle camera frames.
@@ -22,10 +22,9 @@ public class EmguCVCapture : Capture
     /// <xlinka>
     /// Retrieves a raw frame from the camera feed within a 2-second timeout to prevent blocking.
     /// </xlinka>
-    public override Mat RawMat
-    {
-        get => _mat;
-    }
+    public unsafe override Mat RawMat => _mat;
+
+    private Mat _mat = new();
 
     public override uint FrameCount { get; protected set; }
 
@@ -40,7 +39,6 @@ public class EmguCVCapture : Capture
         get => _dimensions;
     }
 
-    private Mat _mat = new Mat();
     private (int width, int height) _dimensions;
 
     /// <summary>
@@ -57,7 +55,9 @@ public class EmguCVCapture : Capture
     /// Constructor that accepts a URL for the video source.
     /// </summary>
     /// <param name="Url">URL for video source.</param>
-    public EmguCVCapture(string Url) : base(Url) { }
+    public OpenCVCapture(string Url) : base(Url) { }
+
+    private bool _loop = false;
 
     /// <summary>
     /// Starts video capture and applies custom resolution and framerate settings.
@@ -75,6 +75,8 @@ public class EmguCVCapture : Capture
             {
                 // Initialize VideoCapture with URL, timeout for robustness
                 _videoCapture = await Task.Run(() => new VideoCapture(Url), cts.Token);
+                _loop = true;
+                Task.Run(VideoCapture_UpdateLoop);
             }
             catch (AggregateException)
             {
@@ -88,26 +90,28 @@ public class EmguCVCapture : Capture
             }
         }
 
-        // _videoCapture.Start();
-        // _videoCapture.ImageGrabbed += VideoCapture_ImageGrabbed;
-
         IsReady = _videoCapture.IsOpened();
         return IsReady;
     }
 
-    private void VideoCapture_ImageGrabbed(object? sender, EventArgs e)
+    private Task VideoCapture_UpdateLoop()
     {
-        try
+        while (_loop)
         {
-            IsReady = _videoCapture?.Retrieve(_mat) == true;
-            if (IsReady)
+            try
             {
-                FrameCount++;
-                _dimensions.width = _mat.Width;
-                _dimensions.height = _mat.Height;
+                IsReady = _videoCapture?.Read(_mat) == true;
+                if (IsReady)
+                {
+                    FrameCount++;
+                    _dimensions.width = _mat.Width;
+                    _dimensions.height = _mat.Height;
+                }
             }
+            catch (Exception) { }
         }
-        catch (Exception) { }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -122,9 +126,7 @@ public class EmguCVCapture : Capture
         if (_videoCapture is null)
             return false;
 
-        // _videoCapture.ImageGrabbed -= VideoCapture_ImageGrabbed;
-
-        // Don't call _videoCapture.Dispose or Release here, it will crash us
+        _loop = false;
         IsReady = false;
         _videoCapture.Release();
         _videoCapture.Dispose();
