@@ -5,9 +5,13 @@
     <color android:color="@color/splash_background"/>
   </item>
 
-  <item android:drawable="@drawable/icon"
+  <item android:drawable="@drawable/Icon_512x512"
         android:width="120dp"
         android:height="120dp"
         android:gravity="center" />
+  <item android:drawable="@drawable/IconOpaque_32x32"
+	    android:width="120dp"
+	    android:height="120dp"
+	    android:gravity="center" />
 
 </layer-list>

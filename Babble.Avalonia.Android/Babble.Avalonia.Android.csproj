@@ -12,11 +12,10 @@
 	<UseMaui>true</UseMaui>
 	<Configurations>Debug;Release;Windows</Configurations>
   </PropertyGroup>
-
   <ItemGroup>
-    <AndroidResource Include="Icon.png">
-      <Link>Resources\drawable\Icon.png</Link>
-    </AndroidResource>
+    <None Remove="Icon.png" />
+    <None Remove="Resources\drawable\IconOpaque_32x32.png" />
+    <None Remove="Resources\drawable\Icon_512x512.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +29,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Babble.Avalonia\Babble.Avalonia.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidResource Update="Resources\drawable\IconOpaque_32x32.png">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\drawable\Icon_512x512.png">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
   </ItemGroup>
 
   <ItemGroup>

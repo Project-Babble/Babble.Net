@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-	  <TargetFrameworks>net8.0-android34.0;net8.0-windows10.0.19041.0;net8.0-maccatalyst;net8.0;net8.0-ios18.0</TargetFrameworks>
+	  <TargetFrameworks>net8.0-android34.0;net8.0-windows10.0.19041.0;net8.0-maccatalyst;net8.0</TargetFrameworks>
 	  <Configurations>Debug;Release;Windows</Configurations>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
