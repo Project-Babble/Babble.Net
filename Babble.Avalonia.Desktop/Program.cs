@@ -10,6 +10,7 @@ namespace Babble.Avalonia.Desktop;
 
 class Program
 {
+
     private static INotificationManager _notificationManager = null;
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any
@@ -45,7 +46,9 @@ class Program
         DateTimeOffset? deliveryTime,
         DateTimeOffset? expirationTime)
     {
-        Notification notification = new Notification();
+        if (_notificationManager is null) return;
+
+        Notification notification = new();
         notification.Title = title;
         notification.Body = body;
         notification.BodyImagePath = bodyImagePath;
@@ -64,14 +67,13 @@ class Program
 
     private static void OnNotificationActivated(object? sender, NotificationActivatedEventArgs e)
     {
-
+        if (_notificationManager is null) return;
     }
 
     private static void OnNotificationDismissed(object? sender, NotificationDismissedEventArgs e)
     {
-
+        if (_notificationManager is null) return;
     }
-
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
