@@ -56,6 +56,7 @@ public class MainActivity : AvaloniaMainActivity<App>
 
     protected override void Dispose(bool disposing)
     {
+        App.SendNotification -= NotificationRequested;
         _wakelock.Release();
         _pmanager.Dispose();
         base.Dispose(disposing);

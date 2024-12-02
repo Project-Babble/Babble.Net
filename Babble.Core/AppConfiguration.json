@@ -24,7 +24,7 @@
 		"gui_multiply": 1.0,
 		"gui_model_file": "Models/3MEFFB0E7MSE/",
 		"gui_runtime": "ONNX",
-		"gui_use_gpu": true,
+		"gui_use_gpu": false,
 		"gui_gpu_index": 0,
 		"gui_inference_threads": 2,
 		"gui_use_red_channel": false,

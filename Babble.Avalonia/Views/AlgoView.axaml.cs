@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Localizer.Core;
 using Avalonia.Platform.Storage;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;

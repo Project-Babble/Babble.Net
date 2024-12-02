@@ -22,21 +22,21 @@ namespace Babble.Core;
 /// </summary>
 public partial class BabbleCore
 {
-    public static BabbleCore Instance { get; private set; }
-    public BabbleSettings Settings { get; private set; }
-    public ILogger<BabbleCore> Logger { get; private set; }
     [MemberNotNullWhen(true, nameof(_platformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
     public bool IsRunning { get; private set; }
     public int FPS => (int)MathF.Floor(1000f / MS);
     public float MS { get; private set; }
+    public static BabbleCore Instance { get; private set; }
+    public BabbleSettings Settings { get; private set; }
+    public ILogger<BabbleCore> Logger { get; private set; }
 
+    private static readonly Size _inputSize = new Size(256, 256);
+    private readonly DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
     private Dictionary<string, CalibrationItem>? _calibrationItems;
     private PlatformConnector? _platformConnector;
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
     private Stopwatch _sw = Stopwatch.StartNew();
-    private Size _inputSize = new Size(256, 256);
-    private DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
     private float _lastTime = 0;
     private string? _inputName;
     
