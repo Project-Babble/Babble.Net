@@ -13,6 +13,7 @@ using VRCFaceTracking;
 using VRCFaceTracking.Core.Library;
 using VRCFaceTracking.Core.Params.Data;
 using VRCFaceTracking.Core.Services;
+
 namespace Babble.Avalonia;
 
 public partial class App : Application
