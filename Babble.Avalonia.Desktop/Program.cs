@@ -30,14 +30,13 @@ class Program
             return builder.StartLinuxDrm(args, "/dev/dri/card1", 1D);
         }
 
-        App.SendNotification += NotificationRequested;
-
         if (_notificationManager is not null)
         {
+            App.SendNotification += NotificationRequested;
             _notificationManager.NotificationActivated += OnNotificationActivated;
             _notificationManager.NotificationDismissed += OnNotificationDismissed;
         }
-        
+
         return builder.StartWithClassicDesktopLifetime(args);
     }
 
@@ -50,8 +49,6 @@ class Program
         DateTimeOffset? deliveryTime,
         DateTimeOffset? expirationTime)
     {
-        if (_notificationManager is null) return;
-
         Notification notification = new();
         notification.Title = title;
         notification.Body = body;
@@ -71,12 +68,12 @@ class Program
 
     private static void OnNotificationActivated(object? sender, NotificationActivatedEventArgs e)
     {
-        if (_notificationManager is null) return;
+        
     }
 
     private static void OnNotificationDismissed(object? sender, NotificationDismissedEventArgs e)
     {
-        if (_notificationManager is null) return;
+        
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

@@ -27,12 +27,14 @@ public partial class BabbleCore
     public ILogger<BabbleCore> Logger { get; private set; }
     [MemberNotNullWhen(true, nameof(_platformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
     public bool IsRunning { get; private set; }
-    
+    public int FPS => (int)MathF.Floor(1000f / MS);
+    public float MS { get; private set; }
+
     private Dictionary<string, CalibrationItem>? _calibrationItems;
     private PlatformConnector? _platformConnector;
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
-    private Stopwatch sw = Stopwatch.StartNew();
+    private Stopwatch _sw = Stopwatch.StartNew();
     private Size _inputSize = new Size(256, 256);
     private DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
     private float _lastTime = 0;
@@ -189,6 +191,7 @@ public partial class BabbleCore
         // Run inference!
         using var results = _session.Run(inputs);
         var output = results[0].AsEnumerable<float>().ToArray();
+        MS = ((float)_sw.Elapsed.TotalSeconds - _lastTime) * 1000;
 
         // Clamp and give meaning to the floats
         var arKitExpressions = Utils.ARKitExpressions;
@@ -206,8 +209,8 @@ public partial class BabbleCore
             foreach (var ue in exp.Value)
             {
                 var expressionName = BabbleAddresses.Addresses[ue];
-                filteredValue = _floatFilter.Filter(filteredValue, (float)sw.Elapsed.TotalSeconds - _lastTime);
-                _lastTime = (float)sw.Elapsed.TotalSeconds;
+                filteredValue = _floatFilter.Filter(filteredValue, (float)_sw.Elapsed.TotalSeconds - _lastTime);
+                _lastTime = (float)_sw.Elapsed.TotalSeconds;
                 CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[expressionName].Min, _calibrationItems[expressionName].Max);
             }
             j++;
@@ -399,7 +402,10 @@ public partial class BabbleCore
                 sessionOptions.AppendExecutionProvider_DML(gpuIndex);
                 return;
             }
-            catch { }
+            catch 
+            {
+                Logger.LogWarning("Failed to create DML Execution Provider on Windows. Falling back to CUDA..."); 
+            };
 
             // If the user's system does not support DirectML (for whatever reason,
             // it's shipped with Windows 10, version 1903(10.0; Build 18362)+
@@ -409,7 +415,11 @@ public partial class BabbleCore
                 sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
                 return;
             }
-            catch { }
+            catch 
+            {
+                Logger.LogWarning("Failed to create CUDA Execution Provider on Windows.");
+                Logger.LogWarning("No GPU acceleration will be applied.");
+            }
         }
         else if (OperatingSystem.IsLinux())
         {

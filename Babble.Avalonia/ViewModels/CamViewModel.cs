@@ -31,6 +31,9 @@ public partial class CamViewModel : ObservableObject
     private double rotation;
 
     [ObservableProperty]
+    private string perf;
+
+    [ObservableProperty]
     private bool enableCalibration;
 
     [ObservableProperty]

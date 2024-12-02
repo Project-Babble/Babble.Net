@@ -78,6 +78,12 @@
 			</Grid>
 
 			<StackPanel Spacing="5"  Margin="0,5,0,0">
+				<TextBlock Text=""
+						   x:Name="PerfText"
+						   Foreground="White"/>
+			</StackPanel>
+
+			<StackPanel Spacing="5"  Margin="0,5,0,0">
 				<TextBlock Text="{localization:Localize camera.rotation}"
 						   ToolTip.Tip="{localization:Localize camera.rotationTooltip}" 
 						   x:Name="RotationText" 

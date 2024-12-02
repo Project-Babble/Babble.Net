@@ -200,10 +200,12 @@ public partial class CamView : UserControl, IIsVisible
         {
             case CamViewMode.Tracking:
                 useColor = false;
+                PerfText.IsVisible = true;
                 valid = BabbleCore.Instance.GetImage(out image, out dims);
                 break;
             case CamViewMode.Cropping:
                 useColor = true;
+                PerfText.IsVisible = false;
                 valid = BabbleCore.Instance.GetRawImage(ColorType.BGR_24, out image, out dims);
                 break;
             default:
@@ -237,6 +239,15 @@ public partial class CamView : UserControl, IIsVisible
                     useColor ? PixelFormats.Bgr24 : PixelFormats.Gray8,
                     AlphaFormat.Opaque);
             }
+            
+            if (BabbleCore.Instance.MS > 0)
+            {
+                PerfText.Text = $"FPS: {BabbleCore.Instance.FPS} MS: {BabbleCore.Instance.MS:F2}";
+            }
+            else
+            {
+                PerfText.Text = $"FPS: -- MS: --.--";
+            }
 
             using var frameBuffer = _viewModel.MouthBitmap.Lock();
             {
@@ -265,6 +276,8 @@ public partial class CamView : UserControl, IIsVisible
         }
         else
         {
+            PerfText.IsVisible = false;
+            _viewModel.Perf = string.Empty;
             MouthWindow.Width = 0;
             MouthWindow.Height = 0;
             CanvasWindow.Width = 0;
