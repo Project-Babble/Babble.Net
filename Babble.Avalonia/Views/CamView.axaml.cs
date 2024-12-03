@@ -12,6 +12,7 @@ using Babble.Avalonia.Scripts;
 using Babble.Avalonia.Scripts.Enums;
 using Babble.Core;
 using Babble.Core.Enums;
+using Babble.Core.Scripts;
 using System.Runtime.InteropServices;
 
 namespace Babble.Avalonia;
@@ -41,6 +42,8 @@ public partial class CamView : UserControl, IIsVisible
 
         _viewModel = new CamViewModel();
         DataContext = _viewModel;
+
+        CameraAddressEntry.ItemsSource = DeviceEnumerator.ListCameraNames();
 
         this.FindControl<Slider>("RotationSlider")!.ValueChanged += RotationEntry_ValueChanged;
         this.FindControl<CheckBox>("EnableCalibration")!.IsCheckedChanged += EnableCalibration_Changed;
