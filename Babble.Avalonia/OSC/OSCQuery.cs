@@ -32,6 +32,7 @@ public class OSCQuery
     {
         var tcpPort = Extensions.GetAvailableTcpPort();
 
+        // This shit doesn't work on MacOS! It just hangs forever
         service = new OSCQueryServiceBuilder()
           .WithDiscovery(new MeaModDiscovery())
           .WithHostIP(hostIP)
