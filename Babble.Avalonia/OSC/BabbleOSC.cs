@@ -4,10 +4,10 @@ using Rug.Osc;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.RegularExpressions;
+using VRC.OSCQuery;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
 using VRCFaceTracking.Core.OSC.DataTypes;
-using VRCFaceTracking.Core.OSC.Query;
 using VRCFaceTracking.Core.Params;
 using VRCFaceTracking.Core.Params.Expressions;
 using VRCFTReceiver;
@@ -20,7 +20,8 @@ public class BabbleOSC
     private OSCQuery _query;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly Task _sendTask;
-    private static readonly Parameter[] _allParams = UnifiedTracking.AllParameters_v2.Concat(UnifiedTracking.AllParameters_v1).ToArray();
+
+    private static readonly Dictionary<string, List<Parameter>> _allParams = [];
     private readonly List<Parameter> _currentParams = [];
 
     private static readonly string[] prefixes = ["", "FT/",];
@@ -34,6 +35,26 @@ public class BabbleOSC
     private const int TIMEOUT_MS = 10000;
 
     private const int MAX_RETRIES = 5;
+
+    static BabbleOSC()
+    {
+        var allParams = UnifiedTracking.AllParameters_v2.Concat(UnifiedTracking.AllParameters_v1);
+        foreach (var param in allParams)
+        {
+            var names = param.GetParamNames();
+            foreach (var name in names)
+            {
+                if (_allParams.TryGetValue(name.paramName, out var paramList))
+                {
+                    paramList.Add(name.paramLiteral);
+                }
+                else
+                {
+                    _allParams.Add(name.paramName, new() { name.paramLiteral });
+                }
+            }
+        }
+    }
 
     public BabbleOSC(string? host = null, int? remotePort = null)
     {
@@ -199,17 +220,28 @@ public class BabbleOSC
         ConfigureReceiver(_sender.RemoteAddress, _sender.Port);
     }
 
-    private void DetermineNewParameters(OscQueryNode avatarConfig)
+    private void DetermineNewParameters(OSCQueryNode avatarConfig)
     {
         // Here, determine from OSCQuery what VRCFTProgrammableExpressions we need to update for this (new!) avatar
         // This method is intense, but only runs when a user changes their avatar so it should be OK
 
         _currentParams.Clear();
 
-        var avatarInfo = new OscQueryAvatarInfo(avatarConfig);
-        foreach (var parameter in _allParams)
+        // Walk the contents tree, and for each parameter determine if it is a VRCFT parameter
+        ParseOSCQueryNodeTree(avatarConfig);
+    }
+
+    private void ParseOSCQueryNodeTree(OSCQueryNode avatarConfig)
+    {
+        if (_allParams.TryGetValue(avatarConfig.Name, out var param))
+            _currentParams.AddRange(param);
+
+        if (avatarConfig.Contents is not null)
         {
-            _currentParams.AddRange(parameter.ResetParam(avatarInfo.Parameters));
+            foreach (var child in avatarConfig.Contents)
+            {
+                ParseOSCQueryNodeTree(child.Value);
+            }
         }
     }
 

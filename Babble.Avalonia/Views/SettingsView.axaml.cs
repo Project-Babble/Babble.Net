@@ -44,6 +44,18 @@ public partial class SettingsView : UserControl, IIsVisible
         }
         comboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
         comboBox.SelectionChanged += ComboBox_SelectionChanged;
+
+        BabbleCore.Instance.Settings.OnUpdate += Settings_OnUpdate;
+    }
+
+    private void Settings_OnUpdate(string obj)
+    {
+        // If OSCQuery connects to a VRChat service, update the UI's IP and Port here
+        if (BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy)
+        {
+            _viewModel.IpAddress = BabbleCore.Instance.Settings.GeneralSettings.GuiOscLocation;
+            _viewModel.Port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
+        }
     }
 
     private void CamView_OnLoaded(object? sender, RoutedEventArgs e)

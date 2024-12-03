@@ -1,16 +1,16 @@
+using Babble.Avalonia.Scripts;
 using Babble.Core;
 using Babble.Core.Scripts;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.RegularExpressions;
 using VRC.OSCQuery;
-using VRCFaceTracking.Core.OSC.Query;
 
 namespace VRCFTReceiver;
 
 public class OSCQuery
 {
-    public event Action<OscQueryNode> OnAvatarChange;
+    public event Action<VRC.OSCQuery.OSCQueryNode> OnAvatarChange;
 
     private OSCQueryService service = null!;
     private readonly List<OSCQueryServiceProfile> profiles = [];
@@ -71,22 +71,25 @@ public class OSCQuery
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                try
+                if (BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy)
                 {
-                    service.RefreshServices();
-                    BabbleCore.Instance.Logger.LogInformation("[VRCFTReceiver] OSCQuery RefreshedServices");
-                    await PollVRChatParameters();
-                    await Task.Delay(TimeSpan.FromMilliseconds(interval), cancellationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    BabbleCore.Instance.Logger.LogError($"[VRCFTReceiver] Error in AutoRefreshServices: {ex.Message}");
+                    try
+                    {
+                        service.RefreshServices();
+                        BabbleCore.Instance.Logger.LogInformation("[VRCFTReceiver] OSCQuery RefreshedServices");
+                        await PollVRChatParameters();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        BabbleCore.Instance.Logger.LogError($"[VRCFTReceiver] Error in AutoRefreshServices: {ex.Message}");
+                    }
                 }
 
+                await Task.Delay(TimeSpan.FromMilliseconds(interval), cancellationToken);
             }
         }, cancellationToken);
     }
@@ -123,6 +126,14 @@ public class OSCQuery
             // Able to read the current avatar ID. So, we'll poll this, see if it changes
             // And if it does we can fire off an event to respond to this!!
             // Oh also add like a bazillion null checks in case we're loading avis.
+            
+            BabbleCore.Instance.Settings.UpdateSetting<string>(
+                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
+                vrcProfile.address.ToString());
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
+                vrcProfile.port.ToString());
+            BabbleCore.Instance.Settings.Save();
 
             var tree = await Extensions.GetOSCTree(vrcProfile.address, vrcProfile.port);
             if (tree is null) return;
@@ -140,34 +151,34 @@ public class OSCQuery
                     _lastAvatarID = currentAvatarID;
 
                     // Convert VRC to VRCFT Query Node
-                    VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
-                    OnAvatarChange?.Invoke(vrcftQueryNode);
+                    // VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
+                    OnAvatarChange?.Invoke(avatar);
                 }
             }
         }
     }
 
-    private VRCFaceTracking.Core.OSC.Query.OscQueryNode ConvertOscQueryNodeTree(VRC.OSCQuery.OSCQueryNode rootNode)
-    {
-        VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = new();
-        vrcftQueryNode.Value = rootNode.Value;
-        vrcftQueryNode.Access = AccessValues.ReadWrite;
-        vrcftQueryNode.Description = rootNode.Description;
-        vrcftQueryNode.OscType = rootNode.OscType;
-        vrcftQueryNode.FullPath = rootNode.FullPath;
+    //private VRCFaceTracking.Core.OSC.Query.OscQueryNode ConvertOscQueryNodeTree(VRC.OSCQuery.OSCQueryNode rootNode)
+    //{
+    //    VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = new();
+    //    vrcftQueryNode.Value = rootNode.Value;
+    //    vrcftQueryNode.Access = AccessValues.ReadWrite;
+    //    vrcftQueryNode.Description = rootNode.Description;
+    //    vrcftQueryNode.OscType = rootNode.OscType;
+    //    vrcftQueryNode.FullPath = rootNode.FullPath;
 
-        vrcftQueryNode.Contents = new();
+    //    vrcftQueryNode.Contents = new();
 
-        if (rootNode.Contents is not null)
-        {
-            foreach (var child in rootNode.Contents)
-            {
-                vrcftQueryNode.Contents.Add(child.Key, ConvertOscQueryNodeTree(child.Value));
-            }
-        }
+    //    if (rootNode.Contents is not null)
+    //    {
+    //        foreach (var child in rootNode.Contents)
+    //        {
+    //            vrcftQueryNode.Contents.Add(child.Key, ConvertOscQueryNodeTree(child.Value));
+    //        }
+    //    }
 
-        return vrcftQueryNode;
-    }
+    //    return vrcftQueryNode;
+    //}
 
     public void Teardown()
     {
