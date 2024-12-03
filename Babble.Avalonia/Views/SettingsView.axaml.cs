@@ -48,12 +48,14 @@ public partial class SettingsView : UserControl, IIsVisible
         BabbleCore.Instance.Settings.OnUpdate += Settings_OnUpdate;
     }
 
-    private void Settings_OnUpdate(string obj)
+    private void Settings_OnUpdate(string setting)
     {
         // If OSCQuery connects to a VRChat service, update the UI's IP and Port here
-        if (BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy)
+        if (BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy &&
+            (setting == nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress) ||
+             setting == nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort)))
         {
-            _viewModel.IpAddress = BabbleCore.Instance.Settings.GeneralSettings.GuiOscLocation;
+            _viewModel.IpAddress = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
             _viewModel.Port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
         }
     }

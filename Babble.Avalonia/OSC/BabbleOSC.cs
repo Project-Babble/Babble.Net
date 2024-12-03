@@ -4,10 +4,10 @@ using Rug.Osc;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.RegularExpressions;
-using VRC.OSCQuery;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
 using VRCFaceTracking.Core.OSC.DataTypes;
+using VRCFaceTracking.Core.OSC.Query;
 using VRCFaceTracking.Core.Params;
 using VRCFaceTracking.Core.Params.Expressions;
 using VRCFTReceiver;
@@ -18,11 +18,11 @@ public class BabbleOSC
 {
     private OscSender _sender;
     private OSCQuery _query;
-    private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly Task _sendTask;
+    private CancellationTokenSource _cancellationTokenSource;
+    private Task _sendTask;
 
-    private static readonly Dictionary<string, List<Parameter>> _allParams = [];
-    private readonly List<Parameter> _currentParams = [];
+    private static readonly Parameter[] AllParams = UnifiedTracking.AllParameters_v2.Concat(UnifiedTracking.AllParameters_v1).ToArray();
+    private readonly List<Parameter> CurrentAvatarParams = [];
 
     private static readonly string[] prefixes = ["", "FT/",];
 
@@ -36,35 +36,16 @@ public class BabbleOSC
 
     private const int MAX_RETRIES = 5;
 
-    static BabbleOSC()
-    {
-        var allParams = UnifiedTracking.AllParameters_v2.Concat(UnifiedTracking.AllParameters_v1);
-        foreach (var param in allParams)
-        {
-            var names = param.GetParamNames();
-            foreach (var name in names)
-            {
-                if (_allParams.TryGetValue(name.paramName, out var paramList))
-                {
-                    paramList.Add(name.paramLiteral);
-                }
-                else
-                {
-                    _allParams.Add(name.paramName, new() { name.paramLiteral });
-                }
-            }
-        }
-    }
-
     public BabbleOSC(string? host = null, int? remotePort = null)
     {
         var settings = BabbleCore.Instance.Settings;
-        var ip = IPAddress.Parse(host ?? DEFAULT_HOST);
-        _query = new OSCQuery(ip, BabbleCore.Instance.Settings.GeneralSettings.GuiOscReceiverPort); // 9001 by default
+        
+        _query = new OSCQuery(IPAddress.Loopback, settings.GeneralSettings.GuiOscReceiverPort); // 9001 by default
         _query.OnAvatarChange += DetermineNewParameters;
 
         OnBabbleSettingsChanged(settings);
 
+        var ip = IPAddress.Parse(host ?? DEFAULT_HOST);
         ConfigureReceiver(
             ip, 
             remotePort ?? DEFAULT_REMOTE_PORT);
@@ -100,27 +81,27 @@ public class BabbleOSC
     [MemberNotNull(nameof(_sender))]
     private void ConfigureReceiver(IPAddress host, int remotePort)
     {
+        if (_sender is not null)
+        {
+            if (_sender.State == OscSocketState.Connected) return;
+            if (_sender.State == OscSocketState.Closing) return;
+        }
+
         _sender = new OscSender(host, DEFAULT_LOCAL_PORT, remotePort)
         {
             DisconnectTimeout = TIMEOUT_MS
         };
-        _sender.Connect();
+
+        // This will throw an exception if a user takes their headset off if OSCQuery is in use
+        _sender.Connect(); 
     }
 
     private async Task SendLoopAsync(CancellationToken cancellationToken)
     {
-       
         while (!cancellationToken.IsCancellationRequested)
         {
             if (!BabbleCore.Instance.IsRunning)
-            {
                 continue;
-            }
-
-            if (_sender.State != OscSocketState.Connected)
-            {
-                return;
-            }
 
             try
             {
@@ -130,11 +111,9 @@ public class BabbleOSC
                     await SendDesktopParameters(cancellationToken);
 
                 await PollConnectionStatus(cancellationToken);
+                await Task.Delay(10);
             }
-            catch (Exception)
-            {
-                // If there's an error here, don't freeze the UI thread
-            }
+            catch { }
         }
     }
 
@@ -144,34 +123,37 @@ public class BabbleOSC
 
         foreach (var prefix in prefixes)
         {
-            foreach (var param in _currentParams)
+            foreach (var param in CurrentAvatarParams)
             {
                 foreach (var name in param.GetParamNames())
                 {
+                    if (name.paramName == "EyeTrackingActive")
+                        continue;
+
                     switch (name.paramLiteral)
                     {
                         case BaseParam<float> floatName:
-                            if (floatName.Relevant)
+                            if (!floatName.Relevant) continue;
+                            var address = $"/avatar/parameters/{prefix}{name.paramName}";
+                            if (address.EndsWith("v2/")) continue; // Not a valid OSC address
+                            float floatValue = 0;
+                            try
                             {
-                                try
-                                {
-                                    var address = $"/avatar/parameters/{prefix}{name.paramName}";
-                                    if (address.EndsWith("v2/"))
-                                        continue; // Not a valid OSC address
-
-                                    _sender.Send(new OscMessage(address, floatName.ParamValue * mul));
-                                }
-                                catch (Exception e)
-                                {
-                                    // Handle weird null ref exceptions on OSCMessage
-                                }
+                                floatValue = floatName.ParamValue;
                             }
+                            catch { continue; }
+                            _sender.Send(new OscMessage(address, floatValue * mul));
                             break;
+                        // This only returns a single bool without Binary steps
                         //case BaseParam<bool> boolName:
-                        //    if (boolName.Relevant)
+                        //    if (!boolName.Relevant) continue;
+                        //    bool boolValue = false;
+                        //    try
                         //    {
-                        //        _sender.Send(new OscMessage($"/avatar/parameters/{prefix}{name.paramName}", boolName.ParamValue));
+                        //        boolValue = boolName.ParamValue;
                         //    }
+                        //    catch { continue; }
+                        //    _sender.Send(new OscMessage($"/avatar/parameters/{prefix}{name.paramName}", boolValue));
                         //    break;
                     }
                 }
@@ -220,21 +202,22 @@ public class BabbleOSC
         ConfigureReceiver(_sender.RemoteAddress, _sender.Port);
     }
 
-    private void DetermineNewParameters(OSCQueryNode avatarConfig)
+    private void DetermineNewParameters(OscQueryNode avatarConfig)
     {
         // Here, determine from OSCQuery what VRCFTProgrammableExpressions we need to update for this (new!) avatar
         // This method is intense, but only runs when a user changes their avatar so it should be OK
 
-        _currentParams.Clear();
+        CurrentAvatarParams.Clear();
 
         // Walk the contents tree, and for each parameter determine if it is a VRCFT parameter
         ParseOSCQueryNodeTree(avatarConfig);
     }
 
-    private void ParseOSCQueryNodeTree(OSCQueryNode avatarConfig)
+    private void ParseOSCQueryNodeTree(OscQueryNode avatarConfig)
     {
-        if (_allParams.TryGetValue(avatarConfig.Name, out var param))
-            _currentParams.AddRange(param);
+        var avatarInfo = new OscQueryAvatarInfo(avatarConfig);
+        foreach (var parameter in AllParams)
+            CurrentAvatarParams.AddRange(parameter.ResetParam(avatarInfo.Parameters));
 
         if (avatarConfig.Contents is not null)
         {
@@ -243,24 +226,6 @@ public class BabbleOSC
                 ParseOSCQueryNodeTree(child.Value);
             }
         }
-    }
-
-    private static (string strippedString, int extractedNumber) StripTrailingNumbers(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-            return (input, 0);
-
-        // Regex to match trailing numbers
-        var match = Regex.Match(input, @"(\d+)$", RegexOptions.Compiled);
-
-        if (match.Success)
-        {
-            string numberPart = match.Value;
-            string strippedString = input.Substring(0, input.Length - numberPart.Length);
-            return (strippedString, int.Parse(numberPart));
-        }
-
-        return (input, 0);
     }
 
     public void Teardown()

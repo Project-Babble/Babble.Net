@@ -5,12 +5,13 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.RegularExpressions;
 using VRC.OSCQuery;
+using VRCFaceTracking.Core.OSC.Query;
 
 namespace VRCFTReceiver;
 
 public class OSCQuery
 {
-    public event Action<VRC.OSCQuery.OSCQueryNode> OnAvatarChange;
+    public event Action<OscQueryNode> OnAvatarChange;
 
     private OSCQueryService service = null!;
     private readonly List<OSCQueryServiceProfile> profiles = [];
@@ -126,59 +127,58 @@ public class OSCQuery
             // Able to read the current avatar ID. So, we'll poll this, see if it changes
             // And if it does we can fire off an event to respond to this!!
             // Oh also add like a bazillion null checks in case we're loading avis.
-            
-            BabbleCore.Instance.Settings.UpdateSetting<string>(
-                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
-                vrcProfile.address.ToString());
-            BabbleCore.Instance.Settings.UpdateSetting<int>(
-                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
-                vrcProfile.port.ToString());
-            BabbleCore.Instance.Settings.Save();
 
             var tree = await Extensions.GetOSCTree(vrcProfile.address, vrcProfile.port);
             if (tree is null) return;
             if (tree.Contents is null) return;
 
-            var avatar = tree.Contents["avatar"];
+            if(!tree.Contents.TryGetValue("avatar", out var avatar))
             if (avatar is null) return;
             if (avatar.Contents is null) return;
 
-            if (avatar.Contents["change"] is not null)
-            {
-                var currentAvatarID = (string)avatar.Contents["change"].Value.First();
-                if (_lastAvatarID != currentAvatarID)
-                {
-                    _lastAvatarID = currentAvatarID;
+            if (!avatar.Contents.TryGetValue("change", out var change))
+            if (change is null) return;
 
-                    // Convert VRC to VRCFT Query Node
-                    // VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
-                    OnAvatarChange?.Invoke(avatar);
-                }
+            var currentAvatarID = (string)change.Value.First(); // Avatar ID
+            if (_lastAvatarID != currentAvatarID)
+            {
+                _lastAvatarID = currentAvatarID;
+
+                // Convert VRC to VRCFT Query Node
+                OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
+                OnAvatarChange?.Invoke(vrcftQueryNode);
             }
+
+            BabbleCore.Instance.Settings.UpdateSetting<string>(
+                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
+                vrcProfile.address.ToString());
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
+                "9000");
         }
     }
 
-    //private VRCFaceTracking.Core.OSC.Query.OscQueryNode ConvertOscQueryNodeTree(VRC.OSCQuery.OSCQueryNode rootNode)
-    //{
-    //    VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = new();
-    //    vrcftQueryNode.Value = rootNode.Value;
-    //    vrcftQueryNode.Access = AccessValues.ReadWrite;
-    //    vrcftQueryNode.Description = rootNode.Description;
-    //    vrcftQueryNode.OscType = rootNode.OscType;
-    //    vrcftQueryNode.FullPath = rootNode.FullPath;
+    private VRCFaceTracking.Core.OSC.Query.OscQueryNode ConvertOscQueryNodeTree(VRC.OSCQuery.OSCQueryNode rootNode)
+    {
+        VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = new();
+        vrcftQueryNode.Value = rootNode.Value;
+        vrcftQueryNode.Access = AccessValues.ReadWrite;
+        vrcftQueryNode.Description = rootNode.Description;
+        vrcftQueryNode.OscType = rootNode.OscType;
+        vrcftQueryNode.FullPath = rootNode.FullPath;
 
-    //    vrcftQueryNode.Contents = new();
+        vrcftQueryNode.Contents = new();
 
-    //    if (rootNode.Contents is not null)
-    //    {
-    //        foreach (var child in rootNode.Contents)
-    //        {
-    //            vrcftQueryNode.Contents.Add(child.Key, ConvertOscQueryNodeTree(child.Value));
-    //        }
-    //    }
+        if (rootNode.Contents is not null)
+        {
+            foreach (var child in rootNode.Contents)
+            {
+                vrcftQueryNode.Contents.Add(child.Key, ConvertOscQueryNodeTree(child.Value));
+            }
+        }
 
-    //    return vrcftQueryNode;
-    //}
+        return vrcftQueryNode;
+    }
 
     public void Teardown()
     {

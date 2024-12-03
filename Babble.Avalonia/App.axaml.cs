@@ -54,6 +54,7 @@ public partial class App : Application
         var mutator = new UnifiedTrackingMutator(mutatorLogger, settings);
         _mainIntegrated = new MainIntegrated(loggerFactory, libManager, mutator);
         Task.Run(async () => await _mainIntegrated.InitializeAsync());
+        ParameterSenderService.AllParametersRelevant = true;
 
         // Setup custom OSC handler
         var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
