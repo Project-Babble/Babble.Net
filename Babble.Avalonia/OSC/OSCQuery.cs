@@ -2,6 +2,7 @@ using Babble.Core;
 using Babble.Core.Scripts;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text.RegularExpressions;
 using VRC.OSCQuery;
 using VRCFaceTracking.Core.OSC.Query;
 
@@ -14,6 +15,7 @@ public class OSCQuery
     private OSCQueryService service = null!;
     private readonly List<OSCQueryServiceProfile> profiles = [];
 
+    private static readonly Regex VRChatClientRegex = new Regex(@"VRChat-Client-[A-Za-z0-9]{6}$", RegexOptions.Compiled);
     private CancellationTokenSource _cancellationTokenSource;
     private Thread _oscQueryThread;
     private string _lastAvatarID = string.Empty;
@@ -96,8 +98,8 @@ public class OSCQuery
 
         try
         {
-            // Replace with random OSCQuery port??
-            vrcProfile = profiles.First(profile => profile.name.StartsWith("VRChat-Client"));
+            // This is so wrong
+            vrcProfile = profiles.First(profile => VRChatClientRegex.IsMatch(profile.name));
         }
         catch (InvalidOperationException e) // No matching element
         {
