@@ -420,13 +420,26 @@ public partial class BabbleCore
             {
                 Logger.LogWarning("Failed to create CUDA Execution Provider on Windows.");
                 Logger.LogWarning("No GPU acceleration will be applied.");
+
+                Settings.UpdateSetting<bool>(nameof(Settings.GeneralSettings.GuiUseGpu), false.ToString());
             }
         }
         else if (OperatingSystem.IsLinux())
         {
             // This will crash Linux users without Nvidia GPUs.
             // TODO: Fix this!
-            sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+            try
+            {
+                sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+                return;
+            }
+            catch
+            {
+                Logger.LogWarning("Failed to create CUDA Execution Provider on Linux.");
+                Logger.LogWarning("No GPU acceleration will be applied.");
+
+                Settings.UpdateSetting<bool>(nameof(Settings.GeneralSettings.GuiUseGpu), false.ToString());
+            }
         }
     }
 }

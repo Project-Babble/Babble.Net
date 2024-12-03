@@ -29,10 +29,12 @@
 					   ToolTip.Tip="{localization:Localize camera.cameraAddressTooltip}"
 					   x:Name="CameraAddressText" 
 					   Foreground="White"/>
-			<TextBox Text="{Binding CameraAddressEntryText}" 
+			<AutoCompleteBox Text="{Binding CameraAddressEntryText}" 
 					 ToolTip.Tip="{Binding CameraAddressTextTooltip}"
 					 x:Name="CameraAddressEntry" 
 					 Background="#2D2D2D"
+					 Watermark="Start typing to see detected devices..."
+					 FilterMode="Contains"
 					 Foreground="White"/>
 			<Button Content="{localization:Localize camera.saveAndRestartTracking}"
 					ToolTip.Tip="{localization:Localize camera.saveAndRestartTrackingTooltip}"
