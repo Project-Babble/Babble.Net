@@ -30,14 +30,14 @@ public class DesktopConnector : PlatformConnector
         {
             Capture = new SerialCameraCapture(Url);
         }
-        //else if (IPConnectionsPrefixes.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
-        //         IPConnectionsSuffixes.Any(suffix => Url.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))))
-        //{
-        //    Capture = new IPCameraCapture(Url);
-        //}
+        else if (IPConnectionsPrefixes.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
+                 IPConnectionsSuffixes.Any(suffix => Url.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))))
+        {
+            Capture = new IPCameraCapture(Url);
+        }
         else
         {
-            // TODO: Fix the IP Camera thingy in this lmao
+            // IPConnections on MacOS Fail here, so use the above implementation
             Capture = new OpenCVCapture(Url); 
         }
 
