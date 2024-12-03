@@ -74,7 +74,7 @@ public class OpenCVCapture : Capture
             try
             {
                 // Initialize VideoCapture with URL, timeout for robustness
-                if (!int.TryParse(Url, out var index))
+                if (int.TryParse(Url, out var index))
                     _videoCapture = await Task.Run(() => VideoCapture.FromCamera(index), cts.Token);
                 else
                     _videoCapture = await Task.Run(() => new VideoCapture(Url), cts.Token);
