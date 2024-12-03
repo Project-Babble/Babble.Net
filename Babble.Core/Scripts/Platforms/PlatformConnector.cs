@@ -169,13 +169,15 @@ public abstract class PlatformConnector
                 double hscale = (camSettings.GuiHorizontalFlip ? -1.0 : 1.0) * scale;
                 double vscale = (camSettings.GuiVerticalFlip ? -1.0 : 1.0) * scale;
                 using var matrix = new Mat(2, 3, MatType.CV_64F);
-                matrix.GetArray<double>(out var data);
-                data[0] = (double)size.Width / (double)resultMat.Width * cos * hscale;
-                data[1] = (double)size.Height / (double)resultMat.Height * sin * hscale;
-                data[2] = ((double)size.Width - ((double)size.Width * cos + (double)size.Height * sin) * hscale) * 0.5;
-                data[3] = -(double)size.Width / (double)resultMat.Width * sin * vscale;
-                data[4] = (double)size.Height / (double)resultMat.Height * cos * vscale;
-                data[5] = ((double)size.Height + ((double)size.Width * sin - (double)size.Height * cos) * vscale) * 0.5;
+                Span<double> data = new Span<double>((void*)matrix.DataPointer, 6)
+                {
+                    [0] = (double)size.Width / (double)resultMat.Width * cos * hscale,
+                    [1] = (double)size.Height / (double)resultMat.Height * sin * hscale,
+                    [2] = ((double)size.Width - ((double)size.Width * cos + (double)size.Height * sin) * hscale) * 0.5,
+                    [3] = -(double)size.Width / (double)resultMat.Width * sin * vscale,
+                    [4] = (double)size.Height / (double)resultMat.Height * cos * vscale,
+                    [5] = ((double)size.Height + ((double)size.Width * sin - (double)size.Height * cos) * vscale) * 0.5
+                };
                 Cv2.WarpAffine(resultMat, newMat, matrix, size);
             }
             else
