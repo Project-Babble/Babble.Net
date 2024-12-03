@@ -238,37 +238,43 @@ public partial class BabbleCore
         
         // https://github.com/shimat/opencvsharp/issues/952
         dimensions = _platformConnector.Capture.Dimensions;
-        if (color == ColorType.GRAY_8)
+        switch (color)
         {
-            using var grayMat = new Mat();
-            Cv2.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversionCodes.BGR2GRAY);
-            grayMat.GetArray(out image);
-        }
-        else if (color == ColorType.BGR_24)
-        {
-            _platformConnector.Capture.RawMat.GetArray<Vec3b>(out var pixels);
-            ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
-            image = new byte[pixels.Length * 3];
-            Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
-        }       
-        else if (color == ColorType.RGB_24)
-        {
-            using var rgbMat = new Mat();
-            Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbMat, ColorConversionCodes.BGR2RGB);
-            rgbMat.GetArray<Vec3b>(out var pixels);
-            ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
-            image = new byte[pixels.Length * 3];
-            Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
-
-        }
-        else if (color == ColorType.RGBA_32)
-        {
-            using var rgbaMat = new Mat();
-            Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbaMat, ColorConversionCodes.BGR2RGBA);
-            rgbaMat.GetArray<Vec4b>(out var pixels);
-            ref var bytes = ref Unsafe.As<Vec4b, byte>(ref pixels[0]);
-            image = new byte[pixels.Length * 4];
-            Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
+            case ColorType.GRAY_8:
+            {
+                using var grayMat = new Mat();
+                Cv2.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversionCodes.BGR2GRAY);
+                grayMat.GetArray(out image);
+                break;
+            }
+            case ColorType.BGR_24:
+            {
+                _platformConnector.Capture.RawMat.GetArray<Vec3b>(out var pixels);
+                ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
+                image = new byte[pixels.Length * 3];
+                Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
+                break;
+            }
+            case ColorType.RGB_24:
+            {
+                using var rgbMat = new Mat();
+                Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbMat, ColorConversionCodes.BGR2RGB);
+                rgbMat.GetArray<Vec3b>(out var pixels);
+                ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
+                image = new byte[pixels.Length * 3];
+                Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
+                break;
+            }
+            case ColorType.RGBA_32:
+            {
+                using var rgbaMat = new Mat();
+                Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbaMat, ColorConversionCodes.BGR2RGBA);
+                rgbaMat.GetArray<Vec4b>(out var pixels);
+                ref var bytes = ref Unsafe.As<Vec4b, byte>(ref pixels[0]);
+                image = new byte[pixels.Length * 4];
+                Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
+                break;
+            }
         }
 
         return true;
