@@ -69,15 +69,15 @@ public class OpenCVCapture : Capture
     /// </xlinka>
     public override async Task<bool> StartCapture()
     {
-        int index = 0;
-        if (!int.TryParse(Url, out index)) return false;
-        
         using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
         {
             try
             {
                 // Initialize VideoCapture with URL, timeout for robustness
-                _videoCapture = await Task.Run(() => VideoCapture.FromCamera(index), cts.Token);
+                if (!int.TryParse(Url, out var index))
+                    _videoCapture = await Task.Run(() => VideoCapture.FromCamera(index), cts.Token);
+                else
+                    _videoCapture = await Task.Run(() => new VideoCapture(Url), cts.Token);
                 _loop = true;
                 Task.Run(VideoCapture_UpdateLoop);
             }
