@@ -111,7 +111,7 @@ public class BabbleOSC
                     await SendDesktopParameters(cancellationToken);
 
                 await PollConnectionStatus(cancellationToken);
-                await Task.Delay(10);
+                await Task.Delay(25);
             }
             catch { }
         }
@@ -142,7 +142,8 @@ public class BabbleOSC
                                 floatValue = floatName.ParamValue;
                             }
                             catch { continue; }
-                            _sender.Send(new OscMessage(address, floatValue * mul));
+                            if (float.IsNaN(floatValue) || floatValue == 0) continue;
+                            _sender.Send(new OscMessage(address, floatValue * (float)mul));
                             break;
                         // This only returns a single bool without Binary steps
                         //case BaseParam<bool> boolName:

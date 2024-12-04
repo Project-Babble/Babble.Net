@@ -1,4 +1,3 @@
-using Babble.Avalonia.Scripts;
 using Babble.Core;
 using Babble.Core.Scripts;
 using Microsoft.Extensions.Logging;
@@ -133,12 +132,12 @@ public class OSCQuery
             if (tree is null) return;
             if (tree.Contents is null) return;
 
-            if(!tree.Contents.TryGetValue("avatar", out var avatar))
-            if (avatar is null) return;
+            if (!tree.Contents.TryGetValue("avatar", out var avatar))
+                if (avatar is null) return;
             if (avatar.Contents is null) return;
 
             if (!avatar.Contents.TryGetValue("change", out var change))
-            if (change is null) return;
+                if (change is null) return;
 
             var currentAvatarID = (string)change.Value.First(); // Avatar ID
             if (_lastAvatarID != currentAvatarID)
@@ -150,25 +149,36 @@ public class OSCQuery
                 OnAvatarChange?.Invoke(vrcftQueryNode);
             }
 
-            BabbleCore.Instance.Settings.UpdateSetting<string>(
-                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
-                vrcProfile.address.ToString());
-            BabbleCore.Instance.Settings.UpdateSetting<int>(
-                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
-                "9000");
+            var ip = vrcProfile.address.ToString();
+            if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress != ip)
+            {
+                BabbleCore.Instance.Settings.UpdateSetting<string>(
+                    nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
+                    vrcProfile.address.ToString());
+            }
+
+            const int vrcPort = 9000;
+            if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort != vrcPort)
+            {
+                BabbleCore.Instance.Settings.UpdateSetting<int>(
+                    nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
+                    vrcPort.ToString());
+            }
+
         }
     }
 
-    private VRCFaceTracking.Core.OSC.Query.OscQueryNode ConvertOscQueryNodeTree(VRC.OSCQuery.OSCQueryNode rootNode)
+    private OscQueryNode ConvertOscQueryNodeTree(OSCQueryNode rootNode)
     {
-        VRCFaceTracking.Core.OSC.Query.OscQueryNode vrcftQueryNode = new();
-        vrcftQueryNode.Value = rootNode.Value;
-        vrcftQueryNode.Access = AccessValues.ReadWrite;
-        vrcftQueryNode.Description = rootNode.Description;
-        vrcftQueryNode.OscType = rootNode.OscType;
-        vrcftQueryNode.FullPath = rootNode.FullPath;
-
-        vrcftQueryNode.Contents = new();
+        OscQueryNode vrcftQueryNode = new()
+        {
+            Value = rootNode.Value,
+            Access = AccessValues.ReadWrite,
+            Description = rootNode.Description,
+            OscType = rootNode.OscType,
+            FullPath = rootNode.FullPath,
+            Contents = new()
+        };
 
         if (rootNode.Contents is not null)
         {

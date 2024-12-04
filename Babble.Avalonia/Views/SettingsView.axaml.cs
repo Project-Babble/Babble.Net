@@ -13,7 +13,7 @@ public partial class SettingsView : UserControl, IIsVisible
     private bool _isVisible;
 
     private readonly SettingsViewModel _viewModel;
-    private readonly ComboBox comboBox;
+    private readonly ComboBox _comboBox;
 
     public SettingsView()
     {
@@ -36,14 +36,14 @@ public partial class SettingsView : UserControl, IIsVisible
         this.FindControl<TextBox>("YResolutionEntry")!.LostFocus += YResolution_LostFocus;
         this.FindControl<TextBox>("FramerateEntry")!.LostFocus += Framerate_LostFocus;
 
-        comboBox = this.Find<ComboBox>("LanguageCombo")!;
-        comboBox!.Items.Clear();
+        _comboBox = this.Find<ComboBox>("LanguageCombo")!;
+        _comboBox!.Items.Clear();
         foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
         {
-            comboBox.Items.Add(item);
+            _comboBox.Items.Add(item);
         }
-        comboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
-        comboBox.SelectionChanged += ComboBox_SelectionChanged;
+        _comboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
+        _comboBox.SelectionChanged += ComboBox_SelectionChanged;
 
         BabbleCore.Instance.Settings.OnUpdate += Settings_OnUpdate;
     }
@@ -55,8 +55,9 @@ public partial class SettingsView : UserControl, IIsVisible
             (setting == nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress) ||
              setting == nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort)))
         {
-            _viewModel.IpAddress = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
-            _viewModel.Port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
+            // Don't notify anyone!
+            _viewModel.ipAddress = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
+            _viewModel.port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
         }
     }
 
@@ -187,7 +188,7 @@ public partial class SettingsView : UserControl, IIsVisible
 
     private void ComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[comboBox.SelectedIndex]);
+        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[_comboBox.SelectedIndex]);
         BabbleCore.Instance.Settings.UpdateSetting<string>(
             nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage),
             LocalizerCore.Localizer.Language);
