@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopNotifications.Avalon
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopNotifications", "..\DesktopNotifications\DesktopNotifications\DesktopNotifications.csproj", "{9E2A7618-EA69-4308-8057-915806D9C30C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopNotifications.Apple", "..\DesktopNotifications\DesktopNotifications.Apple\DesktopNotifications.Apple.csproj", "{442D68F8-A621-485F-B591-63EC732458E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopNotifications.Apple", "..\DesktopNotifications\DesktopNotifications.Apple\DesktopNotifications.Apple.csproj", "{442D68F8-A621-485F-B591-63EC732458E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "vrc-oscquery-lib", "..\vrc-oscquery-lib\vrc-oscquery-lib\vrc-oscquery-lib.csproj", "{0F597D51-0393-46E7-BBA8-95A362779C65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -480,6 +482,36 @@ Global
 		{442D68F8-A621-485F-B591-63EC732458E0}.Windows|x64.Build.0 = Debug|Any CPU
 		{442D68F8-A621-485F-B591-63EC732458E0}.Windows|x86.ActiveCfg = Debug|Any CPU
 		{442D68F8-A621-485F-B591-63EC732458E0}.Windows|x86.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|ARM.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|x64.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Debug|x86.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|ARM.ActiveCfg = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|ARM.Build.0 = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|ARM64.Build.0 = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|x64.ActiveCfg = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|x64.Build.0 = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|x86.ActiveCfg = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Release|x86.Build.0 = Release|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|Any CPU.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|ARM.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|ARM.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|ARM64.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|ARM64.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|x64.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|x64.Build.0 = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|x86.ActiveCfg = Debug|Any CPU
+		{0F597D51-0393-46E7-BBA8-95A362779C65}.Windows|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

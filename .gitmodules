@@ -4,3 +4,6 @@
 [submodule "DesktopNotifications"]
 	path = DesktopNotifications
 	url = https://github.com/dfgHiatus/DesktopNotifications
+[submodule "vrc-oscquery-lib"]
+	path = vrc-oscquery-lib
+	url = https://github.com/vrchat-community/vrc-oscquery-lib
