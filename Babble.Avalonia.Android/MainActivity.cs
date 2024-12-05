@@ -7,6 +7,9 @@ using Microsoft.Maui.ApplicationModel;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Babble.Core;
+using Babble.Core.Scripts.Captures;
+using Microsoft.Extensions.DependencyInjection;
 using static Android.OS.PowerManager;
 
 namespace Babble.Avalonia.Android;
@@ -34,6 +37,7 @@ public class MainActivity : AvaloniaMainActivity<App>
         _notificationManagerService = new NotificationManagerService();
         Task.Run(Permissions.RequestAsync<NotificationPermission>);
         App.SendNotification += NotificationRequested;
+        App.RegisterPlatformService = OnRegisterPlatformService;
 
         return base.CustomizeAppBuilder(builder)
             .WithInterFont();
@@ -60,5 +64,13 @@ public class MainActivity : AvaloniaMainActivity<App>
         _wakelock.Release();
         _pmanager.Dispose();
         base.Dispose(disposing);
+    }
+
+    private void OnRegisterPlatformService(IServiceCollection services)
+    {
+        services.AddSingleton<IUsbService, UsbService>();
+        
+        var tuple = (new HashSet<string>() { "/dev" }, false); 
+        BabbleCore.Instance.PlatformConnector.Captures.Add(tuple, typeof(AndroidSerialCameraCapture));
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenCvSharp;
 
-namespace Babble.Core.Scripts.Decoders;
+namespace Babble.Core.Scripts.Captures;
 
 /// <summary>
 /// Wrapper class for OpenCV. We use this class when we know our camera isn't a:
