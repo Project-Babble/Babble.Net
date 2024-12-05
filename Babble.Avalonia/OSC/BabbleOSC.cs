@@ -40,7 +40,7 @@ public class BabbleOSC
     {
         var settings = BabbleCore.Instance.Settings;
         
-        _query = new OSCQuery(IPAddress.Loopback, settings.GeneralSettings.GuiOscReceiverPort); // 9001 by default
+        _query = new OSCQuery(IPAddress.Loopback);
         _query.OnAvatarChange += DetermineNewParameters;
 
         OnBabbleSettingsChanged(settings);

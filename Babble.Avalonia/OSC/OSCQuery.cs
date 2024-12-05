@@ -13,23 +13,22 @@ public class OSCQuery
     public event Action<OscQueryNode> OnAvatarChange;
 
     private OSCQueryService service = null!;
-    private readonly List<OSCQueryServiceProfile> profiles = [];
+    private HashSet<OSCQueryServiceProfile> profiles = [];
 
     private static readonly Regex VRChatClientRegex = new Regex(@"VRChat-Client-[A-Za-z0-9]{6}$", RegexOptions.Compiled);
     private CancellationTokenSource _cancellationTokenSource;
-    private Thread _oscQueryThread;
     private string _lastAvatarID = string.Empty;
 
-    public OSCQuery(IPAddress hostIP, int udpPort)
+    public OSCQuery(IPAddress hostIP)
     {
         _cancellationTokenSource = new CancellationTokenSource();
-        _oscQueryThread = new Thread(() => RunOSCQuery(hostIP, udpPort));
-        _oscQueryThread.Start();
+        RunOSCQuery(hostIP);
     }
 
-    private void RunOSCQuery(IPAddress hostIP, int udpPort)
+    private void RunOSCQuery(IPAddress hostIP)
     {
         var tcpPort = Extensions.GetAvailableTcpPort();
+        var udpPort = Extensions.GetAvailableUdpPort();
 
         // This shit doesn't work on MacOS! It just hangs forever
         service = new OSCQueryServiceBuilder()
@@ -47,22 +46,19 @@ public class OSCQuery
 
         service.AddEndpoint<string>("/avatar/change", Attributes.AccessValues.ReadWrite, ["default"]);
 
-        service.OnOscQueryServiceAdded += AddProfileToList;
+        service.OnOscQueryServiceAdded += _ => AddProfileToList();
 
         StartAutoRefreshServices(5000, _cancellationTokenSource.Token);
     }
 
-    private void AddProfileToList(OSCQueryServiceProfile profile)
+    private void AddProfileToList()
     {
-        if (profiles.Select(profile => profile.name).Contains(profile.name) || profile.port == service.TcpPort)
+        var set = service.GetOSCQueryServices();
+        profiles = set;
+        foreach (var profile in profiles)
         {
-            return;
+            BabbleCore.Instance.Logger.LogInformation($"[VRCFTReceiver] Added {profile.name} to list of OSCQuery profiles, at address http://{profile.address}:{profile.port}");
         }
-        lock (profiles)
-        {
-            profiles.Add(profile);
-        }
-        BabbleCore.Instance.Logger.LogInformation($"[VRCFTReceiver] Added {profile.name} to list of OSCQuery profiles, at address http://{profile.address}:{profile.port}");
     }
 
     private void StartAutoRefreshServices(double interval, CancellationToken cancellationToken)
@@ -195,7 +191,6 @@ public class OSCQuery
     {
         BabbleCore.Instance.Logger.LogInformation("[VRCFTReceiver] OSCQuery teardown called");
         _cancellationTokenSource.Cancel();
-        _oscQueryThread.Join(); // Wait for the thread to finish
         _cancellationTokenSource.Dispose();
         service.Dispose();
         BabbleCore.Instance.Logger.LogInformation("[VRCFTReceiver] OSCQuery teardown completed");
