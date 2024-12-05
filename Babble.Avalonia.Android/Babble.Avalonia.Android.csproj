@@ -48,5 +48,9 @@
     <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="9.0.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\xml\" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionBabbleAvaloniaAndroidHideInfoBar="True" /></VisualStudio></ProjectExtensions>
 </Project>

@@ -4,7 +4,7 @@ using System.Buffers.Binary;
 using System.IO.Ports;
 using System.Numerics;
 
-namespace Babble.Core.Scripts.Decoders;
+namespace Babble.Core.Scripts.Captures;
 
 /// <summary>
 /// Serial Camera capture class intended for use on Desktop platforms

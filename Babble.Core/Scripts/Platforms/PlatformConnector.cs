@@ -1,6 +1,6 @@
 ﻿using OpenCvSharp;
 
-namespace Babble.Core.Scripts.Decoders;
+namespace Babble.Core.Scripts.Captures;
 
 /// <summary>
 /// Manages what Captures are allowed to run on what platforms, as well as their Urls, etc.
@@ -10,20 +10,31 @@ public abstract class PlatformConnector
     /// <summary>
     /// The path to where the "data" lies
     /// </summary>
-    public string Url { get; set; }
+    public string Url { get; set; } = string.Empty;
 
     /// <summary>
     /// A Platform may have many Capture sources, but only one may ever be active at a time.
     /// This represents the current (and a valid) Capture source for this Platform
     /// </summary>
-    public Capture? Capture { get; set; }
+    public Capture? Capture { get; private set; } = null;
+
+    /// <summary>
+    /// Dynamic collection of Capture types, their identifying strings as well as prefix/suffix controls
+    /// Add (or remove) from this collection to support platform specific connectors at runtime
+    /// Or support weird hardware setups
+    /// </summary>
+    public abstract Dictionary<(HashSet<string> strings, bool areSuffixes), Type> Captures { get; set; }
+    
+    /// <summary>
+    /// What should the default/fallback capture type be for this platform
+    /// </summary>
+    public abstract Type DefaultCapture { get; }
 
     private uint _lastFrameCount = 0;
 
     public PlatformConnector(string Url)
     {
         this.Url = Url;
-        Capture = null;
     }
 
     /// <summary>
@@ -31,7 +42,35 @@ public abstract class PlatformConnector
     /// </summary>
     public virtual void Initialize()
     {
-        Capture = null;
+        foreach (var capture in Captures)
+        {
+            if (capture.Key.Item2)
+            {
+                if (capture.Key.Item1.Any(prefix => Url.EndsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Capture = (Capture)Activator.CreateInstance(capture.Value, Url);
+                    break;
+                }
+            }
+            else
+            {
+                if (capture.Key.Item1.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Capture = (Capture)Activator.CreateInstance(capture.Value, Url);
+                    break;
+                }
+            }
+        }
+
+        if (Capture is null)
+        {
+            Capture = (Capture)Activator.CreateInstance(DefaultCapture, Url);
+        }
+
+        if (Capture is not null)
+        {
+            Capture.StartCapture();
+        }
     }
 
     /// <summary>

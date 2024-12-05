@@ -1,7 +1,7 @@
 ﻿using Babble.Core.Enums;
 using Babble.Core.Scripts;
 using Babble.Core.Scripts.Config;
-using Babble.Core.Scripts.Decoders;
+using Babble.Core.Scripts.Captures;
 using Babble.Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,18 +22,19 @@ namespace Babble.Core;
 /// </summary>
 public partial class BabbleCore
 {
-    [MemberNotNullWhen(true, nameof(_platformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
+    [MemberNotNullWhen(true, nameof(PlatformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
     public bool IsRunning { get; private set; }
     public int FPS => (int)MathF.Floor(1000f / MS);
     public float MS { get; private set; }
     public static BabbleCore Instance { get; private set; }
     public BabbleSettings Settings { get; private set; }
     public ILogger<BabbleCore> Logger { get; private set; }
+    
+    public PlatformConnector? PlatformConnector;
 
     private static readonly Size _inputSize = new Size(256, 256);
     private readonly DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
     private Dictionary<string, CalibrationItem>? _calibrationItems;
-    private PlatformConnector? _platformConnector;
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
     private Stopwatch _sw = Stopwatch.StartNew();
@@ -71,8 +72,8 @@ public partial class BabbleCore
 
             if (setting == captureSource)
             {
-                if (_platformConnector is not null)
-                    _platformConnector!.Terminate();
+                if (PlatformConnector is not null)
+                    PlatformConnector!.Terminate();
                 ConfigurePlatformConnector();
             }
 
@@ -177,7 +178,7 @@ public partial class BabbleCore
         }
         
         // Test if the camera is not ready or connecting to new source
-        var data = _platformConnector.ExtractFrameData(_inputSize);
+        var data = PlatformConnector.ExtractFrameData(_inputSize);
         if (data is null) return false;
         if (data.Length == 0) return false;
 
@@ -231,25 +232,25 @@ public partial class BabbleCore
     {
         dimensions = (0, 0);
         image = Array.Empty<byte>();
-        if (_platformConnector?.Capture!.RawMat is null)
+        if (PlatformConnector?.Capture!.RawMat is null)
         {
             return false;
         }
         
         // https://github.com/shimat/opencvsharp/issues/952
-        dimensions = _platformConnector.Capture.Dimensions;
+        dimensions = PlatformConnector.Capture.Dimensions;
         switch (color)
         {
             case ColorType.GRAY_8:
             {
                 using var grayMat = new Mat();
-                Cv2.CvtColor(_platformConnector.Capture.RawMat, grayMat, ColorConversionCodes.BGR2GRAY);
+                Cv2.CvtColor(PlatformConnector.Capture.RawMat, grayMat, ColorConversionCodes.BGR2GRAY);
                 grayMat.GetArray(out image);
                 break;
             }
             case ColorType.BGR_24:
             {
-                _platformConnector.Capture.RawMat.GetArray<Vec3b>(out var pixels);
+                PlatformConnector.Capture.RawMat.GetArray<Vec3b>(out var pixels);
                 ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
                 image = new byte[pixels.Length * 3];
                 Unsafe.CopyBlock(ref image[0], ref bytes, (uint)image.Length);
@@ -258,7 +259,7 @@ public partial class BabbleCore
             case ColorType.RGB_24:
             {
                 using var rgbMat = new Mat();
-                Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbMat, ColorConversionCodes.BGR2RGB);
+                Cv2.CvtColor(PlatformConnector.Capture.RawMat, rgbMat, ColorConversionCodes.BGR2RGB);
                 rgbMat.GetArray<Vec3b>(out var pixels);
                 ref var bytes = ref Unsafe.As<Vec3b, byte>(ref pixels[0]);
                 image = new byte[pixels.Length * 3];
@@ -268,7 +269,7 @@ public partial class BabbleCore
             case ColorType.RGBA_32:
             {
                 using var rgbaMat = new Mat();
-                Cv2.CvtColor(_platformConnector.Capture.RawMat, rgbaMat, ColorConversionCodes.BGR2RGBA);
+                Cv2.CvtColor(PlatformConnector.Capture.RawMat, rgbaMat, ColorConversionCodes.BGR2RGBA);
                 rgbaMat.GetArray<Vec4b>(out var pixels);
                 ref var bytes = ref Unsafe.As<Vec4b, byte>(ref pixels[0]);
                 image = new byte[pixels.Length * 4];
@@ -291,7 +292,7 @@ public partial class BabbleCore
     {
         image = Array.Empty<byte>();
         dimensions = (0, 0);
-        using var transformedImageCandidate = _platformConnector?.TransformRawImage(_inputSize);
+        using var transformedImageCandidate = PlatformConnector?.TransformRawImage(_inputSize);
         if (transformedImageCandidate is null) return false;
 
         dimensions = (transformedImageCandidate.Width, transformedImageCandidate.Height);
@@ -315,7 +316,7 @@ public partial class BabbleCore
 
         IsRunning = false;
         _session.Dispose();
-        _platformConnector.Terminate();
+        PlatformConnector.Terminate();
         Logger.LogInformation("Babble.Core stopped");
     }
 
@@ -351,16 +352,16 @@ public partial class BabbleCore
     {
         if (OperatingSystem.IsAndroid())
         {
-            _platformConnector = new AndroidConnector(Settings.Cam.CaptureSource);
+            PlatformConnector = new AndroidConnector(Settings.Cam.CaptureSource);
         } 
         else
         {
             // Else, for WinUI, macOS, watchOS, MacCatalyst, tvOS, Tizen, etc...
             // Use the standard EmguCV VideoCapture backend
-            _platformConnector = new DesktopConnector(Settings.Cam.CaptureSource);
+            PlatformConnector = new DesktopConnector(Settings.Cam.CaptureSource);
         }
 
-        _platformConnector.Initialize();
+        PlatformConnector.Initialize();
     }
 
     /// <summary>

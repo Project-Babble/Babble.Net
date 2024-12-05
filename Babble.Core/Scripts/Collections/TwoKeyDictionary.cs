@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Text;
 
-namespace Babble.OSC.Collections;
+namespace Babble.Core.Scripts.Collections;
 
 //  https://stackoverflow.com/questions/32761880/net-dictionary-with-two-keys-and-one-value
 

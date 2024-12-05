@@ -1,46 +1,31 @@
-﻿ namespace Babble.Core.Scripts.Decoders;
+﻿ using Babble.Core.Scripts.Collections;
+
+ namespace Babble.Core.Scripts.Captures;
 
 /// <summary>
 /// Base class for camera capture and frame processing
 /// </summary>
 public class DesktopConnector : PlatformConnector
 {
-    private static readonly HashSet<string> SerialConnections 
+    private static readonly HashSet<string> _serialConnections 
         = new(StringComparer.OrdinalIgnoreCase) { "com" };
 
-    private static readonly HashSet<string> IPConnectionsPrefixes
+    private static readonly HashSet<string> _IPConnectionsPrefixes
     = new(StringComparer.OrdinalIgnoreCase) { "http", };
 
-    private static readonly HashSet<string> IPConnectionsSuffixes
+    private static readonly HashSet<string> _IPConnectionsSuffixes
         = new(StringComparer.OrdinalIgnoreCase) { "local", "local/" };
 
-    private static readonly HashSet<string> ImageConnections 
-        = new(StringComparer.OrdinalIgnoreCase) { "bmp", "gif", "ico", "jpeg", "jpg", "png", "psd", "tiff" };
+    public override Dictionary<(HashSet<string>, bool), Type> Captures { get; set; } = new()
+    {
+        { (_serialConnections, false), typeof(SerialCameraCapture) },
+        { (_IPConnectionsPrefixes, false), typeof(IPCameraCapture) },
+        { (_IPConnectionsSuffixes, true), typeof(IPCameraCapture) }
+    };
+
+    public override Type DefaultCapture => typeof(OpenCVCapture);
 
     public DesktopConnector(string Url) : base(Url)
     {
-    }
-
-    public override void Initialize()
-    {
-        base.Initialize();
-
-        // Determine if this is an IP Camera, Serial Camera, or something else
-        if (SerialConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
-        {
-            Capture = new SerialCameraCapture(Url);
-        }
-        else if (IPConnectionsPrefixes.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
-                 IPConnectionsSuffixes.Any(suffix => Url.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))))
-        {
-            Capture = new IPCameraCapture(Url);
-        }
-        else
-        {
-            // IPConnections on MacOS Fail here, so use the above implementation
-            Capture = new OpenCVCapture(Url); 
-        }
-
-        Capture.StartCapture();
     }
 }

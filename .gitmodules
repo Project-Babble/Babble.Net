@@ -7,3 +7,6 @@
 [submodule "vrc-oscquery-lib"]
 	path = vrc-oscquery-lib
 	url = https://github.com/vrchat-community/vrc-oscquery-lib
+[submodule "UsbSerialForAndroid"]
+	path = Babble.Avalonia.Android/UsbSerialForAndroid
+	url = https://github.com/anotherlab/UsbSerialForAndroid/

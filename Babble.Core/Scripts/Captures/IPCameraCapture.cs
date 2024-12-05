@@ -3,7 +3,7 @@ using OpenCvSharp;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace Babble.Core.Scripts.Decoders;
+namespace Babble.Core.Scripts.Captures;
 
 /// <summary>
 /// Captures and decodes an MJPEG stream, commonly used by IP Cameras
