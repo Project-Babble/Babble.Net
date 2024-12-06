@@ -1,6 +1,6 @@
 ﻿using OpenCvSharp;
 
-namespace Babble.Core.Scripts.Decoders;
+namespace Babble.Core.Scripts.Captures;
 
 /// <summary>
 /// Defines custom camera stream behavior

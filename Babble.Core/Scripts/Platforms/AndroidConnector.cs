@@ -1,32 +1,25 @@
-﻿namespace Babble.Core.Scripts.Decoders;
+﻿namespace Babble.Core.Scripts.Captures;
 
 /// <summary>
-/// Special class for iOS, Android and UWP platforms where EmguCV VideoCapture is not fully implemented
+/// Special class for iOS, Android and UWP platforms where VideoCapture is not fully implemented
 /// Support for MJPEG video streams only presently!
 /// </summary>
 public class AndroidConnector : PlatformConnector
 {
-    private static readonly HashSet<string> SerialConnections 
-        = new(StringComparer.OrdinalIgnoreCase) { "/dev/tty" };
+    private static readonly HashSet<string> _IPConnectionsPrefixes
+        = new(StringComparer.OrdinalIgnoreCase) { "http", };
+
+    private static readonly HashSet<string> _IPConnectionsSuffixes
+        = new(StringComparer.OrdinalIgnoreCase) { "local", "local/" };
+
+    protected override Type DefaultCapture => typeof(IPCameraCapture);
     
     public AndroidConnector(string Url) : base(Url)
     {
-    }
-    
-    public override void Initialize()
-    {
-        base.Initialize();
-        
-        if (SerialConnections.Any(prefix => Url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+        Captures = new()
         {
-            Capture = new SerialCameraCapture(Url);
-        }
-        else
-        {
-            // Default to IPCameraCapture
-            Capture = new IPCameraCapture(Url);
-        }
-
-        Capture.StartCapture();
+            { (_IPConnectionsPrefixes, false), typeof(IPCameraCapture) },
+            { (_IPConnectionsSuffixes, true), typeof(IPCameraCapture) }
+        };
     }
 }

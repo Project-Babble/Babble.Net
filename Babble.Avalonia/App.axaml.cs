@@ -3,11 +3,15 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Localizer.Core;
 using Avalonia.Markup.Xaml;
+using Babble.Avalonia.ReactiveObjects;
+using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
 using Babble.OSC;
 using Hypernex.ExtendedTracking;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using VRCFaceTracking;
 using VRCFaceTracking.Core.Library;
@@ -18,6 +22,21 @@ namespace Babble.Avalonia;
 
 public partial class App : Application
 {
+    public static Action<IServiceCollection>? RegisterPlatformService;
+    public static IHost GlobalHost => Host.CreateDefaultBuilder()
+        .ConfigureServices((services) =>
+        {
+            RegisterPlatformService?.Invoke(services);
+            services.AddSingleton<CamView>();
+            services.AddSingleton<AlgoView>();
+            services.AddSingleton<SettingsView>();
+            services.AddSingleton<CalibrationView>();
+            services.RegisterSingleton<CamView, CamViewModel>();
+            services.RegisterSingleton<AlgoView, AlgoSettingsViewModel>();
+            services.RegisterSingleton<SettingsView, SettingsViewModel>();
+            services.RegisterSingleton<CalibrationView, CalibrationViewModel>();
+        }).Build();
+    
     // Platform-agnostic Notification representation.
     // Implementers can subscribe to this Action when a notification is to be raised
     // Ex: SendNotification.Invoke("Title", "Body", string.Empty, string.Empty, null, null, null);
@@ -62,7 +81,7 @@ public partial class App : Application
         _babbleOSC = new BabbleOSC(ip, port);
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
@@ -86,6 +105,7 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+        await GlobalHost.StartAsync();
     }
 
     private void Desktop_Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
