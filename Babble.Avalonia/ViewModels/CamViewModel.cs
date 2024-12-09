@@ -44,7 +44,7 @@ public partial class CamViewModel : ObservableObject
     public CamViewModel()
     {
         var settings = BabbleCore.Instance.Settings;
-        CameraAddressEntryText = settings.Cam.CaptureSource;
+        cameraAddressEntryText = settings.Cam.CaptureSource;
         rotation = settings.Cam.RotationAngle;
         enableCalibration = settings.GeneralSettings.UseCalibration;
         isVerticalFlip = settings.Cam.GuiVerticalFlip;
@@ -66,6 +66,6 @@ public partial class CamViewModel : ObservableObject
         // With a previously correct URL, but it's not ready just yet
         // Don't send an update event!
         var settings = BabbleCore.Instance.Settings;
-        CameraAddressEntryText = settings.Cam.CaptureSource;
+        cameraAddressEntryText = settings.Cam.CaptureSource;
     }
 }
