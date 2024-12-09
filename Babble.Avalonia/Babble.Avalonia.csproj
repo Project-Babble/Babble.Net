@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Assets\de-de.json" />
     <None Remove="Assets\Localization\de-de.json" />
     <None Remove="Assets\Localization\en-owo.json" />
     <None Remove="Assets\Localization\en-pirate.json" />

@@ -1,174 +1,141 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Babble.Avalonia.SettingsView"
+			 xmlns:local="clr-namespace:Babble.Avalonia.ViewModels"
 			 xmlns:localization="clr-namespace:Avalonia.Localizer.Core.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
 
-	<UserControl.Styles>
-		<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-			<Setter Property="Background" Value="#2D2D2D"/>
-			<Setter Property="BorderBrush" Value="#4CAF50"/>
-			<!-- Optional: gives a nice green highlight when focused -->
-			<Setter Property="BorderThickness" Value="1"/>
-		</Style>
-	</UserControl.Styles>
-	
-	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-		<Border Background="#3D3D3D" CornerRadius="3" Padding="10" Margin="0,0,0,0">
+	<UserControl.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<local:SettingsViewModel />
+	</UserControl.DataContext>
+
+	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" x:Name="ScrollBar">
+		<Border CornerRadius="3" Padding="10" Margin="0,0,0,0">
+			<Border.Background>
+				<SolidColorBrush Color="{Binding BackgroundColor}"/>
+			</Border.Background>
 			<StackPanel Spacing="5" Margin="0,0,0,0">
 				<TextBlock Text="{localization:Localize general.header}"
                            ToolTip.Tip="{localization:Localize general.headerTooltip}"
                            x:Name="GeneralSettingsText"
-                           Foreground="White"
                            FontWeight="Bold"/>
 				<CheckBox Content="{localization:Localize general.checkForUpdates}"
                           ToolTip.Tip="{localization:Localize general.checkForUpdatesTooltip}"
                           x:Name="CheckForUpdates"
-                          Foreground="White"
                           IsChecked="True"
                           Margin="0,10,0,0"/>
 
 				<TextBlock Text="{localization:Localize general.oscSettings}"
                            ToolTip.Tip="{localization:Localize general.oscSettingsTooltip}"
                            x:Name="OSCSettingsText"
-                           Foreground="White"
                            FontWeight="Bold"
                            Margin="0,10,0,0"/>
 
 				<TextBlock Text="{localization:Localize general.locationPrefix}"
                            ToolTip.Tip="{localization:Localize general.locationPrefixTooltip}"
                            x:Name="LocationPrefixText"
-                           Margin="0,0,0,0"
-                           Foreground="White"/>
-				<TextBox Background="#2D2D2D"
-                         Text="{Binding LocationPrefix}"
+                           Margin="0,0,0,0"/>
+				<TextBox Text="{Binding LocationPrefix}"
                          ToolTip.Tip="{localization:Localize general.locationPrefixTooltip}"
-                         x:Name="LocationPrefixEntry"
-                         Foreground="White"/>
+                         x:Name="LocationPrefixEntry"/>
 				
 				<TextBlock Text="{localization:Localize general.address}"
                             ToolTip.Tip="{localization:Localize general.addressTooltip}"
                             x:Name="IpAddressText"
                             Grid.Column="0"
-                            Foreground="White"
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"/>
 				<TextBox Text="{Binding IpAddress}"
                             ToolTip.Tip="{localization:Localize general.addressTooltip}"
                             x:Name="IpAddressEntry"
-                            Grid.Column="1"
-                            Background="#2D2D2D"
-                            Foreground="White"/>
+                            Grid.Column="1"/>
 				
 				<TextBlock Text="{localization:Localize general.port}"
                             ToolTip.Tip="{localization:Localize general.portTooltip}"
                             x:Name="PortText"
                             Grid.Column="0"
-                            Foreground="White"
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"/>
 				<TextBox Text="{Binding Port}"
                             ToolTip.Tip="{localization:Localize general.portTooltip}"
                             x:Name="PortEntry"
-                            Grid.Column="1"
-                            Background="#2D2D2D"
-                            Foreground="White"/>			
+                            Grid.Column="1"/>			
 
 				<CheckBox Content="Use OSCQuery"
 		                  x:Name="UseOSCQuery"
-		                  IsChecked="{Binding UseOSCQuery}"
-		                  Foreground="White"/>
+		                  IsChecked="{Binding UseOSCQuery}"/>
 				<CheckBox Content="{localization:Localize general.receiver}"
                           ToolTip.Tip="{localization:Localize general.receiverTooltip}"
-                          x:Name="ReceiveFunctionsText"
-                          Foreground="White"/>
+                          x:Name="ReceiveFunctionsText"/>
 
 				<TextBlock Text="{localization:Localize general.receiverPort}"
                            ToolTip.Tip="{localization:Localize general.receiverPortTooltip}"
-                           x:Name="ReceiverPortText"
-                           Foreground="White"/>
+                           x:Name="ReceiverPortText"/>
 				<TextBox Text="{Binding ReceiverPort}"
                          ToolTip.Tip="{localization:Localize general.receiverPortTooltip}"
-                         x:Name="ReceiverPortEntry"
-                         Background="#2D2D2D"
-                         Foreground="White"/>
+                         x:Name="ReceiverPortEntry"/>
 
 				<TextBlock Text="{localization:Localize general.recalibrate}"
                            ToolTip.Tip="{localization:Localize general.recalibrateTooltip}"
-                           x:Name="RecalibrateAddressText"
-                           Foreground="White"/>
+                           x:Name="RecalibrateAddressText"/>
 				<TextBox Text="{Binding RecalibrateAddress}"
                          ToolTip.Tip="{localization:Localize general.recalibrateTooltip}"
-                         x:Name="RecalibrateAddressEntry"
-                         Background="#2D2D2D"
-                         Foreground="White"/>
+                         x:Name="RecalibrateAddressEntry"/>
 
 				<TextBlock Text="{localization:Localize general.uvcCameraSettings}"
                            ToolTip.Tip="{localization:Localize general.uvcCameraSettingsTooltip}"
                            x:Name="UVCCameraSettingsText"
-                           Foreground="White"
                            FontWeight="Bold"
                            Margin="0,10,0,0"/>
 				<CheckBox Content="{localization:Localize general.useRedChannel}"
                           ToolTip.Tip="{localization:Localize general.useRedChannelTooltip}"
                           x:Name="UseRedChannel"
-                          IsChecked="{Binding UseRedChannel}"
-                          Foreground="White"/>
+                          IsChecked="{Binding UseRedChannel}"/>
 
 				<StackPanel Grid.Column="1" Spacing="5" Margin="0,10,0,0">
 					<TextBlock Text="{localization:Localize general.xResolution}"
                                ToolTip.Tip="{localization:Localize general.xResolutionTooltip}"
                                x:Name="XResolutionText"
-                               Grid.Column="0"
-                               Foreground="White"/>
+                               Grid.Column="0"/>
 					<TextBox Text="{Binding XResolution}"
                              ToolTip.Tip="{localization:Localize general.xResolutionTooltip}"
                              x:Name="XResolutionEntry"
                              Grid.Row="1"
-                             Grid.Column="0"
-                             Background="#2D2D2D"
-                             Foreground="White"/>
+                             Grid.Column="0"/>
 
 					<TextBlock Text="{localization:Localize general.yResolution}"
                                ToolTip.Tip="{localization:Localize general.yResolutionTooltip}"
                                x:Name="YResolutionText"
-                               Grid.Column="1"
-                               Foreground="White"/>
+                               Grid.Column="1"/>
 					<TextBox Text="{Binding YResolution}"
                              ToolTip.Tip="{localization:Localize general.yResolutionTooltip}"
                              x:Name="YResolutionEntry"
                              Grid.Row="1"
-                             Grid.Column="1"
-                             Background="#2D2D2D"
-                             Foreground="White"/>
+                             Grid.Column="1"/>
 
 					<TextBlock Text="{localization:Localize general.framerate}"
                                ToolTip.Tip="{localization:Localize general.framerateTooltip}"
                                x:Name="FramerateText"
-                               Grid.Column="2"
-                               Foreground="White"/>
+                               Grid.Column="2"/>
 					<TextBox Text="{Binding Framerate}"
                              ToolTip.Tip="{localization:Localize general.framerateTooltip}"
                              x:Name="FramerateEntry"
                              Grid.Row="1"
-                             Grid.Column="2"
-                             Background="#2D2D2D"
-                             Foreground="White"/>
+                             Grid.Column="2"/>
 				</StackPanel>
 
 				<StackPanel Grid.Column="1" Spacing="5" Margin="0,10,0,0">
 					<TextBlock Text="{localization:Localize general.language}"
                                x:Name="LanguageComboText"
 							   FontWeight="Bold"
-                               ToolTip.Tip="{localization:Localize general.languageTooltip}"
-                               Foreground="White"/>
+                               ToolTip.Tip="{localization:Localize general.languageTooltip}"/>
 					<ComboBox SelectedIndex="{Binding SelectedIndex}"
                               x:Name="LanguageCombo"
-                              SelectedItem="{Binding SelectedLanguage}"
-                              Background="#2D2D2D"
-                              Foreground="White">
+                              SelectedItem="{Binding SelectedLanguage}">
 					</ComboBox>
 				</StackPanel>
 

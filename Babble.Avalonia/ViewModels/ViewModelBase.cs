@@ -2,6 +2,10 @@
 
 namespace Babble.Avalonia.ViewModels;
 
-public class ViewModelBase : ObservableObject
+/// <summary>
+/// Base class to handle stuff where Fluent Avalonia, etc. cannot
+/// </summary>
+public partial class ViewModelBase : ObservableObject
 {
+    
 }

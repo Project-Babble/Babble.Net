@@ -6,30 +6,21 @@
 			 xmlns:localization="clr-namespace:Avalonia.Localizer.Core.Localization"
 			 xmlns:model="using:Babble.Avalonia.ReactiveObjects"
              mc:Ignorable="d">
-	
-	<UserControl.Styles>
-		<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-			<Setter Property="Background" Value="#2D2D2D"/>
-			<Setter Property="BorderBrush" Value="#4CAF50"/>
-			<!-- Optional: gives a nice green highlight when focused -->
-			<Setter Property="BorderThickness" Value="1"/>
-		</Style>
-	</UserControl.Styles>
 
-	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" x:Name="ScrollBar">
+		<Border CornerRadius="3" Padding="10" Margin="0,0,0,0">
+			<Border.Background>
+				<SolidColorBrush Color="{Binding BackgroundColor}"/>
+			</Border.Background>
 		<StackPanel Spacing="5" Margin="0,0,0,0">
 			<Grid ColumnDefinitions="Auto,*" Margin="0,0,0,0">
 				<TextBlock Text="Calibration Mode:"
 						 x:Name="CalibrationModeText"
 						 Grid.Column="0"
-						 Foreground="White"
 						 VerticalAlignment="Center"/>
 				<ComboBox Grid.Column="1"
 						SelectedIndex="0"
-						Background="#2D2D2D"
-						Margin="10,0,10,0"
-						Foreground="White">
+						Margin="10,0,10,0">
 					<ComboBoxItem>Neutral</ComboBoxItem>
 				</ComboBox>
 			</Grid>
@@ -44,14 +35,12 @@
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="Shape Name" 
 										Width="Auto"
-										Foreground="White"
 										Binding="{Binding ShapeName}"/>
 
 					<DataGridTemplateColumn Header="Min">
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate DataType="model:CalibrationItem">
 								<TextBlock Text="{Binding Min}"
-										   Foreground="White"
 										   VerticalAlignment="Center" 
 										   HorizontalAlignment="Center" />
 							</DataTemplate>
@@ -69,7 +58,6 @@
 						<DataGridTemplateColumn.CellTemplate>
 							<DataTemplate DataType="model:CalibrationItem">
 								<TextBlock Text="{Binding Max}"
-										   Foreground="White"
 										   VerticalAlignment="Center" 
 										   HorizontalAlignment="Center" />
 							</DataTemplate>
@@ -92,14 +80,10 @@
 					  Margin="0,10,0,0">
 				<Button Content="Reset Min"
 						x:Name="ResetMinText"
-						Click="OnResetMinClicked"
-						Background="#4CAF50"
-						Foreground="White"/>
+						Click="OnResetMinClicked"/>
 				<Button Content="Reset Max"
 						x:Name="ResetMaxText"
-						Click="OnResetMaxClicked"
-						Background="#4CAF50"
-						Foreground="White"/>
+						Click="OnResetMaxClicked"/>
 			</StackPanel>
 		</StackPanel>
 	</Border>

@@ -7,15 +7,6 @@
              mc:Ignorable="d"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 	
-	<UserControl.Styles>
-		<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-			<Setter Property="Background" Value="#2D2D2D"/>
-			<Setter Property="BorderBrush" Value="#4CAF50"/>
-			<!-- Optional: gives a nice green highlight when focused -->
-			<Setter Property="BorderThickness" Value="1"/>
-		</Style>
-	</UserControl.Styles>
-	
 	<Design.DataContext>
 		<!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -23,111 +14,95 @@
 	</Design.DataContext>
 
 	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" x:Name="ScrollBar">
-		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
-		<StackPanel Spacing="5" Margin="0,0,0,0">
-			<TextBlock Text="{localization:Localize camera.cameraAddress}" 
-					   ToolTip.Tip="{localization:Localize camera.cameraAddressTooltip}"
-					   x:Name="CameraAddressText" 
-					   Foreground="White"/>
-			<AutoCompleteBox Text="{Binding CameraAddressEntryText}" 
-					 ToolTip.Tip="{Binding CameraAddressTextTooltip}"
-					 x:Name="CameraAddressEntry" 
-					 Background="#2D2D2D"
-					 Watermark="Start typing to see detected devices..."
-					 FilterMode="Contains"
-					 Foreground="White"/>
-			<Button Content="{localization:Localize camera.saveAndRestartTracking}"
-					ToolTip.Tip="{localization:Localize camera.saveAndRestartTrackingTooltip}"
-					x:Name="SaveAndRestartTrackingText"
-					Click="CameraAddressClicked"
-                    Background="#4CAF50"
-                    Foreground="White"/>
-			<Button Content="Select entire frame"
-					ToolTip.Tip=""
-					x:Name="SelectEntireFrame"
-					Click="SelectEntireFrameClicked"
-					Background="#4CAF50"
-					Foreground="White"/>
+		<Border CornerRadius="3" Padding="10" Margin="0,0,0,0">
+			<Border.Background>
+				<SolidColorBrush Color="{Binding BackgroundColor}"/>
+			</Border.Background>
+			<StackPanel Spacing="5" Margin="0,0,0,0">
+				<TextBlock Text="{localization:Localize camera.cameraAddress}" 
+						   ToolTip.Tip="{localization:Localize camera.cameraAddressTooltip}"
+						   x:Name="CameraAddressText"/>
+				<AutoCompleteBox Text="{Binding CameraAddressEntryText}" 
+						 ToolTip.Tip="{Binding CameraAddressTextTooltip}"
+						 x:Name="CameraAddressEntry"
+						 Watermark="Start typing to see detected devices..."
+						 FilterMode="Contains"/>
+				<Button Content="{localization:Localize camera.saveAndRestartTracking}"
+						ToolTip.Tip="{localization:Localize camera.saveAndRestartTrackingTooltip}"
+						x:Name="SaveAndRestartTrackingText"
+						Click="CameraAddressClicked"/>
+				<Button Content="Select entire frame"
+						ToolTip.Tip=""
+						x:Name="SelectEntireFrame"
+						Click="SelectEntireFrameClicked"/>
 
-			<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,0">
-				<RadioButton Content="{localization:Localize camera.trackingMode}"
-						x:Name="TrackingModeButton"
-						GroupName="ImageControlGroup"
-						ToolTip.Tip="{localization:Localize camera.trackingModeTooltip}"
-						Click="OnTrackingModeClicked"
-                        Foreground="White"/>
-				<RadioButton Content="{localization:Localize camera.croppingMode}"
-						GroupName="ImageControlGroup"
-						x:Name="CroppingModeButton"
-						Click="OnCroppingModeClicked"
-                        Foreground="White"/>
-			</StackPanel>
+				<StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,0">
+					<RadioButton Content="{localization:Localize camera.trackingMode}"
+							x:Name="TrackingModeButton"
+							GroupName="ImageControlGroup"
+							ToolTip.Tip="{localization:Localize camera.trackingModeTooltip}"
+							Click="OnTrackingModeClicked"/>
+					<RadioButton Content="{localization:Localize camera.croppingMode}"
+							GroupName="ImageControlGroup"
+							x:Name="CroppingModeButton"
+							Click="OnCroppingModeClicked"/>
+				</StackPanel>
 
-			<Grid>
-				<Image x:Name="MouthWindow"
-					   Source="{Binding MouthBitmap}"
-					   IsHitTestVisible="True"
-					   Stretch="None"/>
-				<Canvas x:Name="CanvasWindow" 
-						Background="Transparent" 
-						IsHitTestVisible="False">
-					<Rectangle x:Name="RectangleWindow" 
-							   Fill="Transparent" 
-							   IsHitTestVisible="False"
-							   Canvas.Left="{Binding OverlayRectangleCanvasX}" 
-							   Canvas.Top="{Binding OverlayRectangleCanvasY}"/>
-				</Canvas>
-			</Grid>
+				<Grid>
+					<Image x:Name="MouthWindow"
+						   Source="{Binding MouthBitmap}"
+						   IsHitTestVisible="True"
+						   Stretch="None"/>
+					<Canvas x:Name="CanvasWindow" 
+							Background="Transparent" 
+							IsHitTestVisible="False">
+						<Rectangle x:Name="RectangleWindow" 
+								   Fill="Transparent" 
+								   IsHitTestVisible="False"
+								   Canvas.Left="{Binding OverlayRectangleCanvasX}" 
+								   Canvas.Top="{Binding OverlayRectangleCanvasY}"/>
+					</Canvas>
+				</Grid>
 
-			<StackPanel Spacing="5"  Margin="0,5,0,0">
-				<TextBlock Text=""
-						   x:Name="PerfText"
-						   Foreground="White"/>
-			</StackPanel>
+				<StackPanel Spacing="5"  Margin="0,5,0,0">
+					<TextBlock Text=""
+							   x:Name="PerfText"/>
+				</StackPanel>
 
-			<StackPanel Spacing="5"  Margin="0,5,0,0">
-				<TextBlock Text="{localization:Localize camera.rotation}"
-						   ToolTip.Tip="{localization:Localize camera.rotationTooltip}" 
-						   x:Name="RotationText" 
-						   Foreground="White"/>
-				<Slider x:Name="RotationSlider" 
-						Minimum="0" 
-						Maximum="360" 
-						Value="{Binding Rotation}" />
-			</StackPanel>
+				<StackPanel Spacing="5"  Margin="0,5,0,0">
+					<TextBlock Text="{localization:Localize camera.rotation}"
+							   ToolTip.Tip="{localization:Localize camera.rotationTooltip}" 
+							   x:Name="RotationText"/>
+					<Slider x:Name="RotationSlider" 
+							Minimum="0" 
+							Maximum="360" 
+							Value="{Binding Rotation}" />
+				</StackPanel>
 			
-			<StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,0">
-				<Button Content="{localization:Localize camera.startCalibration}"
-						x:Name="StartCalibrationText"
-						ToolTip.Tip="{localization:Localize camera.startCalibrationTooltip}"
-                        Background="#4CAF50"
-                        Foreground="White"/>
-				<Button Content="{localization:Localize camera.stopCalibration}"
-						x:Name="StopCalibrationText"
-						ToolTip.Tip="{localization:Localize camera.stopCalibrationTooltip}"
-                        Background="#4CAF50"
-                        Foreground="White"/>
+				<StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,0">
+					<Button Content="{localization:Localize camera.startCalibration}"
+							x:Name="StartCalibrationText"
+							ToolTip.Tip="{localization:Localize camera.startCalibrationTooltip}"/>
+					<Button Content="{localization:Localize camera.stopCalibration}"
+							x:Name="StopCalibrationText"
+							ToolTip.Tip="{localization:Localize camera.stopCalibrationTooltip}"/>
+				</StackPanel>
+				<CheckBox Content="{localization:Localize camera.enableCalibration}"
+						  x:Name="EnableCalibration"
+						  ToolTip.Tip="{localization:Localize camera.enableCalibrationTooltip}"
+						  IsChecked="{Binding EnableCalibration}"/>
+				<TextBlock Text="{localization:Localize camera.mode}" 
+						   x:Name="ModeText" 
+						   ToolTip.Tip="{localization:Localize camera.modeTooltip}"/>
+				<CheckBox Content="{localization:Localize camera.verticalFlip}"
+						  x:Name="VerticalFlip"
+						  IsChecked="{Binding IsVerticalFlip}"
+						  ToolTip.Tip="{localization:Localize camera.verticalFlipTooltip}"/>
+				<CheckBox Content="{localization:Localize camera.horizontalFlip}"
+						  x:Name="HorizontalFlip"
+						  IsChecked="{Binding IsHorizontalFlip}"
+						  ToolTip.Tip="{localization:Localize camera.horizontalFlipTooltip}"/>
 			</StackPanel>
-			<CheckBox Content="{localization:Localize camera.enableCalibration}"
-					  x:Name="EnableCalibration"
-				      ToolTip.Tip="{localization:Localize camera.enableCalibrationTooltip}"
-                      Foreground="White"
-                      IsChecked="{Binding EnableCalibration}"/>
-			<TextBlock Text="{localization:Localize camera.mode}" 
-					   x:Name="ModeText" 
-					   ToolTip.Tip="{localization:Localize camera.modeTooltip}"
-					   Foreground="White"/>
-			<CheckBox Content="{localization:Localize camera.verticalFlip}"
-					  x:Name="VerticalFlip"
-					  IsChecked="{Binding IsVerticalFlip}"
-					  ToolTip.Tip="{localization:Localize camera.verticalFlipTooltip}"
-					  Foreground="White"/>
-			<CheckBox Content="{localization:Localize camera.horizontalFlip}"
-					  x:Name="HorizontalFlip"
-					  IsChecked="{Binding IsHorizontalFlip}"
-					  ToolTip.Tip="{localization:Localize camera.horizontalFlipTooltip}"
-					  Foreground="White"/>
-		</StackPanel>
-	</Border>
+		</Border>
 	</ScrollViewer>
 </UserControl>

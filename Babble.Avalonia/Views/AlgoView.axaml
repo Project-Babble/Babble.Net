@@ -5,62 +5,43 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:localization="clr-namespace:Avalonia.Localizer.Core.Localization"
              mc:Ignorable="d">
-	
-	<UserControl.Styles>
-		<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-			<Setter Property="Background" Value="#2D2D2D"/>
-			<Setter Property="BorderBrush" Value="#4CAF50"/>
-			<!-- Optional: gives a nice green highlight when focused -->
-			<Setter Property="BorderThickness" Value="1"/>
-		</Style>
-	</UserControl.Styles>
-	
-	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-		<Border Background="#3D3D3D" CornerRadius="3" Padding="10">
+
+	<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" x:Name="ScrollBar">
+		<Border CornerRadius="3" Padding="10" Margin="0,0,0,0">
+			<Border.Background>
+				<SolidColorBrush Color="{Binding BackgroundColor}"/>
+			</Border.Background>
 			<StackPanel Spacing="5">
 				<TextBlock Text="{localization:Localize algorithm.header}"
 						 x:Name="ModelSettingsText"
-						 Foreground="White"
 						 FontWeight="Bold"/>
 
 				<TextBlock Text="Changing any of these will require a restart."
 					TextAlignment="Left"
-					Foreground="White"
 					Margin="0,2,0,12"
 					FontStyle="Italic"
 					x:Name="BrowseModelText"/>
 
 				<TextBlock Text="{localization:Localize algorithm.modelFile}"
-						 x:Name="ModelFileText"
-						 Foreground="White"/>
+						 x:Name="ModelFileText"/>
 				<TextBox Text="{Binding ModelFileEntryText}"
-						x:Name="ModelFileEntry"
-						Background="#2D2D2D"
-						Foreground="White"/>
+						x:Name="ModelFileEntry"/>
 				<Button Content="Browse"
 						x:Name="BrowseModel"
-						ToolTip.Tip="Browse for a model"
-						Background="#4CAF50"
-						Foreground="White"/>
+						ToolTip.Tip="Browse for a model"/>
 				
 				<StackPanel Grid.Column="0" Spacing="5" Margin="0,0,0,0">
 					<TextBlock Text="{localization:Localize algorithm.inferenceThreads}"
-								Foreground="White"
 							   	Margin="0,12,0,0"
 								x:Name="InferenceThreads"/>
 					<TextBox Text="{Binding InferenceThreadsEntryText}"
-							x:Name="InferenceThreadsEntry"
-							Background="#2D2D2D"
-							Foreground="White"/>
+							x:Name="InferenceThreadsEntry"/>
 				</StackPanel>
 
 				<StackPanel Grid.Column="1" Spacing="5" Margin="0,0,0,6">
 					<TextBlock Text="{localization:Localize algorithm.runtime}"
-								x:Name="RuntimeText"
-								Foreground="White"/>
-					<ComboBox SelectedIndex="0"
-							Background="#2D2D2D"
-							Foreground="White">
+								x:Name="RuntimeText"/>
+					<ComboBox SelectedIndex="0">
 						<ComboBoxItem>ONNX</ComboBoxItem>
 					</ComboBox>
 				</StackPanel>			
@@ -70,59 +51,42 @@
 						 Content="{localization:Localize algorithm.useGPU}"
 						 x:Name="UseGpu"
 						 IsChecked="{Binding UseGpu}"
-						 Foreground="White"
 						 Margin="0,0,0,6"
 						 VerticalAlignment="Bottom"/>
 
 					<TextBlock Text="{localization:Localize algorithm.GPUIndex}"
-						 x:Name="GPUIndexText"
-						 Foreground="White"/>
+						 x:Name="GPUIndexText"/>
 					<TextBox Text="{Binding GpuIndexEntryText}"
-						 x:Name="GpuIndexEntry"
-						 Background="#2D2D2D"
-						 Foreground="White"/>
+						 x:Name="GpuIndexEntry"/>
 				</StackPanel>
 
 				<TextBlock Text="{localization:Localize algorithm.modelOutputMultiplier}"
-						 x:Name="ModelOutputMultiplierText"
-						 Foreground="White"/>
+						 x:Name="ModelOutputMultiplierText"/>
 				<TextBox Text="{Binding ModelOutputMultiplierEntryText}"
-						x:Name="ModelOutputMultiplierEntry"
-						Background="#2D2D2D"
-						Foreground="White"/>
+						x:Name="ModelOutputMultiplierEntry"/>
 
 				<TextBlock Text="{localization:Localize algorithm.calibrationDeadzone}"
-						 x:Name="CalibrationDeadzoneText"
-						 Foreground="White"/>
+						 x:Name="CalibrationDeadzoneText"/>
 				<TextBox Text="{Binding CalibrationDeadzoneEntryText}"
-						x:Name="CalibrationDeadzoneEntry"
-						Background="#2D2D2D"
-						Foreground="White"/>
+						x:Name="CalibrationDeadzoneEntry"/>
 
 				<TextBlock Text="{localization:Localize algorithm.oneEuroFilterParameters}" 
 						 x:Name="OneEuroFilterText"
-						 Foreground="White"
 						 FontWeight="Bold"
 						 Margin="0,12,0,0"/>
 				
 				<StackPanel Grid.Column="0" Spacing="5" Margin="0,0,0,0">
 					<TextBlock Text="{localization:Localize algorithm.minFrequencyCutoff}"
-								x:Name="MinFrequencyCutoffText"
-								Foreground="White"/>
+								x:Name="MinFrequencyCutoffText"/>
 					<TextBox Text="{Binding MinFrequencyCutoffEntryText}"
-							x:Name="MinFrequencyCutoffEntry"
-							Background="#2D2D2D"
-							Foreground="White"/>
+							x:Name="MinFrequencyCutoffEntry"/>
 				</StackPanel>
 
 				<StackPanel Grid.Column="1" Spacing="5" Margin="0,0,0,0">
 					<TextBlock Text="{localization:Localize algorithm.speedCoefficient}"
-								x:Name="SpeedCoefficientText"
-								Foreground="White"/>
+								x:Name="SpeedCoefficientText"/>
 					<TextBox Text="{Binding SpeedCoefficientEntryText}"
-							x:Name="SpeedCoefficientEntry"
-							Background="#2D2D2D"
-							Foreground="White"/>
+							x:Name="SpeedCoefficientEntry"/>
 				</StackPanel>
 				
 			</StackPanel>

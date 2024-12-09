@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Babble.Avalonia.ViewModels;
 
-public partial class AboutViewModel : ObservableObject
+public partial class AboutViewModel : ViewModelBase
 {
 
 }

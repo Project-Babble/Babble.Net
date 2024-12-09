@@ -5,17 +5,7 @@
         xmlns:views="clr-namespace:Babble.Avalonia"
 		xmlns:localization="clr-namespace:Avalonia.Localizer.Core.Localization"
         mc:Ignorable="d"
-        x:Class="Babble.Avalonia.Views.MobileMainWindow"
-        Background="#2D2D2D">
-
-	<UserControl.Styles>
-		<Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
-			<Setter Property="Background" Value="#2D2D2D"/>
-			<Setter Property="BorderBrush" Value="#4CAF50"/>
-			<!-- Optional: gives a nice green highlight when focused -->
-			<Setter Property="BorderThickness" Value="1"/>
-		</Style>
-	</UserControl.Styles>
+        x:Class="Babble.Avalonia.Views.MobileMainWindow">
 
 	<Grid Margin="10">
 		<Grid.RowDefinitions>
@@ -23,16 +13,16 @@
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<TabControl Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-			<TabItem Header="{localization:Localize babble.camPage}" x:Name="CameraHeaderText" Foreground="White">
+			<TabItem Header="{localization:Localize babble.camPage}" x:Name="CameraHeaderText">
 				<views:CamView/>
 			</TabItem>
-			<TabItem Header="{localization:Localize babble.settingsPage}" x:Name="AlgoHeaderText" Foreground="White">
+			<TabItem Header="{localization:Localize babble.settingsPage}" x:Name="AlgoHeaderText">
 				<views:SettingsView/>
 			</TabItem>
-			<TabItem Header="{localization:Localize babble.algoSettingsPage}" x:Name="SettingsHeaderText" Foreground="White">
+			<TabItem Header="{localization:Localize babble.algoSettingsPage}" x:Name="SettingsHeaderText">
 				<views:AlgoView/>
 			</TabItem>
-			<TabItem Header="{localization:Localize babble.calibrationPage}" x:Name="CalibrationHeaderText" Foreground="White">
+			<TabItem Header="{localization:Localize babble.calibrationPage}" x:Name="CalibrationHeaderText">
 				<views:CalibrationView/>
 			</TabItem>
 		</TabControl>
