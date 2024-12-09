@@ -1,12 +1,13 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using Babble.Avalonia.ViewModels;
 using Babble.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Babble.Avalonia.ReactiveObjects;
 
-public partial class CamViewModel : ObservableObject
+public partial class CamViewModel : ViewModelBase
 {
     [ObservableProperty]
     private string cameraAddressEntryText;

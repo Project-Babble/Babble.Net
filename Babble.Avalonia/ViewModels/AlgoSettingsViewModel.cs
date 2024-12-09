@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Babble.Avalonia.ViewModels;
 
-public partial class AlgoSettingsViewModel : ObservableObject
+public partial class AlgoSettingsViewModel : ViewModelBase
 {
     [ObservableProperty]
     public string modelFileEntryText;

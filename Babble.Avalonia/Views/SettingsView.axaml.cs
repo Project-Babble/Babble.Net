@@ -23,7 +23,7 @@ public partial class SettingsView : UserControl, IIsVisible
 
         _viewModel = new SettingsViewModel();
         DataContext = _viewModel;
-        
+
         this.FindControl<CheckBox>("CheckForUpdates")!.IsCheckedChanged += CheckForUpdates_Changed;
         this.FindControl<CheckBox>("UseRedChannel")!.IsCheckedChanged += UseRedChannel_Changed;
         this.FindControl<CheckBox>("UseOSCQuery")!.IsCheckedChanged += UseOSCQuery_Changed;

@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Babble.Avalonia.ViewModels;
 
-public partial class SettingsViewModel : ObservableObject
+public partial class SettingsViewModel : ViewModelBase
 {
     [ObservableProperty]
     public ComboBox? languageCombo;
@@ -54,16 +54,16 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsViewModel()
     {
         var settings = BabbleCore.Instance.Settings;
-        CheckForUpdates = settings.GeneralSettings.GuiUpdateCheck;
-        LocationPrefix = settings.GeneralSettings.GuiOscLocation;
-        IpAddress = settings.GeneralSettings.GuiOscAddress;
-        Port = settings.GeneralSettings.GuiOscPort;
-        ReceiverPort = settings.GeneralSettings.GuiOscReceiverPort;
-        RecalibrateAddress = settings.GeneralSettings.GuiOscRecalibrateAddress;
-        UseOSCQuery = settings.GeneralSettings.GuiForceRelevancy;
-        UseRedChannel = settings.GeneralSettings.GuiUseRedChannel;
-        XResolution = settings.GeneralSettings.GuiCamResolutionX;
-        YResolution = settings.GeneralSettings.GuiCamResolutionY;
-        Framerate = settings.GeneralSettings.GuiCamFramerate;
+        checkForUpdates = settings.GeneralSettings.GuiUpdateCheck;
+        locationPrefix = settings.GeneralSettings.GuiOscLocation;
+        ipAddress = settings.GeneralSettings.GuiOscAddress;
+        port = settings.GeneralSettings.GuiOscPort;
+        receiverPort = settings.GeneralSettings.GuiOscReceiverPort;
+        recalibrateAddress = settings.GeneralSettings.GuiOscRecalibrateAddress;
+        useOSCQuery = settings.GeneralSettings.GuiForceRelevancy;
+        useRedChannel = settings.GeneralSettings.GuiUseRedChannel;
+        xResolution = settings.GeneralSettings.GuiCamResolutionX;
+        yResolution = settings.GeneralSettings.GuiCamResolutionY;
+        framerate = settings.GeneralSettings.GuiCamFramerate;
     }
 }

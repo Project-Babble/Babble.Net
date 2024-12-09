@@ -8,26 +8,26 @@
         x:Class="Babble.Avalonia.Views.DesktopMainWindow"
         Title="Babble App v2.0.6"
         Width="700" Height="700"
-        Background="#2D2D2D">
+		RequestedThemeVariant="Default">
 
-	<Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <TabControl Grid.Row="1" Margin="0,10,0,0">
-			<TabItem Header="{localization:Localize babble.camPage}" x:Name="CameraHeaderText" Foreground="White">
-				<views:CamView/>
-			</TabItem>
-			<TabItem Header="{localization:Localize babble.settingsPage}" x:Name="AlgoHeaderText" Foreground="White">
-				<views:SettingsView/>
-			</TabItem>
-			<TabItem Header="{localization:Localize babble.algoSettingsPage}" x:Name="SettingsHeaderText" Foreground="White">
-				<views:AlgoView/>
-			</TabItem>
-			<TabItem Header="{localization:Localize babble.calibrationPage}" x:Name="CalibrationHeaderText" Foreground="White">
-				<views:CalibrationView/>
-			</TabItem>
-        </TabControl>
-    </Grid>
+		<Grid Margin="10">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+			<TabControl Grid.Row="1" Margin="0,10,0,0">
+				<TabItem Header="{localization:Localize babble.camPage}" x:Name="CameraHeaderText">
+					<views:CamView/>
+				</TabItem>
+				<TabItem Header="{localization:Localize babble.settingsPage}" x:Name="AlgoHeaderText">
+					<views:SettingsView/>
+				</TabItem>
+				<TabItem Header="{localization:Localize babble.algoSettingsPage}" x:Name="SettingsHeaderText">
+					<views:AlgoView/>
+				</TabItem>
+				<TabItem Header="{localization:Localize babble.calibrationPage}" x:Name="CalibrationHeaderText">
+					<views:CalibrationView/>
+				</TabItem>
+			</TabControl>
+		</Grid>
 </Window>

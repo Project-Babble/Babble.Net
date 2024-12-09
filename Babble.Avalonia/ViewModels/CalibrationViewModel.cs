@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace Babble.Avalonia.ViewModels;
 
-public partial class CalibrationViewModel : ObservableObject
+public partial class CalibrationViewModel : ViewModelBase
 {
     public ObservableCollection<CalibrationItem> CalibrationItems { get; }
 
