@@ -197,7 +197,7 @@ public partial class CamView : UserControl, IIsVisible
 
         bool valid;
         bool useColor;
-        byte[] image;
+        byte[]? image;
         (int width, int height) dims;
         switch (camViewMode)
         {

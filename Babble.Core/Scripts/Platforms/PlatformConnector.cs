@@ -75,72 +75,29 @@ public abstract class PlatformConnector
     /// Converts Capture.Frame into something Babble can understand
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public unsafe float[] ExtractFrameData(Size size)
+    public unsafe bool ExtractFrameData(Span<float> floatArray, Size size)
     {
-        if (Capture is null)
-        {
-            return Array.Empty<float>();
-        }
-        if (!Capture.IsReady)
-        {
-            return Array.Empty<float>();
-        }
-        if (Capture.RawMat is null)
-        {
-            return Array.Empty<float>();
-        }
-        if (Capture.RawMat.DataPointer == null) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
-        {
-            return Array.Empty<float>();
-        }
-        if (Capture.FrameCount == _lastFrameCount)
-        {
-            return Array.Empty<float>();
-        }
+        if (Capture?.IsReady != true || Capture.RawMat == null || Capture.RawMat.DataPointer == null || Capture.FrameCount == _lastFrameCount)
+            return false;
+        if (floatArray.Length < size.Width * size.Height)
+            throw new ArgumentException("Bad floatArray size");
 
         _lastFrameCount = Capture.FrameCount;
 
-        using Mat resultMat = TransformRawImage(size);
-
-        using var finalMat = new Mat();
-        resultMat.ConvertTo(finalMat, MatType.CV_32F);
-
-        // Convert to float array and normalize
-        // float[] floatArray = new float[finalMat.Height * finalMat.Width];
-        finalMat.GetArray<float>(out var floatArray);
-
-        // Normalize pixel values to [0, 1]?
-        for (int i = 0; i < floatArray.Length; i++)
+        fixed (float* array = floatArray)
         {
-            floatArray[i] /= 255f;
+            using var finalMat = Mat<float>.FromPixelData(size.Height, size.Width, new IntPtr(array));
+            return TransformRawImage(finalMat, 1.0 / 255.0);
         }
-
-        return floatArray;
     }
     
-    public unsafe Mat TransformRawImage(Size size)
+    public unsafe bool TransformRawImage(Mat outputMat, double brightness = 1)
     {
         // If this method is called from above, then the below checks don't apply
         // We need this in case we poll from Babble.Core.cs, in which the developer
         // Just wants the frame data, not expression data
-
-        var emptyMat = Mat.Zeros(0, 0);
-        if (Capture is null)
-        {
-            return emptyMat;
-        }
-        if (!Capture.IsReady)
-        {
-            return emptyMat;
-        }
-        if (Capture.RawMat is null)
-        {
-            return emptyMat;
-        }
-        if (Capture.RawMat.DataPointer == null) // Non-copying version of Capture.RawFrame.GetRawData().Length is null
-        {
-            return emptyMat;
-        }
+        if (Capture?.IsReady != true || Capture.RawMat == null || Capture.RawMat.DataPointer == null)
+            return false;
 
         var settings = BabbleCore.Instance.Settings;
         var camSettings = settings.Cam;
@@ -197,45 +154,44 @@ public abstract class PlatformConnector
             resultMat.Dispose();
             resultMat = newMat;
         }
+        if (resultMat.Type() != outputMat.Type() || brightness != 1)
         {
             var newMat = new Mat();
-            if (rotationRadians != 0 || camSettings.GuiHorizontalFlip || camSettings.GuiVerticalFlip)
-            {
-                double cos = Math.Cos(rotationRadians), sin = Math.Sin(rotationRadians);
-                double scale = 1.0 / (Math.Abs(cos) + Math.Abs(sin));
-                double hscale = (camSettings.GuiHorizontalFlip ? -1.0 : 1.0) * scale;
-                double vscale = (camSettings.GuiVerticalFlip ? -1.0 : 1.0) * scale;
-                using var matrix = new Mat(2, 3, MatType.CV_64F);
-                var span = matrix.AsSpan<double>();
-                span[0] = (double)size.Width / (double)resultMat.Width * cos * hscale;
-                span[1] = (double)size.Height / (double)resultMat.Height * sin * hscale;
-                span[2] = ((double)size.Width - ((double)size.Width * cos + (double)size.Height * sin) * hscale) * 0.5;
-                span[3] = -(double)size.Width / (double)resultMat.Width * sin * vscale;
-                span[4] = (double)size.Height / (double)resultMat.Height * cos * vscale;
-                span[5] = ((double)size.Height + ((double)size.Width * sin - (double)size.Height * cos) * vscale) * 0.5;
-                Cv2.WarpAffine(resultMat, newMat, matrix, size);
-            }
-            else
-            {
-                try
-                {
-                    Cv2.Resize(resultMat, newMat, size);
-                }
-                catch (Exception e)
-                {
-                    return Mat.Zeros(0, 0);
-                }
-            }
+            resultMat.ConvertTo(newMat, outputMat.Type(), brightness);
             resultMat.Dispose();
             resultMat = newMat;
         }
-
-        // Verify That the matrix is in continuous memory layout - xlinka
-        if (!resultMat.IsContinuous()) {
-            resultMat.Dispose();
-            throw new InvalidOperationException("Image Matrix is not continuous in memory layout");
+        Size size = outputMat.Size();
+        if (rotationRadians != 0 || camSettings.GuiHorizontalFlip || camSettings.GuiVerticalFlip)
+        {
+            double cos = Math.Cos(rotationRadians), sin = Math.Sin(rotationRadians);
+            double scale = 1.0 / (Math.Abs(cos) + Math.Abs(sin));
+            double hscale = (camSettings.GuiHorizontalFlip ? -1.0 : 1.0) * scale;
+            double vscale = (camSettings.GuiVerticalFlip ? -1.0 : 1.0) * scale;
+            using var matrix = new Mat<double>(2, 3);
+            Span<double> data = matrix.AsSpan<double>();
+            data[0] = (double)size.Width / (double)resultMat.Width * cos * hscale;
+            data[1] = (double)size.Height / (double)resultMat.Height * sin * hscale;
+            data[2] = ((double)size.Width - ((double)size.Width * cos + (double)size.Height * sin) * hscale) * 0.5;
+            data[3] = -(double)size.Width / (double)resultMat.Width * sin * vscale;
+            data[4] = (double)size.Height / (double)resultMat.Height * cos * vscale;
+            data[5] = ((double)size.Height + ((double)size.Width * sin - (double)size.Height * cos) * vscale) * 0.5;
+            Cv2.WarpAffine(resultMat, outputMat, matrix, size);
         }
-        return resultMat;
+        else
+        {
+            try
+            {
+                Cv2.Resize(resultMat, outputMat, size);
+            }
+            catch (Exception e)
+            {
+                resultMat.Dispose();
+                return false;
+            }
+        }
+        resultMat.Dispose();
+        return true;
     }
 
     /// <summary>

@@ -16,7 +16,7 @@ public class CoreBenchmark
 {
     private BabbleCore _core;
     private Dictionary<UnifiedExpression, float> _expressions;
-    private byte[] _imageData;
+    private byte[]? _imageData;
     private (int width, int height) _dimensions;
 
     public static BabbleSettings Settings { get; set; } = null;
