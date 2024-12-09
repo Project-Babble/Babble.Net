@@ -81,6 +81,9 @@ public sealed class GeneralSettings
     [JsonProperty("gui_language")]
     public string GuiLanguage { get; set; }
 
+    [JsonProperty("gui_theme")]
+    public string GuiTheme { get; set; }
+
     public GeneralSettings()
     {
         // Filter settings
@@ -137,5 +140,8 @@ public sealed class GeneralSettings
 
         // Language
         GuiLanguage = "en-us";
+
+        // Theme
+        GuiTheme = "System";
     }
 }

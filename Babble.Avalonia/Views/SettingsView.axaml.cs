@@ -1,6 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Localizer.Core;
+using Avalonia.Styling;
 using Babble.Avalonia.Scripts;
 using Babble.Avalonia.ViewModels;
 using Babble.Core;
@@ -13,7 +16,8 @@ public partial class SettingsView : UserControl, IIsVisible
     private bool _isVisible;
 
     private readonly SettingsViewModel _viewModel;
-    private readonly ComboBox _comboBox;
+    private readonly ComboBox _themeComboBox;
+    private readonly ComboBox _languageComboBox;
 
     public SettingsView()
     {
@@ -36,14 +40,31 @@ public partial class SettingsView : UserControl, IIsVisible
         this.FindControl<TextBox>("YResolutionEntry")!.LostFocus += YResolution_LostFocus;
         this.FindControl<TextBox>("FramerateEntry")!.LostFocus += Framerate_LostFocus;
 
-        _comboBox = this.Find<ComboBox>("LanguageCombo")!;
-        _comboBox!.Items.Clear();
+        _themeComboBox = this.Find<ComboBox>("ThemeCombo")!;
+        int index = 0;
+        switch (BabbleCore.Instance.Settings.GeneralSettings.GuiTheme)
+        {
+            case "System":
+                index = 0;
+                break;
+            case "Light":
+                index = 1;
+                break;
+            case "Dark":
+                index = 2;
+                break;
+        }
+        _themeComboBox.SelectionChanged += ThemeComboBox_SelectionChanged;
+        _themeComboBox.SelectedIndex = index;
+
+        _languageComboBox = this.Find<ComboBox>("LanguageCombo")!;
+        _languageComboBox!.Items.Clear();
         foreach (var item in LocalizerCore.Localizer.AvailableLanguages)
         {
-            _comboBox.Items.Add(item);
+            _languageComboBox.Items.Add(item);
         }
-        _comboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
-        _comboBox.SelectionChanged += ComboBox_SelectionChanged;
+        _languageComboBox.SelectedItem = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
+        _languageComboBox.SelectionChanged += LanguageComboBox_SelectionChanged;
 
         BabbleCore.Instance.Settings.OnUpdate += Settings_OnUpdate;
     }
@@ -186,12 +207,36 @@ public partial class SettingsView : UserControl, IIsVisible
         BabbleCore.Instance.Settings.Save();
     }
 
-    private void ComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    private void LanguageComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[_comboBox.SelectedIndex]);
+        LocalizerCore.Localizer.SwitchLanguage(LocalizerCore.Localizer.AvailableLanguages[_languageComboBox.SelectedIndex]);
         BabbleCore.Instance.Settings.UpdateSetting<string>(
             nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage),
             LocalizerCore.Localizer.Language);
+        BabbleCore.Instance.Settings.Save();
+    }
+
+    private void ThemeComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        string theme = ((ComboBoxItem)_themeComboBox.SelectedItem!)!.Content!.ToString()!;
+        ThemeVariant variant = ThemeVariant.Default;
+        switch (theme)
+        {
+            case "System":
+                variant = ThemeVariant.Default;
+                break;
+            case "Light":
+                variant = ThemeVariant.Light;
+                break;
+            case "Dark":
+                variant = ThemeVariant.Dark;
+                break;
+        }
+
+        Application.Current!.RequestedThemeVariant = variant;
+        BabbleCore.Instance.Settings.UpdateSetting<string>(
+            nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiTheme),
+            theme);
         BabbleCore.Instance.Settings.Save();
     }
 }

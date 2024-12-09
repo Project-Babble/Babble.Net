@@ -7,6 +7,9 @@ namespace Babble.Avalonia.ViewModels;
 public partial class SettingsViewModel : ViewModelBase
 {
     [ObservableProperty]
+    public ComboBox? themeCombo;
+
+    [ObservableProperty]
     public ComboBox? languageCombo;
 
     [ObservableProperty]
@@ -49,7 +52,10 @@ public partial class SettingsViewModel : ViewModelBase
     public string? selectedLanguage;
 
     [ObservableProperty]
-    public int selectedIndex;
+    public int selectedThemeIndex;
+
+    [ObservableProperty]
+    public string selectedLanguageIndex;
 
     public SettingsViewModel()
     {
@@ -65,5 +71,6 @@ public partial class SettingsViewModel : ViewModelBase
         xResolution = settings.GeneralSettings.GuiCamResolutionX;
         yResolution = settings.GeneralSettings.GuiCamResolutionY;
         framerate = settings.GeneralSettings.GuiCamFramerate;
+        selectedLanguageIndex = settings.GeneralSettings.GuiTheme;
     }
 }
