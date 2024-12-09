@@ -32,12 +32,12 @@ public partial class BabbleCore
 
     public PlatformConnector? PlatformConnector;
     
-    private static readonly Size _inputSize = new Size(256, 256);
     private readonly DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
+    private readonly Stopwatch _sw = Stopwatch.StartNew();
+    private Size _inputSize = new Size(256, 256);
     private Dictionary<string, CalibrationItem>? _calibrationItems;
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
-    private Stopwatch _sw = Stopwatch.StartNew();
     private float _lastTime = 0;
     private string? _inputName;
     
@@ -128,10 +128,10 @@ public partial class BabbleCore
         string modelPath = Path.Combine(AppContext.BaseDirectory, defaultModelName);
         Utils.ExtractEmbeddedResource(
             Assembly.GetExecutingAssembly(), 
-            Assembly.GetExecutingAssembly().
+            Assembly.
+                GetExecutingAssembly().
                 GetManifestResourceNames().
-                Where(x => x.Contains(defaultModelName)).
-                First(), // Babble model
+                First(x => x.Contains(defaultModelName)), // Babble model
             modelPath, 
             overwrite: false);
 
@@ -145,18 +145,17 @@ public partial class BabbleCore
 
         ConfigurePlatformConnector();
 
-        var fps = settings.GeneralSettings.GuiCamFramerate > 0 ? settings.GeneralSettings.GuiCamFramerate : 30;
         var minCutoff = settings.GeneralSettings.GuiMinCutoff > 0 ? settings.GeneralSettings.GuiMinCutoff : 1.0f;
         var speedCoeff = settings.GeneralSettings.GuiSpeedCoefficient > 0 ? settings.GeneralSettings.GuiSpeedCoefficient : 0.007f;
         _floatFilter = new OneEuroFilter(
-            minCutoff: 1.0f,
-            beta: 0.007f
+            minCutoff: minCutoff,
+            beta: speedCoeff
         );
 
         _session = new InferenceSession(modelPath, sessionOptions);
         _inputName = _session.InputMetadata.Keys.First().ToString();
-        //int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
-        //_inputSize = new(dimensions[2], dimensions[3]);
+        int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
+        _inputSize = new(dimensions[2], dimensions[3]);
         IsRunning = true;
 
 
