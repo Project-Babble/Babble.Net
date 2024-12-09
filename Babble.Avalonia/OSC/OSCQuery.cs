@@ -15,9 +15,10 @@ public class OSCQuery
     private OSCQueryService service = null!;
     private HashSet<OSCQueryServiceProfile> profiles = [];
 
-    private static readonly Regex VRChatClientRegex = new Regex(@"VRChat-Client-[A-Za-z0-9]{6}$", RegexOptions.Compiled);
+    private static readonly Regex VRChatClientRegex = new(@"VRChat-Client-[A-Za-z0-9]{6}$", RegexOptions.Compiled);
     private CancellationTokenSource _cancellationTokenSource;
     private string _lastAvatarID = string.Empty;
+    private const int VRC_PORT = 9000;
 
     public OSCQuery(IPAddress hostIP)
     {
@@ -47,18 +48,13 @@ public class OSCQuery
         service.AddEndpoint<string>("/avatar/change", Attributes.AccessValues.ReadWrite, ["default"]);
 
         service.OnOscQueryServiceAdded += _ => AddProfileToList();
-
+        
         StartAutoRefreshServices(5000, _cancellationTokenSource.Token);
     }
 
     private void AddProfileToList()
     {
-        var set = service.GetOSCQueryServices();
-        profiles = set;
-        foreach (var profile in profiles)
-        {
-            BabbleCore.Instance.Logger.LogInformation($"[VRCFTReceiver] Added {profile.name} to list of OSCQuery profiles, at address http://{profile.address}:{profile.port}");
-        }
+        profiles = service.GetOSCQueryServices();
     }
 
     private void StartAutoRefreshServices(double interval, CancellationToken cancellationToken)
@@ -73,16 +69,11 @@ public class OSCQuery
                     try
                     {
                         service.RefreshServices();
-                        BabbleCore.Instance.Logger.LogInformation("[VRCFTReceiver] OSCQuery RefreshedServices");
                         await PollVRChatParameters();
                     }
-                    catch (OperationCanceledException)
+                    catch (Exception)
                     {
                         break;
-                    }
-                    catch (Exception ex)
-                    {
-                        BabbleCore.Instance.Logger.LogError($"[VRCFTReceiver] Error in AutoRefreshServices: {ex.Message}");
                     }
                 }
 
@@ -93,74 +84,73 @@ public class OSCQuery
 
     private async Task PollVRChatParameters()
     {
+        if (profiles == null || profiles.Count == 0) return;
+        
         OSCQueryServiceProfile vrcProfile;
-        if (profiles.Count == 0) return;
 
         try
         {
-            // This is so wrong
             vrcProfile = profiles.First(profile => VRChatClientRegex.IsMatch(profile.name));
+            if (vrcProfile == null) return;
         }
-        catch (InvalidOperationException e) // No matching element
+        catch (InvalidOperationException) // No matching element
         {
             return;
         }
+        
+        // In VRChat, tree.Contents yields 4 elements:
+        // 1) tracking
+        // 2) input
+        // 3) chatbox
+        // 4) avatar
+        // Where we care about the contents under /avatar.
+        // avatar.Contents yields:
+        // 1) change
+        // 2) parameters
+        // Where we care about parameters. Duh
 
-        if (vrcProfile is not null)
+        // Also, on Quest we aren't sent /avatar/change events but *are*
+        // Able to read the current avatar ID. So, we'll poll this, see if it changes
+        // And if it does we can fire off an event to respond to this!!
+        // Oh also add like a bazillion null checks in case we're loading avis.
+        
+        
+        var tree = await Extensions.GetOSCTree(vrcProfile.address, vrcProfile.port);
+        if (tree is null) return;
+        if (tree.Contents is null) return;
+
+        if (!tree.Contents.TryGetValue("avatar", out var avatar))
+            if (avatar is null)
+                return;
+        if (avatar.Contents is null) return;
+
+        if (!avatar.Contents.TryGetValue("change", out var change))
+            if (change is null)
+                return;
+
+        var currentAvatarID = (string)change.Value.First(); // Avatar ID
+        if (_lastAvatarID != currentAvatarID)
         {
-            // In VRChat, tree.Contents yields 4 elements:
-            // 1) tracking
-            // 2) input
-            // 3) chatbox
-            // 4) avatar
-            // Where we care about the contents under /avatar.
-            // avatar.Contents yields:
-            // 1) change
-            // 2) parameters
-            // Where we care about parameters. Duh
+            _lastAvatarID = currentAvatarID;
 
-            // Also, on Quest we aren't sent /avatar/change events but *are*
-            // Able to read the current avatar ID. So, we'll poll this, see if it changes
-            // And if it does we can fire off an event to respond to this!!
-            // Oh also add like a bazillion null checks in case we're loading avis.
+            // Convert VRC to VRCFT Query Node
+            OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
+            OnAvatarChange?.Invoke(vrcftQueryNode);
+        }
 
-            var tree = await Extensions.GetOSCTree(vrcProfile.address, vrcProfile.port);
-            if (tree is null) return;
-            if (tree.Contents is null) return;
+        var ip = vrcProfile.address.ToString();
+        if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress != ip)
+        {
+            BabbleCore.Instance.Settings.UpdateSetting<string>(
+                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
+                vrcProfile.address.ToString());
+        }
 
-            if (!tree.Contents.TryGetValue("avatar", out var avatar))
-                if (avatar is null) return;
-            if (avatar.Contents is null) return;
-
-            if (!avatar.Contents.TryGetValue("change", out var change))
-                if (change is null) return;
-
-            var currentAvatarID = (string)change.Value.First(); // Avatar ID
-            if (_lastAvatarID != currentAvatarID)
-            {
-                _lastAvatarID = currentAvatarID;
-
-                // Convert VRC to VRCFT Query Node
-                OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
-                OnAvatarChange?.Invoke(vrcftQueryNode);
-            }
-
-            var ip = vrcProfile.address.ToString();
-            if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress != ip)
-            {
-                BabbleCore.Instance.Settings.UpdateSetting<string>(
-                    nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
-                    vrcProfile.address.ToString());
-            }
-
-            const int vrcPort = 9000;
-            if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort != vrcPort)
-            {
-                BabbleCore.Instance.Settings.UpdateSetting<int>(
-                    nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
-                    vrcPort.ToString());
-            }
-
+        if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort != VRC_PORT)
+        {
+            BabbleCore.Instance.Settings.UpdateSetting<int>(
+                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
+                VRC_PORT.ToString());
         }
     }
 

@@ -146,16 +146,16 @@ public class BabbleOSC
                             _sender.Send(new OscMessage(address, floatValue * (float)mul));
                             break;
                         // This only returns a single bool without Binary steps
-                        //case BaseParam<bool> boolName:
-                        //    if (!boolName.Relevant) continue;
-                        //    bool boolValue = false;
-                        //    try
-                        //    {
-                        //        boolValue = boolName.ParamValue;
-                        //    }
-                        //    catch { continue; }
-                        //    _sender.Send(new OscMessage($"/avatar/parameters/{prefix}{name.paramName}", boolValue));
-                        //    break;
+                        case BaseParam<bool> boolName:
+                            if (!boolName.Relevant) continue;
+                            bool boolValue = false;
+                            try
+                            {
+                                boolValue = boolName.ParamValue;
+                            }
+                            catch { continue; }
+                            _sender.Send(new OscMessage($"/avatar/parameters/{prefix}{name.paramName}", boolValue));
+                            break;
                     }
                 }
             }

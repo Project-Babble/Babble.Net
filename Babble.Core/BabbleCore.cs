@@ -388,7 +388,7 @@ public partial class BabbleCore
         // It was added in Android 8.1 and will be deprecated in Android 15
         if (OperatingSystem.IsAndroid() &&
             OperatingSystem.IsAndroidVersionAtLeast(8, 1) && // At least 8.1
-            !OperatingSystem.IsAndroidVersionAtLeast(15))    // At most 15
+            !OperatingSystem.IsAndroidVersionAtLeast(15))          // At most 15
         {
             sessionOptions.AppendExecutionProvider_Nnapi();
         }
