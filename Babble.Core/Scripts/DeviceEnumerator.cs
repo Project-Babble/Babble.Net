@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Runtime.InteropServices;
 
 namespace Babble.Core.Scripts;
 
@@ -13,13 +14,12 @@ public static class DeviceEnumerator
         if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
         {
             camNames.AddRange(ListCamerasOpenCV());
-            camNames.AddRange(ListSerialPorts());
         }
         else if (OperatingSystem.IsLinux())
         {
             camNames.AddRange(ListLinuxUvcDevices());
-            camNames.AddRange(ListSerialPorts());
         }
+        camNames.AddRange(ListSerialPorts());
 
         return camNames;
     }
@@ -48,44 +48,67 @@ public static class DeviceEnumerator
         return cameraIndexes;
     }
 
-    // Check for UVC devices on Linux using `v4l2-ctl` command
     private static List<string> ListLinuxUvcDevices()
     {
+        [DllImport("libudev.so")] static extern IntPtr udev_new();
+        [DllImport("libudev.so")] static extern IntPtr udev_unref(IntPtr udev);
+        [DllImport("libudev.so")] static extern IntPtr udev_enumerate_new(IntPtr udev);
+        [DllImport("libudev.so")] static extern int udev_enumerate_add_match_subsystem(IntPtr udev_enumerate, [MarshalAs(UnmanagedType.LPUTF8Str)] string subsystem);
+        [DllImport("libudev.so")] static extern int udev_enumerate_scan_devices(IntPtr udev_enumerate);
+        [DllImport("libudev.so")] static extern IntPtr udev_enumerate_get_list_entry(IntPtr udev_enumerate);
+        [DllImport("libudev.so")] static extern IntPtr udev_list_entry_get_next(IntPtr list_entry);
+        [DllImport("libudev.so")] static extern IntPtr udev_list_entry_get_name(IntPtr list_entry);
+        [DllImport("libudev.so")] static extern IntPtr udev_device_new_from_syspath(IntPtr udev, IntPtr syspath);
+        [DllImport("libudev.so")] static extern IntPtr udev_device_get_devnode(IntPtr udev_device);
+        [DllImport("libudev.so")] static extern IntPtr udev_enumerate_unref(IntPtr udev_enumerate);
+
+        [DllImport("libc.so.6")] static extern int open(IntPtr file, int oflag, int _unused);
+        [DllImport("libc.so.6")] static extern int close(int fd);
+        [DllImport("libc.so.6", SetLastError=true)] static extern int ioctl(int fd, nuint request, ref uint arg);
+
+        const int O_RDWR = 0x2, O_NONBLOCK = 0x800, EINTR = 4, EAGAIN = 11, ETIMEDOUT = 110;
+        const uint VIDIOC_QUERYCAP = 0x80685600, V4L2_CAP_VIDEO_CAPTURE = 0x1, V4L2_CAP_DEVICE_CAPS = 0x80000000;
+
         var devices = new List<string>();
         try
         {
-            var process = new Process
+            IntPtr udev = udev_new();
+            IntPtr enumerate = udev_enumerate_new(udev);
+            try
             {
-                StartInfo = new ProcessStartInfo
+                udev_enumerate_add_match_subsystem(enumerate, "video4linux");
+                udev_enumerate_scan_devices(enumerate);
+                Span<uint> capsStruct = stackalloc uint[26];
+                for (IntPtr iter = udev_enumerate_get_list_entry(enumerate); iter != IntPtr.Zero; iter = udev_list_entry_get_next(iter))
                 {
-                    FileName = "v4l2-ctl",
-                    Arguments = "--list-devices",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-
-            // Process the output to get UVC device paths
-            var lines = output.Split('\n');
-            string currentDevice = null;
-
-            foreach (var line in lines)
-            {
-                if (!line.StartsWith("\t"))
-                {
-                    currentDevice = line.Trim();
-                }
-                else
-                {
-                    if (line.Contains("/dev/video") && IsUvcDevice(line.Trim()))
+                    IntPtr v4l2_device = udev_device_get_devnode(udev_device_new_from_syspath(udev, udev_list_entry_get_name(iter)));
+                    int fd = open(v4l2_device, O_RDWR | O_NONBLOCK, 0);
+                    if (fd < 0)
+                        continue;
+                    try
                     {
-                        devices.Add(line.Trim());
+                        int result, tries = 0;
+                        do
+                        {
+                            result = ioctl(fd, VIDIOC_QUERYCAP, ref MemoryMarshal.GetReference(capsStruct));
+                        } while (result != 0 && (Marshal.GetLastPInvokeError() is EINTR or EAGAIN or ETIMEDOUT) && ++tries < 4);
+                        if (result < 0)
+                            continue;
                     }
+                    finally
+                    {
+                        close(fd);
+                    }
+                    uint caps = (capsStruct[21] & V4L2_CAP_DEVICE_CAPS) != 0 ? capsStruct[22] : capsStruct[21];
+                    if ((caps & V4L2_CAP_VIDEO_CAPTURE) != 0)
+                        devices.Add(Marshal.PtrToStringUTF8(v4l2_device));
                 }
+            }
+            finally
+            {
+                if (enumerate != IntPtr.Zero)
+                    udev_enumerate_unref(enumerate);
+                udev_unref(udev);
             }
         }
         catch (Exception e)
@@ -96,56 +119,15 @@ public static class DeviceEnumerator
         return devices;
     }
 
-    // Helper function to check if the device is a valid UVC device
-    private static bool IsUvcDevice(string device)
-    {
-        try
-        {
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "v4l2-ctl",
-                    Arguments = $"--device={device} --all",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-
-            // Check for "UVC Payload Header Metadata" to exclude non-video devices
-            if (output.Contains("UVC Payload Header Metadata"))
-            {
-                return false;  // Not a valid video device
-            }
-
-            return true;  // Valid video device
-        }
-        catch
-        {
-            return false; // Error checking the device
-        }
-    }
-
     // List serial ports available on the system
-    private static List<string> ListSerialPorts()
+    private static string[] ListSerialPorts()
     {
-        List<string> result = new List<string>();
-
         if (OperatingSystem.IsWindows())
-        {
-            result.AddRange(SerialPort.GetPortNames());
-        }
-        else if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
-        {
-            var ports = Directory.GetFiles("/dev", "tty*");
-            result.AddRange(ports);
-        }
-
-        return result;
+            return SerialPort.GetPortNames();
+        if (OperatingSystem.IsLinux())
+            return Directory.GetFiles("/dev/serial/by-id");
+        if (OperatingSystem.IsMacOS())
+            return Directory.GetFiles("/dev", "tty*");
+        return new string[0];
     }
 }
