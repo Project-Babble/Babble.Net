@@ -207,12 +207,12 @@ public partial class BabbleCore
             {
                 var expressionName = BabbleAddresses.Addresses[ue];
                 filteredValue = _floatFilter.Filter(filteredValue, (float)_sw.Elapsed.TotalSeconds - _lastTime);
-                _lastTime = (float)_sw.Elapsed.TotalSeconds;
                 CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[expressionName].Min, _calibrationItems[expressionName].Max);
             }
             j++;
         }
 
+        _lastTime = (float)_sw.Elapsed.TotalSeconds;
         UnifiedExpressions = CachedExpressionTable;
         return true;
     }
