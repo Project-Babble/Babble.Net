@@ -5,6 +5,7 @@ using Avalonia.Localizer.Core;
 using Avalonia.Markup.Xaml;
 using Babble.Avalonia.ReactiveObjects;
 using Babble.Avalonia.Scripts;
+using Babble.Avalonia.Scripts.Models;
 using Babble.Avalonia.ViewModels;
 using Babble.Avalonia.Views;
 using Babble.Core;
@@ -40,14 +41,7 @@ public partial class App : Application
     // Platform-agnostic Notification representation.
     // Implementers can subscribe to this Action when a notification is to be raised
     // Ex: SendNotification.Invoke("Title", "Body", string.Empty, string.Empty, null, null, null);
-    public static event Action<                      
-        string?,                                     // Title
-        string?,                                     // Body
-        string?,                                     // Body Image Path 
-        string,                                      // Body Alt. Text
-        List<(string Title, string ActionId)?>,      // Action Buttons
-        DateTimeOffset?,                             // Optional: Scheduled time to send Notification
-        DateTimeOffset?> SendNotification;           // Optional: Expiration time for sent Notification
+    public static event Action<NotificationModel> SendNotification;           // Optional: Expiration time for sent Notification
 
     private MainIntegrated _mainIntegrated = null!;
     private BabbleOSC _babbleOSC = null!;

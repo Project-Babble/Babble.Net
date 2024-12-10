@@ -1,14 +1,11 @@
 ﻿using Android.App;
 using Android.Content.PM;
-using Android.OS;
 using Avalonia;
 using Avalonia.Android;
 using Microsoft.Maui.ApplicationModel;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Android.Views;
-using static Android.OS.PowerManager;
+using Babble.Avalonia.Scripts.Models;
 
 namespace Babble.Avalonia.Android;
 
@@ -21,7 +18,7 @@ namespace Babble.Avalonia.Android;
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>
 {
-    private NotificationManagerService _notificationManagerService;
+    private NotificationManagerService _notificationManagerService = null!;
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
@@ -41,19 +38,17 @@ public class MainActivity : AvaloniaMainActivity<App>
             .WithInterFont();
     }
 
-    private void NotificationRequested(
-        string? title,
-        string? body,
-        string? bodyImagePath,
-        string bodyImageAltText,
-        List<(string Title, string ActionId)?> buttons,
-        DateTimeOffset? deliveryTime,
-        DateTimeOffset? expirationTime)
+    private void NotificationRequested(NotificationModel notificationModel)
     {
-        if (deliveryTime is not null)
-            _notificationManagerService.SendNotification(title, body, deliveryTime.Value.DateTime);
+        if (notificationModel.OptionalScheduledTime is not null)
+            _notificationManagerService.SendNotification(
+                notificationModel.Title!, 
+                notificationModel.Body!, 
+                notificationModel.OptionalScheduledTime.Value.DateTime);
         else
-            _notificationManagerService.SendNotification(title, body);
+            _notificationManagerService.SendNotification(
+                notificationModel.Title!, 
+                notificationModel.Body!);
     }
 
     protected override void Dispose(bool disposing)

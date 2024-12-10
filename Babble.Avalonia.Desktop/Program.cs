@@ -2,16 +2,15 @@
 using DesktopNotifications;
 using DesktopNotifications.Avalonia;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Babble.Avalonia.Scripts.Models;
 
 namespace Babble.Avalonia.Desktop;
 
 class Program
 {
-
-    private static INotificationManager _notificationManager = null;
+    private static INotificationManager _notificationManager = null!;
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -30,38 +29,35 @@ class Program
             return builder.StartLinuxDrm(args, "/dev/dri/card1", 1D);
         }
 
-        if (_notificationManager is not null)
-        {
-            App.SendNotification += NotificationRequested;
-            _notificationManager.NotificationActivated += OnNotificationActivated;
-            _notificationManager.NotificationDismissed += OnNotificationDismissed;
-        }
+        App.SendNotification += NotificationRequested;
+        _notificationManager.NotificationActivated += OnNotificationActivated;
+        _notificationManager.NotificationDismissed += OnNotificationDismissed;
 
         return builder.StartWithClassicDesktopLifetime(args);
     }
 
-    private static void NotificationRequested(
-        string? title, 
-        string? body, 
-        string? bodyImagePath, 
-        string bodyImageAltText, 
-        List<(string Title, string ActionId)?> buttons,
-        DateTimeOffset? deliveryTime,
-        DateTimeOffset? expirationTime)
+    private static void NotificationRequested(NotificationModel notificationModel)
     {
-        Notification notification = new();
-        notification.Title = title;
-        notification.Body = body;
-        notification.BodyImagePath = bodyImagePath;
-        notification.BodyImageAltText = bodyImageAltText;
+        Notification notification = new()
+        {
+            Title = notificationModel.Title,
+            Body = notificationModel.Body,
+            BodyImagePath = notificationModel.BodyImagePath,
+            BodyImageAltText = notificationModel.BodyAltText
+        };
 
-        if (buttons is not null)
-            notification.Buttons.AddRange(buttons.AsEnumerable().Select(x => x!.Value));
-
-        if (deliveryTime.HasValue && expirationTime.HasValue)
-            _notificationManager.ScheduleNotification(notification, deliveryTime.Value, expirationTime.Value);
-        else if (deliveryTime.HasValue)
-            _notificationManager.ScheduleNotification(notification, deliveryTime.Value);
+        if (notificationModel.ActionButtons is not null)
+        {
+            if (notificationModel.ActionButtons.Count != 0)
+                notification.Buttons.AddRange(notificationModel.ActionButtons.
+                    Where(x => x.HasValue).
+                    Select(x => x!.Value));
+        }
+        
+        if (notificationModel is { OptionalScheduledTime: not null, OptionalExpirationTime: not null })
+            _notificationManager.ScheduleNotification(notification, notificationModel.OptionalScheduledTime.Value, notificationModel.OptionalExpirationTime.Value);
+        else if (notificationModel.OptionalScheduledTime.HasValue)
+            _notificationManager.ScheduleNotification(notification, notificationModel.OptionalScheduledTime.Value);
         else
             _notificationManager.ShowNotification(notification);
     }
@@ -83,7 +79,6 @@ class Program
             .SetupDesktopNotifications(out _notificationManager!)
             .WithInterFont()
             .LogToTrace();
-
 
     private static void SilenceConsole()
     {
