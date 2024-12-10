@@ -188,7 +188,8 @@ public partial class BabbleCore
         // Run inference!
         using var results = _session.Run(inputs);
         var output = results[0].AsEnumerable<float>().ToArray();
-        MS = ((float)_sw.Elapsed.TotalSeconds - _lastTime) * 1000;
+        float time = (float)_sw.Elapsed.TotalSeconds;
+        MS = (time - _lastTime) * 1000;
 
         // Clamp and give meaning to the floats
         var arKitExpressions = Utils.ARKitExpressions;
@@ -206,13 +207,13 @@ public partial class BabbleCore
             foreach (var ue in exp.Value)
             {
                 var expressionName = BabbleAddresses.Addresses[ue];
-                filteredValue = _floatFilter.Filter(filteredValue, (float)_sw.Elapsed.TotalSeconds - _lastTime);
+                filteredValue = _floatFilter.Filter(filteredValue, time - _lastTime);
                 CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[expressionName].Min, _calibrationItems[expressionName].Max);
             }
             j++;
         }
 
-        _lastTime = (float)_sw.Elapsed.TotalSeconds;
+        _lastTime = time;
         UnifiedExpressions = CachedExpressionTable;
         return true;
     }
