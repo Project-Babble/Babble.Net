@@ -243,9 +243,9 @@ public partial class CamView : UserControl, IIsVisible
                     AlphaFormat.Opaque);
             }
             
-            if (BabbleCore.Instance.MS > 0)
+            if (BabbleCore.Instance.Ms > 0)
             {
-                PerfText.Text = $"FPS: {BabbleCore.Instance.FPS} MS: {BabbleCore.Instance.MS:F2}";
+                PerfText.Text = $"FPS: {BabbleCore.Instance.Fps} MS: {BabbleCore.Instance.Ms:F2}";
             }
             else
             {

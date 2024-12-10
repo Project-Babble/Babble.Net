@@ -1,6 +1,5 @@
 ﻿using Android.App;
 using Android.Content.PM;
-using Android.OS;
 using Avalonia;
 using Avalonia.Android;
 using Microsoft.Maui.ApplicationModel;
@@ -8,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Android.Views;
-using static Android.OS.PowerManager;
 
 namespace Babble.Avalonia.Android;
 
@@ -21,15 +19,15 @@ namespace Babble.Avalonia.Android;
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>
 {
-    private NotificationManagerService _notificationManagerService;
+    private NotificationManagerService _notificationManagerService = null!;
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
-        // I cannot, for the life of me, create a partial wake on lock for this god-forsaken platform.
+        // I cannot, for the life of me, create a partial wake on lock for this godforsaken platform.
         // No, this is not a permissions issue. Name it, I've tried them all. Partial wake lock, full wake lock,
         // ignore battery optimization settings, etc.
         // Droidcam does it, Google maps can run on the lock screen, tf it going on here
-        // Whatever. On the Quest the app runs in the background screen-on anyways, if you're running this on a 
+        // Whatever. On the Quest the app runs in the background screen-on anyway, if you're running this on an 
         // Android phone just turn your brightness all the way down or something ¯\_(ツ)_/¯
         Window?.AddFlags(WindowManagerFlags.KeepScreenOn);
 
@@ -50,9 +48,9 @@ public class MainActivity : AvaloniaMainActivity<App>
         DateTimeOffset? deliveryTime,
         DateTimeOffset? expirationTime)
     {
-        if (deliveryTime is not null)
+        if (deliveryTime is not null && title is not null && body is not null)
             _notificationManagerService.SendNotification(title, body, deliveryTime.Value.DateTime);
-        else
+        else if (title is not null && body is not null)
             _notificationManagerService.SendNotification(title, body);
     }
 

@@ -10,8 +10,7 @@ namespace Babble.Avalonia.Desktop;
 
 class Program
 {
-
-    private static INotificationManager _notificationManager = null;
+    private static INotificationManager _notificationManager = null!;
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -30,12 +29,9 @@ class Program
             return builder.StartLinuxDrm(args, "/dev/dri/card1", 1D);
         }
 
-        if (_notificationManager is not null)
-        {
-            App.SendNotification += NotificationRequested;
-            _notificationManager.NotificationActivated += OnNotificationActivated;
-            _notificationManager.NotificationDismissed += OnNotificationDismissed;
-        }
+        App.SendNotification += NotificationRequested;
+        _notificationManager.NotificationActivated += OnNotificationActivated;
+        _notificationManager.NotificationDismissed += OnNotificationDismissed;
 
         return builder.StartWithClassicDesktopLifetime(args);
     }
@@ -49,14 +45,14 @@ class Program
         DateTimeOffset? deliveryTime,
         DateTimeOffset? expirationTime)
     {
-        Notification notification = new();
-        notification.Title = title;
-        notification.Body = body;
-        notification.BodyImagePath = bodyImagePath;
-        notification.BodyImageAltText = bodyImageAltText;
-
-        if (buttons is not null)
-            notification.Buttons.AddRange(buttons.AsEnumerable().Select(x => x!.Value));
+        Notification notification = new()
+        {
+            Title = title,
+            Body = body,
+            BodyImagePath = bodyImagePath,
+            BodyImageAltText = bodyImageAltText
+        };
+        notification.Buttons.AddRange(buttons.AsEnumerable().Select(x => x!.Value));
 
         if (deliveryTime.HasValue && expirationTime.HasValue)
             _notificationManager.ScheduleNotification(notification, deliveryTime.Value, expirationTime.Value);
@@ -92,6 +88,7 @@ class Program
                 Console.CursorVisible = false;
                 while(true)
                     Console.ReadKey(true);
+                // ReSharper disable once FunctionNeverReturns
             })
             { IsBackground = true }.Start();
     }

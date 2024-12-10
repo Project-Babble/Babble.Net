@@ -115,7 +115,7 @@ public class OSCQuery
         // Oh also add like a bazillion null checks in case we're loading avis.
         
         
-        var tree = await Extensions.GetOSCTree(vrcProfile.address, vrcProfile.port);
+        var tree = await Extensions.GetOscTree(vrcProfile.address, vrcProfile.port);
         if (tree is null) return;
         if (tree.Contents is null) return;
 

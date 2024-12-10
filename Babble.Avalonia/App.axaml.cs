@@ -20,9 +20,11 @@ using VRCFaceTracking.Core.Services;
 
 namespace Babble.Avalonia;
 
-public partial class App : Application
+public class App : Application
 {
     public static Action<IServiceCollection>? RegisterPlatformService;
+    
+    // ReSharper disable once MemberCanBePrivate.Global
     public static IHost GlobalHost => Host.CreateDefaultBuilder()
         .ConfigureServices((services) =>
         {
@@ -47,10 +49,12 @@ public partial class App : Application
         string,                                      // Body Alt. Text
         List<(string Title, string ActionId)?>,      // Action Buttons
         DateTimeOffset?,                             // Optional: Scheduled time to send Notification
-        DateTimeOffset?> SendNotification;           // Optional: Expiration time for sent Notification
+#pragma warning disable CS0067 // Event is never used
+        DateTimeOffset?> SendNotification = null!;           // Optional: Expiration time for sent Notification
+#pragma warning restore CS0067 // Event is never used
 
     private MainIntegrated _mainIntegrated = null!;
-    private BabbleOSC _babbleOSC = null!;
+    private BabbleOSC _babbleOsc = null!;
 
     public override void Initialize()
     {
@@ -78,7 +82,7 @@ public partial class App : Application
         // Setup custom OSC handler
         var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
         var port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
-        _babbleOSC = new BabbleOSC(ip, port);
+        _babbleOsc = new BabbleOSC(ip, port);
     }
 
     public override async void OnFrameworkInitializationCompleted()
@@ -111,7 +115,7 @@ public partial class App : Application
     private void Desktop_Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         _mainIntegrated.Teardown();
-        _babbleOSC.Teardown();
+        _babbleOsc.Teardown();
     }
 
     private void OnShutdownClicked(object? sender, EventArgs e)

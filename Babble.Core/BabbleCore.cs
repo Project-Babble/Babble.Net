@@ -13,7 +13,6 @@ using OpenCvSharp;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Babble.Core;
 
@@ -24,11 +23,11 @@ public partial class BabbleCore
 {
     [MemberNotNullWhen(true, nameof(PlatformConnector), nameof(_session), nameof(_floatFilter), nameof(_calibrationItems))]
     public bool IsRunning { get; private set; }
-    public int FPS => (int)MathF.Floor(1000f / MS);
-    public float MS { get; private set; }
-    public static BabbleCore Instance { get; private set; }
+    public int Fps => (int)MathF.Floor(1000f / Ms);
+    public float Ms { get; private set; }
+    public static BabbleCore Instance { get; }
     public BabbleSettings Settings { get; private set; }
-    public ILogger<BabbleCore> Logger { get; private set; }
+    public ILogger<BabbleCore> Logger { get; }
 
     public PlatformConnector? PlatformConnector;
     
@@ -38,7 +37,7 @@ public partial class BabbleCore
     private Dictionary<string, CalibrationItem>? _calibrationItems;
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
-    private float _lastTime = 0;
+    private float _lastTime;
     private string? _inputName;
     
     static BabbleCore()
@@ -141,7 +140,7 @@ public partial class BabbleCore
         }
 
         SessionOptions sessionOptions = SetupSessionOptions();
-        ConfigurePlatformSpecificGPU(sessionOptions);
+        ConfigurePlatformSpecificGpu(sessionOptions);
 
         ConfigurePlatformConnector();
 
@@ -153,7 +152,7 @@ public partial class BabbleCore
         );
 
         _session = new InferenceSession(modelPath, sessionOptions);
-        _inputName = _session.InputMetadata.Keys.First().ToString();
+        _inputName = _session.InputMetadata.Keys.First();
         int[] dimensions = _session.InputMetadata.Values.First().Dimensions;
         _inputSize = new(dimensions[2], dimensions[3]);
         IsRunning = true;
@@ -165,12 +164,12 @@ public partial class BabbleCore
     /// <summary>
     /// Poll expression data, frames
     /// </summary>
-    /// <param name="UnifiedExpressions"></param>
+    /// <param name="unifiedExpressions"></param>
     /// <returns></returns>
-    public bool GetExpressionData(out Dictionary<UnifiedExpression, float>? UnifiedExpressions)
+    public bool GetExpressionData(out Dictionary<UnifiedExpression, float>? unifiedExpressions)
     {
-        UnifiedExpressions = null;
-        if (!IsRunning || Instance is null)
+        unifiedExpressions = null;
+        if (!IsRunning)
         {
             Logger.LogError("Tried to to poll Babble.Core, but it wasn't running!");
             return false;
@@ -188,7 +187,7 @@ public partial class BabbleCore
         // Run inference!
         using var results = _session.Run(inputs);
         var output = results[0].AsEnumerable<float>().ToArray();
-        MS = ((float)_sw.Elapsed.TotalSeconds - _lastTime) * 1000;
+        Ms = ((float)_sw.Elapsed.TotalSeconds - _lastTime) * 1000;
 
         // Clamp and give meaning to the floats
         var arKitExpressions = Utils.ARKitExpressions;
@@ -199,7 +198,6 @@ public partial class BabbleCore
 
         // Map unfiltered ARKit expressions to filtered Unified Expressions
         // TODO Replace clamp with remap?
-        int j = 0;
         foreach (var exp in Utils.ExpressionMapping)
         {
             float filteredValue = arKitExpressions[exp.Key];
@@ -210,10 +208,9 @@ public partial class BabbleCore
                 _lastTime = (float)_sw.Elapsed.TotalSeconds;
                 CachedExpressionTable[ue] = Math.Clamp(filteredValue, _calibrationItems[expressionName].Min, _calibrationItems[expressionName].Max);
             }
-            j++;
         }
 
-        UnifiedExpressions = CachedExpressionTable;
+        unifiedExpressions = CachedExpressionTable;
         return true;
     }
 
@@ -229,7 +226,7 @@ public partial class BabbleCore
         if (PlatformConnector?.Capture!.RawMat is null)
         {
             dimensions = (0, 0);
-            image = Array.Empty<byte>();
+            image = [];
             return false;
         }
 
@@ -245,10 +242,12 @@ public partial class BabbleCore
                 ColorType.BGR_24 => ColorConversionCodes.GRAY2BGR,
                 ColorType.RGB_24 => ColorConversionCodes.GRAY2RGB,
                 ColorType.RGBA_32 => ColorConversionCodes.GRAY2RGBA,
+                _ => throw new ArgumentOutOfRangeException(nameof(color), color, null)
             } : color switch {
                 ColorType.GRAY_8 => ColorConversionCodes.BGR2GRAY,
                 ColorType.RGB_24 => ColorConversionCodes.BGR2RGB,
                 ColorType.RGBA_32 => ColorConversionCodes.BGR2RGBA,
+                _ => throw new ArgumentOutOfRangeException(nameof(color), color, null)
             });
             image = convertedMat.AsSpan<byte>().ToArray();
         }
@@ -263,7 +262,7 @@ public partial class BabbleCore
     /// <param name="image"></param>
     /// <param name="dimensions"></param>
     /// <returns></returns>
-    public unsafe bool GetImage(out byte[]? image, out (int width, int height) dimensions)
+    public bool GetImage(out byte[]? image, out (int width, int height) dimensions)
     {
         image = null;
         dimensions = (0, 0);
@@ -347,7 +346,7 @@ public partial class BabbleCore
     /// Per-platform hardware accel. detection/activation
     /// </summary>
     /// <param name="sessionOptions"></param>
-    private void ConfigurePlatformSpecificGPU(SessionOptions sessionOptions)
+    private void ConfigurePlatformSpecificGpu(SessionOptions sessionOptions)
     {
         sessionOptions.AppendExecutionProvider_CPU();
         if (!Settings.GeneralSettings.GuiUseGpu)
@@ -386,7 +385,7 @@ public partial class BabbleCore
             catch 
             {
                 Logger.LogWarning("Failed to create DML Execution Provider on Windows. Falling back to CUDA..."); 
-            };
+            }
 
             // If the user's system does not support DirectML (for whatever reason,
             // it's shipped with Windows 10, version 1903(10.0; Build 18362)+
@@ -394,7 +393,6 @@ public partial class BabbleCore
             try
             {
                 sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
-                return;
             }
             catch 
             {
@@ -411,7 +409,6 @@ public partial class BabbleCore
             try
             {
                 sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
-                return;
             }
             catch
             {

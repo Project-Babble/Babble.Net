@@ -8,7 +8,7 @@ namespace Babble.Benchmarks;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static void Main(params string[] args)
     {
         var config = DefaultConfig.Instance
                     .WithOption(ConfigOptions.DisableOptimizationsValidator, true)
