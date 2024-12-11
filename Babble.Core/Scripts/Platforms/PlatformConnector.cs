@@ -1,4 +1,5 @@
-﻿using OpenCvSharp;
+﻿using Microsoft.Extensions.Logging;
+using OpenCvSharp;
 
 namespace Babble.Core.Scripts.Captures;
 
@@ -47,6 +48,7 @@ public abstract class PlatformConnector
                 if (capture.Key.Item1.Any(prefix => url.EndsWith(prefix, StringComparison.OrdinalIgnoreCase)))
                 {
                     Capture = (Capture)Activator.CreateInstance(capture.Value, url);
+                    BabbleCore.Instance.Logger.LogInformation($"Changed capture source to {capture.Value.Name} with url {url}.");
                     break;
                 }
             }
@@ -55,6 +57,7 @@ public abstract class PlatformConnector
                 if (capture.Key.Item1.Any(prefix => url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
                 {
                     Capture = (Capture)Activator.CreateInstance(capture.Value, url);
+                    BabbleCore.Instance.Logger.LogInformation($"Changed capture source to {capture.Value.Name} with url {url}.");
                     break;
                 }
             }
@@ -63,11 +66,13 @@ public abstract class PlatformConnector
         if (Capture is null)
         {
             Capture = (Capture)Activator.CreateInstance(DefaultCapture, url);
+            BabbleCore.Instance.Logger.LogInformation($"Defaulting capture source to {DefaultCapture.Name} with url {url}.");
         }
 
         if (Capture is not null)
         {
             Capture.StartCapture();
+            BabbleCore.Instance.Logger.LogInformation($"Starting {DefaultCapture.Name} capture source...");
         }
     }
 
@@ -195,7 +200,7 @@ public abstract class PlatformConnector
     }
 
     /// <summary>
-    /// Shuts down any and all current Capture sources
+    /// Shuts down the current Capture source
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public virtual void Terminate()
@@ -205,6 +210,7 @@ public abstract class PlatformConnector
             throw new InvalidOperationException();
         }
 
+        BabbleCore.Instance.Logger.LogInformation("Stopping capture source...");
         Capture.StopCapture();
     }
 }

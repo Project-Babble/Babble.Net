@@ -53,8 +53,11 @@ public partial class App : Application
         // Start BabbleCore early so we can load settings.
         // In the VRCFT module, we skip init if we're already started
         BabbleCore.Instance.Start();
+        
+        BabbleCore.Instance.Logger.LogInformation("Starting localization service...");
         var lang = BabbleCore.Instance.Settings.GeneralSettings.GuiLanguage;
         LocalizerCore.Localizer.SwitchLanguage(lang);
+        BabbleCore.Instance.Logger.LogInformation("Started localization service.");
 
         // Setup VRCFT
         var settings = new FaceTrackingServices.FTSettings();
@@ -70,9 +73,13 @@ public partial class App : Application
         ParameterSenderService.AllParametersRelevant = true; // Don't touch! We need
 
         // Setup custom OSC handler
+        BabbleCore.Instance.Logger.LogInformation("Starting OSC service...");
         var ip = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
         var port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
         _babbleOSC = new BabbleOSC(ip, port);
+        BabbleCore.Instance.Logger.LogInformation("Started OSC service.");
+        
+        BabbleCore.Instance.Logger.LogInformation("App startup complete!");
     }
 
     public override async void OnFrameworkInitializationCompleted()
@@ -104,8 +111,10 @@ public partial class App : Application
 
     private void Desktop_Exit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
+        BabbleCore.Instance.Logger.LogInformation("App exit requested...");
         _mainIntegrated.Teardown();
         _babbleOSC.Teardown();
+        BabbleCore.Instance.Logger.LogInformation("App exited gracefully!");
     }
 
     private void OnShutdownClicked(object? sender, EventArgs e)

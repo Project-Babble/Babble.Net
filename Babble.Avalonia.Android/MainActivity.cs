@@ -6,6 +6,8 @@ using Microsoft.Maui.ApplicationModel;
 using System.Threading.Tasks;
 using Android.Views;
 using Babble.Avalonia.Scripts.Models;
+using Babble.Core;
+using Microsoft.Extensions.Logging;
 
 namespace Babble.Avalonia.Android;
 
@@ -22,11 +24,11 @@ public class MainActivity : AvaloniaMainActivity<App>
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
-        // I cannot, for the life of me, create a partial wake on lock for this god-forsaken platform.
+        // I cannot, for the life of me, create a partial wake on lock for this godforsaken platform.
         // No, this is not a permissions issue. Name it, I've tried them all. Partial wake lock, full wake lock,
         // ignore battery optimization settings, etc.
-        // Droidcam does it, Google maps can run on the lock screen, tf it going on here
-        // Whatever. On the Quest the app runs in the background screen-on anyways, if you're running this on a 
+        // Droidcam does it, Google Maps can run on the lock screen, tf it going on here
+        // Whatever. On the Quest the app runs in the background screen-on anyway, if you're running this on a 
         // Android phone just turn your brightness all the way down or something ¯\_(ツ)_/¯
         Window?.AddFlags(WindowManagerFlags.KeepScreenOn);
 
@@ -34,6 +36,7 @@ public class MainActivity : AvaloniaMainActivity<App>
         Task.Run(Permissions.RequestAsync<NotificationPermission>);
         App.SendNotification += NotificationRequested;
 
+        BabbleCore.Instance.Logger.LogInformation("App started in Android mode.");
         return base.CustomizeAppBuilder(builder)
             .WithInterFont();
     }

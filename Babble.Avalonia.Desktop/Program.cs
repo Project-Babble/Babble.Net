@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using Babble.Avalonia.Scripts.Models;
+using Babble.Core;
+using Microsoft.Extensions.Logging;
 
 namespace Babble.Avalonia.Desktop;
 
@@ -33,6 +35,7 @@ class Program
         _notificationManager.NotificationActivated += OnNotificationActivated;
         _notificationManager.NotificationDismissed += OnNotificationDismissed;
 
+        BabbleCore.Instance.Logger.LogInformation("App started in desktop mode.");
         return builder.StartWithClassicDesktopLifetime(args);
     }
 
@@ -43,7 +46,7 @@ class Program
             Title = notificationModel.Title,
             Body = notificationModel.Body,
             BodyImagePath = notificationModel.BodyImagePath,
-            BodyImageAltText = notificationModel.BodyAltText
+            BodyImageAltText = notificationModel.BodyAltText!
         };
 
         if (notificationModel.ActionButtons is not null)

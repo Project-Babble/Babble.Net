@@ -111,10 +111,12 @@ public partial class BabbleCore
     /// <exception cref="InvalidOperationException"></exception>
     public void Start(BabbleSettings settings)
     {
+        Logger.LogInformation("Starting BabbleCore...");
+        
         // Fail fast
         if (IsRunning)
         {
-            Logger.LogInformation("Babble.Core was already running. Restarting...");
+            Logger.LogInformation("BabbleCore was already running. Restarting...");
             Stop();
         }
 
@@ -158,8 +160,7 @@ public partial class BabbleCore
         _inputSize = new(dimensions[2], dimensions[3]);
         IsRunning = true;
 
-
-        Logger.LogInformation("Babble.Core started.");
+        Logger.LogInformation("BabbleCore started!");
     }
 
     /// <summary>
@@ -366,6 +367,7 @@ public partial class BabbleCore
             !OperatingSystem.IsAndroidVersionAtLeast(15))          // At most 15
         {
             sessionOptions.AppendExecutionProvider_Nnapi();
+            Logger.LogInformation("Initialized ExecutionProvider: nnAPI");
         }
         else if (OperatingSystem.IsIOS() ||
                  OperatingSystem.IsMacCatalyst() ||
@@ -374,6 +376,7 @@ public partial class BabbleCore
                  OperatingSystem.IsTvOS())
         {
             sessionOptions.AppendExecutionProvider_CoreML();
+            Logger.LogInformation("Initialized ExecutionProvider: CoreML");
         }
         else if (OperatingSystem.IsWindows())
         {
@@ -382,10 +385,12 @@ public partial class BabbleCore
             try
             {
                 sessionOptions.AppendExecutionProvider_DML(gpuIndex);
+                Logger.LogInformation("Initialized ExecutionProvider: DirectML");
                 return;
             }
-            catch 
+            catch (Exception ex)
             {
+                Logger.LogError(ex, "Failed to configure Gpu.");
                 Logger.LogWarning("Failed to create DML Execution Provider on Windows. Falling back to CUDA..."); 
             };
 
@@ -395,32 +400,35 @@ public partial class BabbleCore
             try
             {
                 sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+                Logger.LogInformation("Initialized ExecutionProvider: CUDA");
+                return;
                 return;
             }
-            catch 
+            catch (Exception ex)
             {
+                Logger.LogError(ex, "Failed to configure Gpu.");
                 Logger.LogWarning("Failed to create CUDA Execution Provider on Windows.");
-                Logger.LogWarning("No GPU acceleration will be applied.");
-
-                Settings.UpdateSetting<bool>(nameof(Settings.GeneralSettings.GuiUseGpu), false.ToString());
             }
+            
+            Logger.LogWarning("No GPU acceleration will be applied.");
+            Settings.UpdateSetting<bool>(nameof(Settings.GeneralSettings.GuiUseGpu), false.ToString());
         }
         else if (OperatingSystem.IsLinux())
         {
-            // This will crash Linux users without Nvidia GPUs.
-            // TODO: Fix this!
             try
             {
                 sessionOptions.AppendExecutionProvider_CUDA(gpuIndex);
+                Logger.LogInformation("Initialized ExecutionProvider: CUDA");
                 return;
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.LogError(ex, "Failed to configure CUDA.");
                 Logger.LogWarning("Failed to create CUDA Execution Provider on Linux.");
-                Logger.LogWarning("No GPU acceleration will be applied.");
-
-                Settings.UpdateSetting<bool>(nameof(Settings.GeneralSettings.GuiUseGpu), false.ToString());
             }
+            
+            Logger.LogWarning("No GPU acceleration will be applied.");
+            Settings.UpdateSetting<bool>(nameof(Settings.GeneralSettings.GuiUseGpu), false.ToString());
         }
     }
 }
