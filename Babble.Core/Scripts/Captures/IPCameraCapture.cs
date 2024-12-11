@@ -11,7 +11,7 @@ namespace Babble.Core.Scripts.Captures;
 /// https://github.com/Larry57/SimpleMJPEGStreamViewer
 /// https://stackoverflow.com/questions/3801275/how-to-convert-image-to-byte-array
 /// </summary>
-public class IPCameraCapture : Capture
+public class IPCameraCapture(string Url) : Capture(Url)
 { 
     public override (int width, int height) Dimensions 
     {
@@ -46,11 +46,7 @@ public class IPCameraCapture : Capture
     private const byte picEnd = 0xD9;
 
     // Determine if we've got stuck on the same frame
-    private Mat _prevMat = new Mat();
-
-    public IPCameraCapture(string Url) : base(Url)
-    {
-    }
+    private readonly Mat _prevMat = new();
 
     public override Task<bool> StartCapture()
     {

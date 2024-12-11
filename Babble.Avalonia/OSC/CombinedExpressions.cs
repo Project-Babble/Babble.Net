@@ -2,8 +2,8 @@
 
 internal static class CombinedExpressions
 {
-    internal static readonly HashSet<string> Set = new()
-    {
+    internal static readonly HashSet<string> Set =
+    [
         "EyeLeftX",
         "EyeLeftY",
         "EyeRightX",
@@ -54,5 +54,5 @@ internal static class CombinedExpressions
         "v2/SmileSadRight",
         "v2/SmileSadLeft",
         "v2/SmileSad",
-    };
+    ];
 }

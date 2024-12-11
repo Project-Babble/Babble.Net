@@ -306,7 +306,7 @@ public partial class CamView : UserControl, IIsVisible
     {
         camViewMode = CamViewMode.Tracking;
         isCropping = false;
-        OnPointerReleased(null, null); // Close and save any open crops
+        OnPointerReleased(null, null!); // Close and save any open crops
     }
 
     public void OnCroppingModeClicked(object sender, RoutedEventArgs args)

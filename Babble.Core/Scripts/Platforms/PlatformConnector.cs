@@ -5,12 +5,12 @@ namespace Babble.Core.Scripts.Captures;
 /// <summary>
 /// Manages what Captures are allowed to run on what platforms, as well as their Urls, etc.
 /// </summary>
-public abstract class PlatformConnector
+public abstract class PlatformConnector(string url)
 {
     /// <summary>
     /// The path to where the "data" lies
     /// </summary>
-    public string Url { get; private set; }
+    public string Url { get; private set; } = url;
 
     /// <summary>
     /// A Platform may have many Capture sources, but only one may ever be active at a time.
@@ -29,46 +29,34 @@ public abstract class PlatformConnector
 
     private uint _lastFrameCount = 0;
 
-    public PlatformConnector(string url)
-    {
-        Url = url;
-    }
-
     /// <summary>
     /// Initializes a Platform Connector
     /// </summary>
     public virtual void Initialize(string url)
     {
-        this.Url = url;
+        Url = url;
         foreach (var capture in Captures)
         {
-            if (capture.Key.Item2)
+            if (capture.Key.areSuffixes)
             {
-                if (capture.Key.Item1.Any(prefix => url.EndsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                if (capture.Key.strings.Any(prefix => url.EndsWith(prefix, StringComparison.OrdinalIgnoreCase)))
                 {
-                    Capture = (Capture)Activator.CreateInstance(capture.Value, url);
+                    Capture = (Capture)Activator.CreateInstance(capture.Value, url)!;
                     break;
                 }
             }
             else
             {
-                if (capture.Key.Item1.Any(prefix => url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                if (capture.Key.strings.Any(prefix => url.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
                 {
-                    Capture = (Capture)Activator.CreateInstance(capture.Value, url);
+                    Capture = (Capture)Activator.CreateInstance(capture.Value, url)!;
                     break;
                 }
             }
         }
 
-        if (Capture is null)
-        {
-            Capture = (Capture)Activator.CreateInstance(DefaultCapture, url);
-        }
-
-        if (Capture is not null)
-        {
-            Capture.StartCapture();
-        }
+        Capture ??= (Capture)Activator.CreateInstance(DefaultCapture, url)!;
+        Capture?.StartCapture();
     }
 
     /// <summary>
@@ -142,7 +130,7 @@ public abstract class PlatformConnector
             BabbleCore.Instance.Settings.Save();
         }
 
-        Mat sourceMat = Capture.RawMat, resultMat = new Mat(sourceMat, (roiX == 0 || roiY == 0 || roiWidth == 0 || roiHeight == 0 ||
+        Mat sourceMat = Capture.RawMat, resultMat = new(sourceMat, (roiX == 0 || roiY == 0 || roiWidth == 0 || roiHeight == 0 ||
             roiWidth == sourceMat.Width || roiHeight == sourceMat.Height) ? new Rect(0, 0, sourceMat.Width, sourceMat.Height) : new Rect(roiX, roiY, roiWidth, roiHeight));
         if (resultMat.Channels() >= 2)
         {
@@ -184,7 +172,7 @@ public abstract class PlatformConnector
             {
                 Cv2.Resize(resultMat, outputMat, size);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 resultMat.Dispose();
                 return false;

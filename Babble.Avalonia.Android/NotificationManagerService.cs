@@ -22,7 +22,7 @@ public class NotificationManagerService
     int messageId = 0;
     int pendingIntentId = 0;
 
-    NotificationManagerCompat compatManager;
+    readonly NotificationManagerCompat compatManager;
 
     public static NotificationManagerService Instance { get; private set; }
 
@@ -30,10 +30,12 @@ public class NotificationManagerService
     {
         if (Instance == null)
         {
-            CreateNotificationChannel();
-            compatManager = NotificationManagerCompat.From(Platform.AppContext);
-            Instance = this;
+            return;
         }
+
+        CreateNotificationChannel();
+        compatManager = NotificationManagerCompat.From(Platform.AppContext);
+        Instance = this;
     }
 
     public void SendNotification(string title, string message, DateTime? notifyTime = null)
@@ -45,7 +47,7 @@ public class NotificationManagerService
 
         if (notifyTime != null)
         {
-            Intent intent = new Intent(Platform.AppContext, typeof(AlarmHandler));
+            Intent intent = new(Platform.AppContext, typeof(AlarmHandler));
             intent.PutExtra(TitleKey, title);
             intent.PutExtra(MessageKey, message);
             intent.SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
@@ -54,9 +56,9 @@ public class NotificationManagerService
                 ? PendingIntentFlags.CancelCurrent | PendingIntentFlags.Immutable
                 : PendingIntentFlags.CancelCurrent;
 
-            PendingIntent pendingIntent = PendingIntent.GetBroadcast(Platform.AppContext, pendingIntentId++, intent, pendingIntentFlags);
+            PendingIntent pendingIntent = PendingIntent.GetBroadcast(Platform.AppContext, pendingIntentId++, intent, pendingIntentFlags)!;
             long triggerTime = GetNotifyTime(notifyTime.Value);
-            AlarmManager alarmManager = Platform.AppContext.GetSystemService(Context.AlarmService) as AlarmManager;
+            AlarmManager alarmManager = (AlarmManager)Platform.AppContext.GetSystemService(Context.AlarmService)!;
             alarmManager.Set(AlarmType.RtcWakeup, triggerTime, pendingIntent);
         }
         else
@@ -67,7 +69,7 @@ public class NotificationManagerService
 
     public void SendNotification(string title, string message)
     {
-        Intent intent = new Intent(Platform.AppContext, typeof(MainActivity));
+        Intent intent = new(Platform.AppContext, typeof(MainActivity));
         intent.PutExtra(TitleKey, title);
         intent.PutExtra(MessageKey, message);
         intent.SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
@@ -76,7 +78,7 @@ public class NotificationManagerService
             ? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
             : PendingIntentFlags.UpdateCurrent;
 
-        PendingIntent pendingIntent = PendingIntent.GetActivity(Platform.AppContext, pendingIntentId++, intent, pendingIntentFlags);
+        PendingIntent pendingIntent = PendingIntent.GetActivity(Platform.AppContext, pendingIntentId++, intent, pendingIntentFlags)!;
         NotificationCompat.Builder builder = new NotificationCompat.Builder(Platform.AppContext, channelId)
             .SetContentIntent(pendingIntent)
             .SetContentTitle(title)
@@ -99,7 +101,7 @@ public class NotificationManagerService
                 Description = channelDescription
             };
             // Register the channel
-            NotificationManager manager = (NotificationManager)Platform.AppContext.GetSystemService(Context.NotificationService);
+            NotificationManager manager = (NotificationManager)Platform.AppContext.GetSystemService(Context.NotificationService)!;
             manager.CreateNotificationChannel(channel);
             channelInitialized = true;
         }

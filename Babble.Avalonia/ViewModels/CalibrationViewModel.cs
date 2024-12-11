@@ -13,7 +13,7 @@ public partial class CalibrationViewModel : ViewModelBase
 
     public CalibrationViewModel()
     {
-        CalibrationItems = new ObservableCollection<CalibrationItem>();
+        CalibrationItems = [];
         var config = JsonConvert.DeserializeObject<CalibrationItem[]>(BabbleCore.Instance.Settings.GeneralSettings.CalibArray)!;
         foreach (var item in config)
         {

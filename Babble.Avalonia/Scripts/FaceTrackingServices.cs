@@ -8,13 +8,11 @@ namespace Hypernex.ExtendedTracking;
 // From https://github.com/TigersUniverse/Hypernex.Unity/blob/main/Assets/Scripts/ExtendedTracking/FaceTrackingServices.cs
 public static class FaceTrackingServices
 {
-    public class FTLogger : ILogger
+    public class FTLogger(string c) : ILogger
     {
-        private string p;
+        private readonly string p = $"[{c}] ";
 
-        public FTLogger(string c) => p = $"[{c}] ";
-        
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             Task.Run(new Action(() =>
             {
@@ -72,13 +70,13 @@ public static class FaceTrackingServices
             return default;
         }
 
-        public Task<T> ReadSettingAsync<T>(string key, T? defaultValue = default(T?), bool forceLocal = false)
+        public Task<T> ReadSettingAsync<T>(string key, T? defaultValue = default, bool forceLocal = false)
         {
-            return default;
+            return default!;
         }
 
         public Task SaveSettingAsync<T>(string key, T value, bool forceLocal = false) =>
-            SaveSettingAsync(key, value);
+            SaveSettingAsync(key, value)!;
 
         // Why do I have to do this? Why not just Serialize the object??
         private Dictionary<MemberInfo, SavedSettingAttribute> GetSavedSettings(object target)
@@ -103,7 +101,7 @@ public static class FaceTrackingServices
             //    members.Add(propertyInfo, attributes[0]);
             //}
             //return members;
-            return new Dictionary <MemberInfo, SavedSettingAttribute>();
+            return [];
         }
 
         public Task Save(object target)

@@ -4,7 +4,7 @@ namespace Babble.Core;
 
 public partial class BabbleCore
 {
-    private static Dictionary<UnifiedExpression, float> CachedExpressionTable = new()
+    private static readonly Dictionary<UnifiedExpression, float> CachedExpressionTable = new()
     {
         { UnifiedExpression.CheekPuffLeft, 0f },
         { UnifiedExpression.CheekPuffRight, 0f },

@@ -38,7 +38,9 @@ public class App : Application
             services.RegisterSingleton<SettingsView, SettingsViewModel>();
             services.RegisterSingleton<CalibrationView, CalibrationViewModel>();
         }).Build();
-    
+
+#pragma warning disable CS0414
+#pragma warning disable CS0067
     // Platform-agnostic Notification representation.
     // Implementers can subscribe to this Action when a notification is to be raised
     // Ex: SendNotification.Invoke("Title", "Body", string.Empty, string.Empty, null, null, null);
@@ -49,9 +51,9 @@ public class App : Application
         string,                                      // Body Alt. Text
         List<(string Title, string ActionId)?>,      // Action Buttons
         DateTimeOffset?,                             // Optional: Scheduled time to send Notification
-#pragma warning disable CS0067 // Event is never used
-        DateTimeOffset?> SendNotification = null!;           // Optional: Expiration time for sent Notification
-#pragma warning restore CS0067 // Event is never used
+        DateTimeOffset?> SendNotification = null!;   // Optional: Expiration time for sent Notification
+#pragma warning restore CS0067
+#pragma warning disable CS0414
 
     private MainIntegrated _mainIntegrated = null!;
     private BabbleOSC _babbleOsc = null!;

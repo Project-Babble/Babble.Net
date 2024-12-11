@@ -9,8 +9,8 @@ public class AlarmHandler : BroadcastReceiver
     {
         if (intent?.Extras != null)
         {
-            string title = intent.GetStringExtra(NotificationManagerService.TitleKey);
-            string message = intent.GetStringExtra(NotificationManagerService.MessageKey);
+            string title = intent.GetStringExtra(NotificationManagerService.TitleKey)!;
+            string message = intent.GetStringExtra(NotificationManagerService.MessageKey)!;
 
             NotificationManagerService manager = NotificationManagerService.Instance ?? new NotificationManagerService();
             manager.SendNotification(title, message);

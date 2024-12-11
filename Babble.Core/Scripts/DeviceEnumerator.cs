@@ -8,7 +8,7 @@ public static class DeviceEnumerator
 {
     public static List<string> ListCameraNames()
     {
-        List<string> camNames = new List<string>();
+        List<string> camNames = [];
 
         if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
         {
@@ -71,7 +71,7 @@ public static class DeviceEnumerator
 
             // Process the output to get UVC device paths
             var lines = output.Split('\n');
-            string currentDevice = null;
+            string currentDevice = null!;
 
             foreach (var line in lines)
             {
@@ -134,7 +134,7 @@ public static class DeviceEnumerator
     // List serial ports available on the system
     private static List<string> ListSerialPorts()
     {
-        List<string> result = new List<string>();
+        List<string> result = [];
 
         if (OperatingSystem.IsWindows())
         {

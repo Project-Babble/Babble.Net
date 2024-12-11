@@ -5,7 +5,7 @@ namespace Babble.Core.Scripts.Captures;
 /// <summary>
 /// Defines custom camera stream behavior
 /// </summary>
-public abstract class Capture
+public abstract class Capture(string Url)
 {
     /// <summary>
     /// Represents the size of a "default" Babble frame 
@@ -18,7 +18,7 @@ public abstract class Capture
     /// </summary>
     protected virtual Mat EmptyMat => Mat.Zeros(DefaultFrameDimensions.width, DefaultFrameDimensions.height, MatType.CV_32F, 3);
 
-    public abstract string Url { get; set; }
+    public virtual string Url { get; set; } = Url;
 
     public abstract uint FrameCount { get; protected set; }
 
@@ -37,7 +37,7 @@ public abstract class Capture
     /// <summary>
     /// Is this Capture source ready to produce data?
     /// </summary>
-    public abstract bool IsReady { get; protected set; }
+    public virtual bool IsReady { get; protected set; } = false;
 
     /// <summary>
     /// Start Capture on this source
@@ -50,10 +50,4 @@ public abstract class Capture
     /// </summary>
     /// <returns></returns>
     public abstract bool StopCapture();
-
-    public Capture(string Url)
-    {
-        this.Url = Url;
-        IsReady = false;
-    }
 }

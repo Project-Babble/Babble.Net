@@ -1,24 +1,13 @@
 ﻿namespace Babble.Core.Scripts;
 
-public class OneEuroFilter
+public class OneEuroFilter(float minCutoff, float beta)
 {
-    public OneEuroFilter(float minCutoff, float beta)
-    {
-        firstTime = true;
-        this.minCutoff = minCutoff;
-        this.beta = beta;
-
-        xFilt = new LowpassFilter();
-        dxFilt = new LowpassFilter();
-        dcutoff = 1;
-    }
-
-    protected bool firstTime;
-    protected float minCutoff;
-    protected float beta;
-    protected LowpassFilter xFilt;
-    protected LowpassFilter dxFilt;
-    protected float dcutoff;
+    protected bool firstTime = true;
+    protected float minCutoff = minCutoff;
+    protected float beta = beta;
+    protected LowpassFilter xFilt = new LowpassFilter();
+    protected LowpassFilter dxFilt = new LowpassFilter();
+    protected float dcutoff = 1;
 
     public float MinCutoff
     {

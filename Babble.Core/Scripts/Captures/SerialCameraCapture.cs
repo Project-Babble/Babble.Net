@@ -93,7 +93,7 @@ public class SerialCameraCapture : Capture, IDisposable
                 FrameCount++;
             }
         }
-        catch (ObjectDisposedException ex)
+        catch (ObjectDisposedException)
         {
             // Handle when the device is unplugged
             StopCapture();

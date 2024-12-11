@@ -55,7 +55,7 @@ namespace Avalonia.Localizer.Core.Localization
         public string Language { get; private set; } = string.Empty;
 
         /// <inheritdoc/>
-        public List<string> AvailableLanguages { get; private set; } = new();
+        public List<string> AvailableLanguages { get; private set; } = [];
 
         /// <inheritdoc/>
         public string this[string key]
@@ -132,7 +132,7 @@ namespace Avalonia.Localizer.Core.Localization
         /// <exception cref="CultureNotFoundException"> Missing localization packages </exception>
         private void LoadLocalizationPackages()
         {
-            AvailableLanguages = new List<string>();
+            AvailableLanguages = [];
 
             var dirUri = new Uri(LocalizationPath);
             var assets = AssetLoader.GetAssets(dirUri, null);

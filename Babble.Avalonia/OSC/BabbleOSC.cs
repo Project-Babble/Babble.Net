@@ -3,7 +3,6 @@ using Babble.Core.Settings;
 using Rug.Osc;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Text.RegularExpressions;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
 using VRCFaceTracking.Core.OSC.DataTypes;
@@ -17,11 +16,10 @@ namespace Babble.OSC;
 public class BabbleOSC
 {
     private OscSender _sender;
-    private OSCQuery _query;
-    private CancellationTokenSource _cancellationTokenSource;
-    private Task _sendTask;
+    private readonly OSCQuery _query;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
-    private static readonly Parameter[] AllParams = UnifiedTracking.AllParameters_v2.Concat(UnifiedTracking.AllParameters_v1).ToArray();
+    private static readonly Parameter[] AllParams = [.. UnifiedTracking.AllParameters_v2, .. UnifiedTracking.AllParameters_v1];
     private readonly List<Parameter> CurrentAvatarParams = [];
 
     private static readonly string[] prefixes = ["", "FT/",];
@@ -33,8 +31,6 @@ public class BabbleOSC
     private const int DEFAULT_REMOTE_PORT = 8888;
 
     private const int TIMEOUT_MS = 10000;
-
-    private const int MAX_RETRIES = 5;
 
     public BabbleOSC(string? host = null, int? remotePort = null)
     {
@@ -51,7 +47,7 @@ public class BabbleOSC
             remotePort ?? DEFAULT_REMOTE_PORT);
 
         _cancellationTokenSource = new CancellationTokenSource();
-        _sendTask = Task.Run(() => SendLoopAsync(_cancellationTokenSource.Token));
+        _ = Task.Run(() => SendLoopAsync(_cancellationTokenSource.Token));
     }
 
     private void OnBabbleSettingsChanged(BabbleSettings settings)
@@ -106,18 +102,18 @@ public class BabbleOSC
             try
             {
                 if (BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy)
-                    await SendMobileParameters(cancellationToken);
+                    await SendMobileParameters();
                 else
-                    await SendDesktopParameters(cancellationToken);
+                    await SendDesktopParameters();
 
                 await PollConnectionStatus(cancellationToken);
-                await Task.Delay(25);
+                await Task.Delay(25, cancellationToken);
             }
             catch { }
         }
     }
 
-    private async Task SendMobileParameters(CancellationToken cancellationToken)
+    private Task SendMobileParameters()
     {
         var mul = BabbleCore.Instance.Settings.GeneralSettings.GuiMultiply;
 
@@ -125,18 +121,18 @@ public class BabbleOSC
         {
             foreach (var param in CurrentAvatarParams)
             {
-                foreach (var name in param.GetParamNames())
+                foreach (var (paramName, paramLiteral) in param.GetParamNames())
                 {
-                    if (name.paramName == "EyeTrackingActive")
+                    if (paramName == "EyeTrackingActive")
                         continue;
 
-                    switch (name.paramLiteral)
+                    switch (paramLiteral)
                     {
                         case BaseParam<float> floatName:
                             if (!floatName.Relevant) continue;
-                            var address = $"/avatar/parameters/{prefix}{name.paramName}";
+                            var address = $"/avatar/parameters/{prefix}{paramName}";
                             if (address.EndsWith("v2/")) continue; // Not a valid OSC address
-                            float floatValue = 0;
+                            float floatValue;
                             try
                             {
                                 floatValue = floatName.ParamValue;
@@ -148,21 +144,23 @@ public class BabbleOSC
                         // This only returns a single bool without Binary steps
                         case BaseParam<bool> boolName:
                             if (!boolName.Relevant) continue;
-                            bool boolValue = false;
+                            bool boolValue;
                             try
                             {
                                 boolValue = boolName.ParamValue;
                             }
                             catch { continue; }
-                            _sender.Send(new OscMessage($"/avatar/parameters/{prefix}{name.paramName}", boolValue));
+                            _sender.Send(new OscMessage($"/avatar/parameters/{prefix}{paramName}", boolValue));
                             break;
                     }
                 }
             }
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task SendDesktopParameters(CancellationToken cancellationToken)
+    private Task SendDesktopParameters()
     {
         var mul = BabbleCore.Instance.Settings.GeneralSettings.GuiMultiply;
         var prefix = BabbleCore.Instance.Settings.GeneralSettings.GuiOscLocation;
@@ -183,6 +181,8 @@ public class BabbleOSC
 
             _sender.Send(new OscMessage($"{prefix}{address}", value * (float)mul));
         }
+
+        return Task.CompletedTask;
     }
 
     private async Task PollConnectionStatus(CancellationToken cancellationToken)

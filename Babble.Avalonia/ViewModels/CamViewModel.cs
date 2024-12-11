@@ -61,6 +61,7 @@ public partial class CamViewModel : ViewModelBase
         BabbleCore.Instance.Settings.OnUpdate += Settings_OnUpdate;
     }
 
+#pragma warning disable MVVMTK0034 // Direct field reference to [ObservableProperty] backing field
     private void Settings_OnUpdate(string obj)
     {
         // Handle a very niche edge case where the user starts up the application
@@ -69,4 +70,5 @@ public partial class CamViewModel : ViewModelBase
         var settings = BabbleCore.Instance.Settings;
         cameraAddressEntryText = settings.Cam.CaptureSource;
     }
+#pragma warning restore MVVMTK0034 // Direct field reference to [ObservableProperty] backing field
 }

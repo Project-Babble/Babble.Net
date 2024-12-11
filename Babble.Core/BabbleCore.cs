@@ -31,9 +31,9 @@ public partial class BabbleCore
 
     public PlatformConnector? PlatformConnector;
     
-    private readonly DenseTensor<float> _inputTensor = new DenseTensor<float>([1, 1, 256, 256]);
+    private readonly DenseTensor<float> _inputTensor = new([1, 1, 256, 256]);
     private readonly Stopwatch _sw = Stopwatch.StartNew();
-    private Size _inputSize = new Size(256, 256);
+    private Size _inputSize = new(256, 256);
     private Dictionary<string, CalibrationItem>? _calibrationItems;
     private InferenceSession? _session;
     private OneEuroFilter? _floatFilter;
@@ -305,10 +305,12 @@ public partial class BabbleCore
         Environment.SetEnvironmentVariable("OMP_NUM_THREADS", "1");
 
         // Setup inference backend
-        var sessionOptions = new SessionOptions();
-        sessionOptions.InterOpNumThreads = 1;
-        sessionOptions.IntraOpNumThreads = Math.Clamp(Settings.GeneralSettings.GuiInferenceThreads, 0, 2);
-        sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
+        var sessionOptions = new SessionOptions
+        {
+            InterOpNumThreads = 1,
+            IntraOpNumThreads = Math.Clamp(Settings.GeneralSettings.GuiInferenceThreads, 0, 2),
+            GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL
+        };
         // ~3% savings worth ~6ms avg latency. Not noticeable at 60fps?
         sessionOptions.AddSessionConfigEntry("session.intra_op.allow_spinning", "0");  
         sessionOptions.EnableMemoryPattern = true;

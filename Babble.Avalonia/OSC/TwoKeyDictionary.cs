@@ -16,8 +16,8 @@ namespace Babble.OSC.Collections;
 /// <typeparam name="TValue"></typeparam>
 public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable where TKey1 : notnull where  TKey2 : notnull
 {
-    private Dictionary<TKey1, TKey2> m_dic1 = new Dictionary<TKey1, TKey2>();
-    private Dictionary<TKey2, TValue> m_dic2 = new Dictionary<TKey2, TValue>();
+    private readonly Dictionary<TKey1, TKey2> m_dic1 = [];
+    private readonly Dictionary<TKey2, TValue> m_dic2 = [];
     private IEnumerator<TKey1>? m_cachedEnumerator;
 
     /// <summary>
@@ -128,13 +128,13 @@ public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable where TKey1 : 
     {
         if (!ContainsKey1(key1))
         {
-            value = default(TValue);
+            value = default;
             return false;
         }
 
         if (!ContainsKey2(m_dic1[key1]))
         {
-            value = default(TValue);
+            value = default;
             return false;
         }
 
@@ -151,7 +151,7 @@ public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable where TKey1 : 
     {
         if (!ContainsKey2(key2))
         {
-            value = default(TValue);
+            value = default;
             return false;
         }
 
@@ -256,7 +256,7 @@ public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable where TKey1 : 
 
     public override string ToString()
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         foreach (KeyValuePair<TKey1, TKey2> kvp in m_dic1)
         {
             sb.AppendLine($"Key1: {kvp.Key}, Key2: {kvp.Value}, Value: {m_dic2[kvp.Value]}");
@@ -275,7 +275,7 @@ public class TwoKeyDictionary<TKey1, TKey2, TValue> : IEnumerable where TKey1 : 
 
     public IEnumerator<TKey1> GetEnumerator()
     {
-        m_cachedEnumerator.Reset();
+        m_cachedEnumerator!.Reset();
         return m_cachedEnumerator;
     }
 

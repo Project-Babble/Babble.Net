@@ -9,7 +9,11 @@ namespace Babble.Core.Scripts.Captures;
 /// 2) IP Camera capture
 /// 3) Or we aren't on an unsupported mobile platform (iOS or Android. Tizen/WatchOS are ok though??)
 /// </summary>
-public class OpenCVCapture : Capture
+/// <remarks>
+/// Constructor that accepts a URL for the video source.
+/// </remarks>
+/// <param name="Url">URL for video source.</param>
+public class OpenCVCapture(string Url) : Capture(Url)
 {
     /// <xlinka>
     /// VideoCapture instance to handle camera frames.
@@ -24,7 +28,7 @@ public class OpenCVCapture : Capture
     /// </xlinka>
     public unsafe override Mat RawMat => _mat;
 
-    private Mat _mat = new();
+    private readonly Mat _mat = new();
 
     public override uint FrameCount { get; protected set; }
 
@@ -48,12 +52,6 @@ public class OpenCVCapture : Capture
     /// </summary>
     public override string Url { get; set; } = null!;
 
-    /// <summary>
-    /// Constructor that accepts a URL for the video source.
-    /// </summary>
-    /// <param name="Url">URL for video source.</param>
-    public OpenCVCapture(string Url) : base(Url) { }
-
     private bool _loop = false;
 
     /// <summary>
@@ -76,7 +74,7 @@ public class OpenCVCapture : Capture
                 else
                     _videoCapture = await Task.Run(() => new VideoCapture(Url), cts.Token);
                 _loop = true;
-                Task.Run(VideoCapture_UpdateLoop);
+                _ = Task.Run(VideoCapture_UpdateLoop);
             }
             catch (AggregateException)
             {

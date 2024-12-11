@@ -8,22 +8,18 @@ namespace Avalonia.Localizer.Core.Localization
     /// <summary>
     /// Markup extension for localization in XAML designers
     /// </summary>
-    internal sealed class LocalizeExtension : MarkupExtension
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="LocalizeExtension"/> class.
+    /// </remarks>
+    /// <param name="key"> Key </param>
+    internal sealed class LocalizeExtension(string key) : MarkupExtension
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LocalizeExtension"/> class.
-        /// </summary>
-        /// <param name="key"> Key </param>
-        public LocalizeExtension(string key)
-        {
-            Key = key;
-        }
 
         /// <summary>
         /// Gets or sets the localization key
         /// </summary>
         /// <value>The localization key.</value>
-        public string Key { get; set; }
+        public string Key { get; set; } = key;
 
         /// <summary>
         /// Gets or sets the context

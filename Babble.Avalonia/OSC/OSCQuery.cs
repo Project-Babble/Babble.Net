@@ -16,7 +16,7 @@ public class OSCQuery
     private HashSet<OSCQueryServiceProfile> profiles = [];
 
     private static readonly Regex VRChatClientRegex = new(@"VRChat-Client-[A-Za-z0-9]{6}$", RegexOptions.Compiled);
-    private CancellationTokenSource _cancellationTokenSource;
+    private readonly CancellationTokenSource _cancellationTokenSource;
     private string _lastAvatarID = string.Empty;
     private const int VRC_PORT = 9000;
 
@@ -163,7 +163,7 @@ public class OSCQuery
             Description = rootNode.Description,
             OscType = rootNode.OscType,
             FullPath = rootNode.FullPath,
-            Contents = new()
+            Contents = []
         };
 
         if (rootNode.Contents is not null)
