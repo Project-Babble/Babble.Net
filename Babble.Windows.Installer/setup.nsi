@@ -54,7 +54,7 @@
   Section "-hidden app"
     SectionIn RO
     SetOutPath "$INSTDIR"
-    File /r "app\*.*" 
+    File /r /x ".gitignore" "app\*.*"
     WriteRegStr HKCU "Software\${NAME}" "" $INSTDIR
     WriteUninstaller "$INSTDIR\Uninstall.exe"
   SectionEnd
