@@ -49,7 +49,7 @@ public class OSCQuery
 
         service.OnOscQueryServiceAdded += _ => AddProfileToList();
         
-        StartAutoRefreshServices(5000, _cancellationTokenSource.Token);
+        StartAutoRefreshServices(5000);
     }
 
     private void AddProfileToList()
@@ -57,12 +57,12 @@ public class OSCQuery
         profiles = service.GetOSCQueryServices();
     }
 
-    private void StartAutoRefreshServices(double interval, CancellationToken cancellationToken)
+    private void StartAutoRefreshServices(double interval)
     {
         BabbleCore.Instance.Logger.LogInformation("[VRCFTReceiver] OSCQuery start StartAutoRefreshServices");
         Task.Run(async () =>
         {
-            while (!cancellationToken.IsCancellationRequested)
+            while (true)
             {
                 if (BabbleCore.Instance.Settings.GeneralSettings.GuiForceRelevancy)
                 {
@@ -73,13 +73,13 @@ public class OSCQuery
                     }
                     catch (Exception)
                     {
-                        break;
+                        
                     }
                 }
 
-                await Task.Delay(TimeSpan.FromMilliseconds(interval), cancellationToken);
+                await Task.Delay(TimeSpan.FromMilliseconds(interval));
             }
-        }, cancellationToken);
+        });
     }
 
     private async Task PollVRChatParameters()
@@ -133,24 +133,24 @@ public class OSCQuery
         {
             _lastAvatarID = currentAvatarID;
 
+            var ip = vrcProfile.address.ToString();
+            if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress != ip)
+            {
+                BabbleCore.Instance.Settings.UpdateSetting<string>(
+                    nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
+                    vrcProfile.address.ToString());
+            }
+
+            if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort != VRC_PORT)
+            {
+                BabbleCore.Instance.Settings.UpdateSetting<int>(
+                    nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
+                    VRC_PORT.ToString());
+            }
+
             // Convert VRC to VRCFT Query Node
             OscQueryNode vrcftQueryNode = ConvertOscQueryNodeTree(avatar);
             OnAvatarChange?.Invoke(vrcftQueryNode);
-        }
-
-        var ip = vrcProfile.address.ToString();
-        if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress != ip)
-        {
-            BabbleCore.Instance.Settings.UpdateSetting<string>(
-                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress),
-                vrcProfile.address.ToString());
-        }
-
-        if (BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort != VRC_PORT)
-        {
-            BabbleCore.Instance.Settings.UpdateSetting<int>(
-                nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort),
-                VRC_PORT.ToString());
         }
     }
 

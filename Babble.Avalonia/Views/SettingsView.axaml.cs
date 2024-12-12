@@ -77,8 +77,8 @@ public partial class SettingsView : UserControl, IIsVisible
              setting == nameof(BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort)))
         {
             // Don't notify anyone!
-            _viewModel.ipAddress = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
-            _viewModel.port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
+            _viewModel.IpAddress = BabbleCore.Instance.Settings.GeneralSettings.GuiOscAddress;
+            _viewModel.Port = BabbleCore.Instance.Settings.GeneralSettings.GuiOscPort;
         }
     }
 
