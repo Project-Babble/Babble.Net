@@ -3,7 +3,6 @@ using Babble.Core.Settings;
 using Rug.Osc;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Text.RegularExpressions;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
 using VRCFaceTracking.Core.OSC.DataTypes;
@@ -120,6 +119,7 @@ public class BabbleOSC
     private async Task SendMobileParameters(CancellationToken cancellationToken)
     {
         var mul = BabbleCore.Instance.Settings.GeneralSettings.GuiMultiply;
+        var messages = new List<OscMessage>();
 
         foreach (var prefix in prefixes)
         {
@@ -134,31 +134,29 @@ public class BabbleOSC
                     {
                         case BaseParam<float> floatName:
                             if (!floatName.Relevant) continue;
-                            var address = $"/avatar/parameters/{prefix}{name.paramName}";
-                            if (address.EndsWith("v2/")) continue; // Not a valid OSC address
-                            float floatValue = 0;
-                            try
+                            float floatValue = floatName.ParamValue;
+                            if (!float.IsNaN(floatValue) && floatValue != 0)
                             {
-                                floatValue = floatName.ParamValue;
+                                var address = $"/avatar/parameters/{prefix}{name.paramName}";
+                                if (!address.EndsWith("v2/"))
+                                    messages.Add(new OscMessage(address, floatValue * (float)mul));
                             }
-                            catch { continue; }
-                            if (float.IsNaN(floatValue) || floatValue == 0) continue;
-                            _sender.Send(new OscMessage(address, floatValue * (float)mul));
                             break;
                         // This only returns a single bool without Binary steps
-                        case BaseParam<bool> boolName:
-                            if (!boolName.Relevant) continue;
-                            bool boolValue = false;
-                            try
-                            {
-                                boolValue = boolName.ParamValue;
-                            }
-                            catch { continue; }
-                            _sender.Send(new OscMessage($"/avatar/parameters/{prefix}{name.paramName}", boolValue));
-                            break;
+                        //case BaseParam<bool> boolName:
+                        //    if (!boolName.Relevant) continue;
+                        //    var boolAddress = $"/avatar/parameters/{prefix}{name.paramName}";
+                        //    messages.Add(new OscMessage(boolAddress, boolName.ParamValue));
+                        //    break;
                     }
                 }
             }
+        }
+
+        if (messages.Count > 0)
+        {
+            OscBundle bundle = new OscBundle(DateTime.Now, messages.ToArray());
+            _sender.Send(bundle);
         }
     }
 
@@ -166,6 +164,7 @@ public class BabbleOSC
     {
         var mul = BabbleCore.Instance.Settings.GeneralSettings.GuiMultiply;
         var prefix = BabbleCore.Instance.Settings.GeneralSettings.GuiOscLocation;
+        var messages = new List<OscMessage>();
 
         foreach (var exp in BabbleMapping.Mapping)
         {
@@ -181,7 +180,13 @@ public class BabbleOSC
                 exp.Value == UnifiedExpressions.LipPuckerUpperRight)
                 continue;
 
-            _sender.Send(new OscMessage($"{prefix}{address}", value * (float)mul));
+            messages.Add(new OscMessage($"{prefix}{address}", value * (float)mul));
+        }
+
+        if (messages.Count > 0)
+        {
+            OscBundle bundle = new OscBundle(DateTime.Now, messages.ToArray());
+            _sender.Send(bundle);
         }
     }
 
