@@ -113,9 +113,18 @@ public class OSCQuery
         // Able to read the current avatar ID. So, we'll poll this, see if it changes
         // And if it does we can fire off an event to respond to this!!
         // Oh also add like a bazillion null checks in case we're loading avis.
+
+        OSCQueryRootNode tree = null!;
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            tree = await Task.Run(() => Extensions.GetOSCTree(vrcProfile.address, vrcProfile.port), cts.Token);
+        }
+        catch (AggregateException)
+        {
+            return;
+        }
         
-        
-        var tree = await Extensions.GetOSCTree(vrcProfile.address, vrcProfile.port);
         if (tree is null) return;
         if (tree.Contents is null) return;
 
@@ -184,5 +193,10 @@ public class OSCQuery
         _cancellationTokenSource.Dispose();
         service.Dispose();
         BabbleCore.Instance.Logger.LogInformation("[VRCFTReceiver] OSCQuery teardown completed");
+    }
+    
+    private static async Task TimeoutAfter(Task task, int millisecondsTimeout)
+    {
+        
     }
 }
