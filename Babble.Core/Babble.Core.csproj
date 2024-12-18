@@ -73,10 +73,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-maccatalyst13.2'">
-    <PackageReference Include="Emgu.CV.runtime.maui.mini.macos">
-      <Version>4.9.0.5494</Version>
-    </PackageReference>
-  </ItemGroup>
-
 </Project>
