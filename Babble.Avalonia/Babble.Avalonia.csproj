@@ -48,8 +48,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Babble.Core\Babble.Core.csproj" />
 	<ProjectReference Include="..\DesktopNotifications\DesktopNotifications\DesktopNotifications.csproj" />
-	<ProjectReference Include="..\vrc-oscquery-lib\vrc-oscquery-lib\vrc-oscquery-lib.csproj" />
-    <ProjectReference Include="..\VRCFaceTracking\VRCFaceTracking.Core\VRCFaceTracking.Core.csproj" />
+	<ProjectReference Include="..\VRCFaceTracking\VRCFaceTracking.Core\VRCFaceTracking.Core.csproj" />
     <ProjectReference Include="..\VRCFaceTracking\VRCFaceTracking.SDK\VRCFaceTracking.SDK.csproj" />
   </ItemGroup>
 
