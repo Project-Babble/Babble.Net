@@ -1,13 +1,12 @@
-﻿using Babble.Core;
+﻿using Babble.Avalonia.OSC;
+using Babble.Avalonia.Scripts;
+using Babble.Core;
 using Babble.Core.Settings;
 using Rug.Osc;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using VRCFaceTracking;
 using VRCFaceTracking.BabbleNative;
-using VRCFaceTracking.Core.OSC.DataTypes;
-using VRCFaceTracking.Core.OSC.Query;
-using VRCFaceTracking.Core.Params;
 using VRCFaceTracking.Core.Params.Expressions;
 using VRCFTReceiver;
 
@@ -15,15 +14,12 @@ namespace Babble.OSC;
 
 public class BabbleOSC
 {
+    private static readonly string[] Prefixes = ["/", "/v2/", "/FT/", "/FT/v2/"];
+    private List<OscMessage> messages = new List<OscMessage>();
     private OscSender _sender;
     private OSCQuery _query;
     private CancellationTokenSource _cancellationTokenSource;
     private Task _sendTask;
-
-    private static readonly Parameter[] AllParams = UnifiedTracking.AllParameters_v2.Concat(UnifiedTracking.AllParameters_v1).ToArray();
-    private readonly List<Parameter> CurrentAvatarParams = [];
-
-    private static readonly string[] prefixes = ["", "FT/",];
 
     private const string DEFAULT_HOST = "127.0.0.1";
 
@@ -40,7 +36,6 @@ public class BabbleOSC
         var settings = BabbleCore.Instance.Settings;
         
         _query = new OSCQuery(IPAddress.Loopback);
-        _query.OnAvatarChange += DetermineNewParameters;
 
         OnBabbleSettingsChanged(settings);
 
@@ -119,44 +114,24 @@ public class BabbleOSC
     private async Task SendMobileParameters(CancellationToken cancellationToken)
     {
         var mul = BabbleCore.Instance.Settings.GeneralSettings.GuiMultiply;
-        var messages = new List<OscMessage>();
 
-        foreach (var prefix in prefixes)
+        foreach (var element in TheGrandLookupTable.Table)
         {
-            foreach (var param in CurrentAvatarParams)
+            foreach (var prefix in Prefixes)
             {
-                foreach (var name in param.GetParamNames())
-                {
-                    if (name.paramName == "EyeTrackingActive")
-                        continue;
+                messages.Clear();
+                float val = element.Value.Invoke() * (float)mul;
+                messages.Add(new OscMessage($"/avatar/parameters{prefix}{element.Key}", val));
 
-                    switch (name.paramLiteral)
-                    {
-                        case BaseParam<float> floatName:
-                            if (!floatName.Relevant) continue;
-                            float floatValue = floatName.ParamValue;
-                            if (!float.IsNaN(floatValue) && floatValue != 0)
-                            {
-                                var address = $"/avatar/parameters/{prefix}{name.paramName}";
-                                if (!address.EndsWith("v2/"))
-                                    messages.Add(new OscMessage(address, floatValue * (float)mul));
-                            }
-                            break;
-                        // This only returns a single bool without Binary steps
-                        //case BaseParam<bool> boolName:
-                        //    if (!boolName.Relevant) continue;
-                        //    var boolAddress = $"/avatar/parameters/{prefix}{name.paramName}";
-                        //    messages.Add(new OscMessage(boolAddress, boolName.ParamValue));
-                        //    break;
-                    }
-                }
+                var bools = Float8Converter.ConvertFloatToBinaryParameter(val);
+                messages.Add(new OscMessage($"/avatar/parameters{prefix}{element.Key}Negative", bools.Negative));
+                messages.Add(new OscMessage($"/avatar/parameters{prefix}{element.Key}1", bools.Parameter1));
+                messages.Add(new OscMessage($"/avatar/parameters{prefix}{element.Key}2", bools.Parameter2));
+                messages.Add(new OscMessage($"/avatar/parameters{prefix}{element.Key}4", bools.Parameter4));
+                messages.Add(new OscMessage($"/avatar/parameters{prefix}{element.Key}8", bools.Parameter8));
+
+                _sender.Send(new OscBundle(DateTime.Now, messages.ToArray()));
             }
-        }
-
-        if (messages.Count > 0)
-        {
-            OscBundle bundle = new OscBundle(DateTime.Now, messages.ToArray());
-            _sender.Send(bundle);
         }
     }
 
@@ -164,8 +139,8 @@ public class BabbleOSC
     {
         var mul = BabbleCore.Instance.Settings.GeneralSettings.GuiMultiply;
         var prefix = BabbleCore.Instance.Settings.GeneralSettings.GuiOscLocation;
-        var messages = new List<OscMessage>();
 
+        messages.Clear();
         foreach (var exp in BabbleMapping.Mapping)
         {
             // Don't send the UE copies of pucker/funnel
@@ -183,11 +158,7 @@ public class BabbleOSC
             messages.Add(new OscMessage($"{prefix}{address}", value * (float)mul));
         }
 
-        if (messages.Count > 0)
-        {
-            OscBundle bundle = new OscBundle(DateTime.Now, messages.ToArray());
-            _sender.Send(bundle);
-        }
+        _sender.Send(new OscBundle(DateTime.Now, messages.ToArray()));
     }
 
     private async Task PollConnectionStatus(CancellationToken cancellationToken)
@@ -206,32 +177,6 @@ public class BabbleOSC
 
         // Attempt to reconfigure the receiver and reconnect
         ConfigureReceiver(_sender.RemoteAddress, _sender.Port);
-    }
-
-    private void DetermineNewParameters(OscQueryNode avatarConfig)
-    {
-        // Here, determine from OSCQuery what VRCFTProgrammableExpressions we need to update for this (new!) avatar
-        // This method is intense, but only runs when a user changes their avatar so it should be OK
-
-        CurrentAvatarParams.Clear();
-
-        // Walk the contents tree, and for each parameter determine if it is a VRCFT parameter
-        ParseOSCQueryNodeTree(avatarConfig);
-    }
-
-    private void ParseOSCQueryNodeTree(OscQueryNode avatarConfig)
-    {
-        var avatarInfo = new OscQueryAvatarInfo(avatarConfig);
-        foreach (var parameter in AllParams)
-            CurrentAvatarParams.AddRange(parameter.ResetParam(avatarInfo.Parameters));
-
-        if (avatarConfig.Contents is not null)
-        {
-            foreach (var child in avatarConfig.Contents)
-            {
-                ParseOSCQueryNodeTree(child.Value);
-            }
-        }
     }
 
     public void Teardown()
