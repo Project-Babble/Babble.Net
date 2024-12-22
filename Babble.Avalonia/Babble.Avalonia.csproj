@@ -43,6 +43,7 @@
       <Version>11.2.2</Version>
     </PackageReference>
     <PackageReference Include="Rug.Osc" Version="1.2.5" />
+    <PackageReference Include="VRChat.OSCQuery" Version="0.0.7" />
   </ItemGroup>
 
   <ItemGroup>
