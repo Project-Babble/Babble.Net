@@ -16,7 +16,8 @@
 
   Name "${NAME}"
   OutFile "${NAME} Setup.exe"
-  InstallDir "$PROGRAMFILES\${NAME}"
+  ; Default install directory in user's AppData folder
+  InstallDir "$LOCALAPPDATA\\${NAME}"
   InstallDirRegKey HKCU "Software\${NAME}" ""
   RequestExecutionLevel admin
   

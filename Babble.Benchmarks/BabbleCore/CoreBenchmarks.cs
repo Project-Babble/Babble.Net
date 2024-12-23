@@ -59,7 +59,7 @@ public class CoreBenchmark
     [Benchmark(Description = "Raw Frame Capture")]
     public bool BenchmarkRawFrameCapture()
     {
-        return _core.GetRawImage(out _imageData, out _dimensions);
+        return _core.GetRawImage(ColorType.RGB_24, out _imageData, out _dimensions);
     }
 
     [Benchmark(Description = "Processed Frame")]

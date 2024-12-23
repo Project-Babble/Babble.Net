@@ -22,6 +22,8 @@ Run the app as you would the existing Babble App!
 ## Building
 To build Babble.Net from source, clone this repo and restore any and all nuget packages. You'll need a copy of the Avalonia SDK installed, as well as the Android SDK if you plan to build for Android devices.
 
+*If using NVIDIA GPU acceleration on Windows, be sure to run the installers under the `Babble.Windows.Installer` folder. For Linux, you'll need versions CUDA v12.6 and CUDNN v9.5 for the version of your distro."
+
 ## Links
 - [Our Discord](https://discord.gg/XAMZmjBktk)
 - [Our Twitter](https://x.com/projectBabbleVR)

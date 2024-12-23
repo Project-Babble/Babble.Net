@@ -1,8 +1,8 @@
-﻿using Babble.Core.Scripts.Decoders;
+﻿using Babble.Core.Scripts.Captures;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Babble.Tests.Decoders;
+namespace Babble.Tests.Captures;
 
 public class IPCameraCaptureTests
 {

@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VRCFaceTracking.SDK", "..\V
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Babble.Benchmarks", "..\Babble.Benchmarks\Babble.Benchmarks.csproj", "{831FED58-B94E-40A8-8DC3-54F2EF36E879}"
 EndProject
-Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Babble.Windows.Installer", "..\Babble.Windows.Installer\Babble.Windows.Installer.wapproj", "{C613C4EF-C576-4D06-B26A-DDB84DE8930C}"
+Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Babble.Windows.Installer.NSIS", "..\Babble.Windows.Installer\Babble.Windows.Installer.NSIS.wapproj", "{C613C4EF-C576-4D06-B26A-DDB84DE8930C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopNotifications.Windows", "..\DesktopNotifications\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj", "{121F7EC9-299C-4996-8019-F3F58C5CEEFF}"
 EndProject
